@@ -1,0 +1,216 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    var objPaymentSettings = (WATS.Entities.PaymentSettings)ViewBag.objPaymentSettings;
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#MSettings').addClass('active');
+    });
+
+    function ValidateApplication() {
+        if ($('#ddlPaymentMethod').val() == '') { $('#spanPaymentMethod').html('Required.'); $('#ddlPaymentMethod').focus(); return false; } else { $('#spanPaymentMethod').html(''); }
+        if ($('#AccountType').val() == '') { $('#spanAccountType').html('Required.'); $('#AccountType').focus(); return false; } else { $('#spanAccountType').html(''); }
+        if ($('#PaymentUrl').val() == '') { $('#spanPaymentUrl').html('Required.'); $('#PaymentUrl').focus(); return false; } else { $('#spanPaymentUrl').html(''); }
+        if ($('#PaymentEmail').val() == '') { $('#spanPaymentEmail').html('Required.'); $('#PaymentEmail').focus(); return false; } else { $('#spanPaymentEmail').html(''); }
+        if (!Common.CheckEmail($('#PaymentEmail').val())) { $('#spanPaymentEmail').html('Please enter valid email address.'); $('#PaymentEmail').focus(); return false; } else { $('#spanPaymentEmail').html(''); }
+        if ($('#PaymentPassword').val() == '') { $('#spanPaymentPassword').html('Required.'); $('#PaymentPassword').focus(); return false; } else { $('#spanPaymentPassword').html(''); }
+        if ($('#ddlCurrencyCode').val() == '') { $('#spanCurrencyCode').html('Required.'); $('#ddlCurrencyCode').focus(); return false; } else { $('#spanCurrencyCode').html(''); }
+        if ($('#SuccessUrl').val() == '') { $('#spanSuccessUrl').html('Required.'); $('#SuccessUrl').focus(); return false; } else { $('#spanSuccessUrl').html(''); }
+        if ($('#CancelUrl').val() == '') { $('#spanCancelUrl').html('Required.'); $('#CancelUrl').focus(); return false; } else { $('#spanCancelUrl').html(''); }
+
+        return true;
+    }
+
+</script>
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+
+        <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+        <li><a href="@Url.Action("Index", "PaymentSettings")">Payment Settings</a> <span class="divider">/</span></li>
+        <li class="active">Payment Settings</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r "><a class="clearfix" href="@Url.Action("Index", "PaymentSettings")">←back to Payment Settings</a>  </div>
+                <h3 class="title">Payment Settings</h3>
+               @* <div class="sectionTabNav">
+                    <div class="btn-group">
+                        <a href="@Url.Action("Index", "ApplicationSettings")" class="btn ">Application Settings</a>
+                        <a href="@Url.Action("Index", "PaymentSettings")" class="btn active">Payment Settings</a>
+
+                    </div>
+                </div>*@
+            </div>
+        </div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            { @Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            { @Html.Raw(ViewBag.message.ToString())}
+        </div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" class="text12">
+            <tbody>
+                <tr>
+                    <td>@using (Html.BeginForm("UpdateAppInfo", "PaymentSettings", FormMethod.Post))
+                        {
+                        <div class="custom-adn grayBackground nobL nobR">
+                            <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                                <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Payment Details</b></h3>
+                                <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                                    <table width="100%" cellpadding="5" class="tblstyle2">
+                                        <tbody>
+                                            @if (objPaymentSettings == null)
+                                            {
+                                                <tr>
+                                                    <td width="185">Payment Method :<span class="red">*</span></td>
+                                                    <td width="773">@Html.DropDownList("PaymentMethodId", new SelectList((IEnumerable<WATS.Entities.PaymentMethods>)ViewBag.PaymentMethodsList, "PaymentMethodId", "PaymentMethod"), "Select Payment Method", new { id = "ddlPaymentMethod", @onchange = "ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanPaymentMethod"></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Account Type : <span class="red">*</span></td>
+                                                    <td>
+                                                        <select id="AccountType" name="AccountType">
+                                                            <option value="">--Select--</option>
+                                                            <option value="Test">Test</option>
+                                                            <option value="Online">Online</option>
+                                                        </select>
+                                                        <span class="field-validation-error" id="spanAccountType"></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Payment Url :<span class="red">*</span></td>
+                                                    <td>@Html.TextBox("PaymentUrl", "", new { @onchange = "return ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanPaymentUrl"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Payment Email :<span class="red">*</span></td>
+                                                    <td>@Html.TextBox("PaymentEmail", "", new { @onchange = "return ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanPaymentEmail"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Currency Code :<span class="red">*</span></td>
+                                                    <td>@Html.DropDownList("CurrencyCodeId", new SelectList((IEnumerable<WATS.Entities.CurrencyCodes>)ViewBag.CurrencyCodesList, "CurrencyCodeId", "CurrencyCode"), "Select Currency Code", new { id = "ddlCurrencyCode", @onchange = "ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanCurrencyCode"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Success Url :<span class="red">*</span></td>
+                                                    <td>@Html.TextBox("SuccessUrl", "", new { @onchange = "ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanSuccessUrl"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Cancel Url :<span class="red">*</span></td>
+                                                    <td>@Html.TextBox("CancelUrl", "", new { @onchange = "return ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanCancelUrl"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Notify Url :</td>
+                                                    <td>@Html.TextBox("NotifyUrl", "", new { @onchange = "return ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanNotifyUrl"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Token No :</td>
+                                                    <td>@Html.TextBox("TokenNo", "", new { @onchange = "return ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanCompanyName"></span></td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <input type="hidden" name="PaymentSettingId" id="PaymentSettingId" value="@(objPaymentSettings.PaymentSettingId)" />
+                                                <tr>
+                                                    <td width="185">Payment Method :<span class="red">*</span></td>
+                                                    <td width="773">@Html.DropDownList("PaymentMethodId", new SelectList((IEnumerable<WATS.Entities.PaymentMethods>)ViewBag.PaymentMethodsList, "PaymentMethodId", "PaymentMethod"), "Select Payment Method", new { id = "ddlPaymentMethod", @onchange = "ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanPaymentMethod"></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Account Type :<span class="red">*</span></td>
+                                                    <td>
+                                                        <select id="AccountType" name="AccountType">
+                                                            <option value="">--Select--</option>
+                                                            <option value="Test">Test</option>
+                                                            <option value="Online">Online</option>
+                                                        </select>
+                                                        <span class="field-validation-error" id="spanAccountType"></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Payment Url : <span class="red">*</span></td>
+                                                    <td>@Html.TextBox("PaymentUrl", objPaymentSettings.PaymentUrl, new { @onchange = "return ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanPaymentUrl"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Payment Email : <span class="red">*</span></td>
+                                                    <td>@Html.TextBox("PaymentEmail", objPaymentSettings.PaymentEmail, new { @onchange = "return ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanPaymentEmail"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Currency Code : <span class="red">*</span></td>
+                                                    <td>@Html.DropDownList("CurrencyCodeId", new SelectList((IEnumerable<WATS.Entities.CurrencyCodes>)ViewBag.CurrencyCodesList, "CurrencyCodeId", "CurrencyCode"), "Select Currency Code", new { id = "ddlCurrencyCode", @onchange = "ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanCurrencyCode"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Success Url :<span class="red">*</span></td>
+                                                    <td>@Html.TextBox("SuccessUrl", (string)objPaymentSettings.SuccessUrl, new { @onchange = "ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanSuccessUrl"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Cancel Url : <span class="red">*</span></td>
+                                                    <td>@Html.TextBox("CancelUrl", (string)objPaymentSettings.CancelUrl, new { @onchange = "return ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanCancelUrl"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Notify Url : </td>
+                                                    <td>@Html.TextBox("NotifyUrl", (string)objPaymentSettings.NotifyUrl, new { @onchange = "return ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanNotifyUrl"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Token No :</td>
+                                                    <td>@Html.TextBox("TokenNo", (string)objPaymentSettings.TokenNo, new { @onchange = "return ValidateApplication();" })
+                                                        <span class="field-validation-error" id="spanCompanyName"></span></td>
+                                                </tr>
+                                                <script type="text/javascript">
+                                                    $(document).ready(function () {
+                                                        $('#ddlCurrencyCode').val('@objPaymentSettings.CurrencyCodeId');
+                                                        $('#ddlPaymentMethod').val('@objPaymentSettings.PaymentMethodId');
+                                                        $('#AccountType').val('@objPaymentSettings.AccountType');
+                                                    });
+                                                </script>
+                                            }
+                                            <tr>
+                                                <td>&nbsp;</td>
+                                                <td>
+                                                    @*<input type="submit" value="Submit" name="button2" disabled="disabled" class="btn btn-primary">*@
+                                                    <input type="submit" value="Submit" name="button2" onclick="return ValidateApplication();" class="btn btn-primary"> <a class="btn" href="@Url.Action("Index", "PaymentSettings")">Cancel</a></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>  
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

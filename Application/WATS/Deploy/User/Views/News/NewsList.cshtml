@@ -1,0 +1,51 @@
+﻿@using System.Configuration;
+@{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+    string Category = ViewBag.Category;
+    var imgloc = ConfigurationManager.AppSettings["adminimgurl"] + "news/";
+    List<WATS.Entities.News> lstNews = ViewBag.NewsList;    
+}
+
+
+<div id="prolist">
+    @if (Total == -1)
+    {
+        <div class="p100 t-c">Sorry failed processing your request.</div> 
+    }
+    else
+    {
+        if (lstNews != null && lstNews.Count != 0)
+        {
+        
+           <ul class="clearfix m0 list-pn news-list Raleway-Medium">
+                 @foreach (var item in lstNews)
+            {
+<li>
+   
+<section class="clearfix  @(item.NewsText.Length >= 390 ? "read-more" : "")">
+<section class="clearfix p25 mobilev-p10 tabhorizontal-p15">
+<article class="clearfix r-p20 pull-left tabhorizontal-r-p10 link-hover-black mobile-t-c mobile-dis-b mobile-r-p10 mobile-b-p10"> <span class="thumbnail b-m0">
+    <img width="132" border="0" height="112" src="@WATS.BLL.Common.ValidateImage((imgloc + item.ImageUrl), "Content/images/no-image.png")" alt=""></span> </article>
+<article class="clearfix Poppins-Regular font13 dkgray-t2 l-h22">
+<h2 class="poppinssemibold font16 l-h20 dk-t t-m0 tabhorizontal-font18">@item.Title</h2>
+ @Html.Raw(item.NewsText)
+</article>
+</section>
+</section>
+</li>
+   }
+
+</ul>
+  }
+        else
+        {
+        <h4 class="font30 Lobster-Regular thickblack-t t-c t-b-p30">No News Found...</h4>
+        }
+    }
+</div>
+

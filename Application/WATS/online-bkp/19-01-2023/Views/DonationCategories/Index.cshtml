@@ -1,0 +1,236 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+        PagerClickBind();
+
+    });
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            DonationCategoryBind($(this).text());
+        });
+    }
+
+    $(document).ready(function () {
+
+        $('#AddDonationCategory').dialog
+           ({
+               autoOpen: false,
+               width: 450,
+               modal: true
+           });
+
+    });
+
+    function sortresult(sortcolumn) {
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        DonationCategoryBind(1);
+    }
+
+    function Add() {
+        clearDonationCategory();
+        $("#AddDonationCategory").dialog("open");
+        $('#lbltitle').html('Add Donation Category');
+    }
+
+    function clearDonationCategory() {
+        $('#DonationCategoryId').val('');
+        $('#CategoryName').val('');
+        $('#OrderNo').val('');
+        $('#spanCategoryName').html('');
+        $('#spanOrderNo').html('');
+        $("#AddDonationCategory").dialog("close");
+        $('#CategoryName').focus().removeClass("red-border");
+        $('#OrderNo').focus().removeClass("red-border");
+    }
+
+    function DonationCategoryBind(Pageno) {
+
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+        var Search = $('#txtsearch').val();
+
+        $.ajax({
+            url: '@Url.Action("DonationCategoriesList", "DonationCategories")',
+            type: 'GET',
+            cache: false,
+            data: { Search: Search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items },
+            success: function (result) {
+                $('#divDonationCategory').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+
+    function EditDonationCategory(DonationCategoryId) {
+        $.ajax({
+            url: '@Url.Action("EditDonationCategory", "DonationCategories")',
+            type: 'POST',
+            data: { DonationCategoryId: DonationCategoryId },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objDonationCategory = result.data;
+                    $('#DonationCategoryId').val(objDonationCategory.DonationCategoryId);
+                    $('#CategoryName').val(objDonationCategory.CategoryName);
+                    $('#OrderNo').val(objDonationCategory.OrderNo);
+                    $('#lbltitle').html('Edit Donation Category');
+                    $('#spanCategoryName').html('');
+                    $('#CategoryName').focus().removeClass("red-border");
+                    $("#AddDonationCategory").dialog("open");
+                }
+                else {
+                    alert(result.data);
+                }
+            }
+        });
+    }
+
+    function DonationCategorySave() {
+        if (Validate()) {
+            var objDonationCategory = {};
+            objDonationCategory.DonationCategoryId = $('#DonationCategoryId').val();
+            objDonationCategory.CategoryName = $('#CategoryName').val();
+            objDonationCategory.OrderNo = $('#OrderNo').val();
+
+            $.ajax({
+                url: '@Url.Action("AddDonationCategory", "DonationCategories")',
+                type: 'POST',
+                data: JSON.stringify(objDonationCategory),
+                datatype: "JSON",
+                contentType: 'application/json',
+                success: function (result) {
+                    if (result.ok) {
+                        $("#divmessage").html(result.data);
+                        DonationCategoryBind($('#hdnPageNo').val());
+
+                        $("#AddDonationCategory").dialog("close");
+                    }
+                    else {
+                        $("#spanCategoryName").html(result.data);
+                    }
+                }
+            });
+        }
+    }
+
+    function Delete(DonationCategoryId) {
+        var val2 = confirm("Do you want to delete this record?");
+        if (val2) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("DeleteDonationCategory", "DonationCategories")',  // the URL of the controller action method
+                data: { DonationCategoryId: DonationCategoryId }, // optional data
+                success: function (result) {
+                    $("#divmessage").html(result.data);
+                    DonationCategoryBind($('#hdnPageNo').val());
+                },
+                error: function (req, status, error) {
+                    $("#divmessage").html(result.data);
+                }
+            });
+        }
+    }
+
+    function Validate() {
+        if ($('#CategoryName').val() == '') { $('#spanCategoryName').html('Required.'); $('#CategoryName').focus().addClass("red-border"); return false; } else { $('#spanCategoryName').html(''); $('#CategoryName').focus().removeClass("red-border"); }
+                
+        return true;
+    }
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="DonationCategoryId" />
+<input id="hdnsortorder" type="hidden" value="ASC" />
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    <li><a href="@Url.Action("Index", "InnerPages")">Website</a> <span class="divider">/</span></li>
+    <li class="active">Donation Categories</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+</ul></div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r">
+                    <a class="btn btn-small btn-primary coursesMenu" onclick="Add();">Add Category</a>
+                </div>
+                <h3 class="title">Donation Categories </h3>
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="text12">
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="divmessage">
+                            @if (TempData["message"] != null)
+                            { @Html.Raw(TempData["message"].ToString())}
+
+                            @if (ViewBag.message != null)
+                            { @Html.Raw(ViewBag.message.ToString())}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td height="10"></td>
+                </tr>
+                <tr>
+
+                    <td>
+                        <div id="divDonationCategory">
+                            @{Html.RenderAction("DonationCategoriesList", "DonationCategories");}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="AddDonationCategory" style="display: none;">
+    <input type="hidden" id="DonationCategoryId" name="DonationCategoryId" value="0" />
+    <div class="dialog-title"><span id="lbltitle"></span></div>
+    <div class="dialog-content">
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span5">Category Name :</div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="CategoryName" name="CategoryName">
+                    <span class="field-validation-error" id="spanCategoryName"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Order No :</div>
+                <div class="span7">
+                    <input type="text" maxlength="3" value="" onkeypress="return Common.isNumberKey(event);" class="inputstyle" id="OrderNo" name="OrderNo">
+                    <span class="field-validation-error" id="spanOrderNo"></span>
+                </div>
+            </div>
+            <div class="clearfix t-r t-p5">
+                <input type="button" onclick="javascript: DonationCategorySave();" class="btn btn-primary font-w7" value="Submit" />
+                <a class="btn font-w7" onclick=" $('#AddDonationCategory').dialog('close')">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+

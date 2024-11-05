@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "PhotosList";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var lstPhoto = (List<WATS.Entities.Photos>)ViewBag.lstPhoto;
+    var lstPhotoCategories = (List<WATS.Entities.PhotoCategories>)ViewBag.lstPhotoCategories;
+
+    var imglocNormal = System.Configuration.ConfigurationManager.AppSettings["adminimgurl"] + "photogallery/normalphoto/";
+}
+
+
+         <article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height:1150px;">
+                    <article class="clearfix curve position-r t-m4n b-p15">
+     <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">Photo <span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16">Gallery </span></h2></article>
+     <article class="clearfix p30 t-p15 tabhorizontal-p10">
+          @if (lstPhotoCategories != null && lstPhotoCategories.Count != 0 && lstPhoto.Count != 0)
+        {
+            foreach (var PhotoCategory in lstPhotoCategories)
+            {
+                if (lstPhoto != null && lstPhoto.Count != 0 && PhotoCategory.PhotosCount != 0)
+                {
+                    if (lstPhoto != null && lstPhoto.Count != 0 && PhotoCategory.PhotosCount != 0)
+                    {
+                         <h4 class="clearfix font22 ligray-bg poppinsregular t-b-p10 t-m0">@PhotoCategory.CategoryName</h4>
+                    }
+                    if (lstPhoto != null && lstPhoto.Count != 0)
+                    {        
+<ul class="clearfix list-pn list-f m0 p-g-list black-t t-p25 tabhorizontal-t-p10">
+     @foreach (var item in lstPhoto)
+                {
+                    if (item.PhotoCategoryId == PhotoCategory.PhotoCategoryId)
+                    {     
+                            <li class="effectpart3">
+                                <figure class="clearfix position-r overflow-h maskeffect imggrow border shadow-b">
+                                   <a class="fancybox" data-fancybox-group="gallery" target="_blank" href="@item.AlbumLink"> <img width="100%" height="360" title="@item.DefaultImage" alt="@item.DefaultImage" src="@WATS.BLL.Common.ValidateImage((imglocNormal + item.ImageUrl), imglocNormal + "no-image.jpg")"> </a>                       </figure>
+                            </li>
+     }
+     }
+                             
+                    </ul>
+          }
+          }
+          }
+          }
+</article>
+         </article>
+   

@@ -1,0 +1,54 @@
+﻿@using System.Configuration;
+@{
+    Layout = null;
+    HttpContext ctx = HttpContext.Current;
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+
+    authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+
+    string Role = authTicket.UserData;
+
+    string url = "";
+   
+    
+}
+
+ <div class="tabNavWrapper">
+     <a href="Content/documents/WATS-documentation.pdf" target="_blank" class="r-p20 pull-right t-p5"><i class="icon-question-sign t-m2"></i> Help</a>
+     <ul>
+         @if (Role.Contains("InnerPages") || Role.Contains("Sponsors") || Role.Contains("ThemeBanners") || Role.Contains("Enquiries") || Role.Contains("SuperAdmin") || Role.Contains("SubAdmin"))
+         {
+         <li>
+             @if (Role.Contains("InnerPages") || Role.Contains("SuperAdmin") || Role.Contains("SubAdmin"))
+             {<a id="MWebsite" href="@Url.Action("Index", "InnerPages")">Web Site</a>}
+             @if (Role.Contains("Sponsors") && !Role.Contains("WebMaster"))
+             {<a id="MWebsite" href="@Url.Action("Index", "Sponsors")">Web Site</a>}
+             @if (Role.Contains("WebsiteBanners") && !Role.Contains("WebMaster"))
+             {<a id="MWebsite" href="@Url.Action("Index", "WebsiteBanners")">Web Site</a>}
+             @if (Role.Contains("Enquiries") && !Role.Contains("WebMaster"))
+             {<a id="MWebsite" href="@Url.Action("Index", "Enquiry")">Web Site</a>}
+             @if (Role.Contains("WebMaster"))
+             {<a id="MWebsite" href="@Url.Action("Index", "Sponsors")">Web Site</a>}
+         </li>
+         }
+         @if (Role.Contains("Events") || Role.Contains("SuperAdmin") || Role.Contains("WebMaster") || Role.Contains("Cultural"))
+         {
+             <li><a id="MEvents" href="@Url.Action("Index", "Events", new { EventType="upcoming"})">Events</a></li>
+         }
+         @if (Role.Contains("Members") || Role.Contains("SuperAdmin") || Role.Contains("WebMaster") || Role.Contains("Cultural") || Role.Contains("Treasurer") || Role.Contains("VicePresident"))
+         {
+             <li><a id="MMembers" href="@Url.Action("Index","Members")">Members</a></li>
+         }
+         @if (Role.Contains("SuperAdmin"))
+         {
+             <li><a id="wTeluguBadiRegistrations" href="@Url.Action("Index","TeluguBadiRegistrations")">TeluguBadi Registrations</a></li>
+
+             <li><a id="MSettings" href="@Url.Action("Index","ApplicationSettings")">Settings</a></li>
+         }
+         <li><a id="MSendmail" href="@Url.Action("SendMail","Home")">Send Mail</a></li>
+     </ul>
+     
+</div>
+

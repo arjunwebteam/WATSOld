@@ -1,0 +1,16 @@
+﻿@{
+    Layout = null;
+    
+    
+    Int64 EventId = ViewBag.EventId;
+    string EventName = ViewBag.EventName;
+    string tab = ViewBag.tab;
+}
+
+<div class="sectionTabNav">
+    <div class="btn-group">
+        <a class="btn @(tab == "edit"?"active":"")" href="@Url.Action("EditEvent", "Events", new { EventId = EventId, EventName = EventName })">Edit Event</a>
+        @*<a class="btn @(tab == "registrations"?"active":"")" href="@Url.Action("EventRegistrationForm", "Events", new { EventId = EventId, EventName = EventName })">Registration Form</a>*@
+        <a class="btn @(tab == "users"?"active":"")" href="@Url.Action("Index", "EventRegistrations", new { EventId = EventId, EventName = EventName })">Registered Users</a>
+    </div>
+</div>

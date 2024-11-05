@@ -1,0 +1,107 @@
+﻿@using System.Configuration
+@{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+
+    List<WATS.Entities.InnerPages> lstDetails = ViewBag.lstInnerPages;    
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+        $('#MWebsite').addClass('active');
+    });
+
+    function UpdateDisplayOrder(i, InnerPageId) {
+        var DisplayOrder = parseInt($('#DisplayOrder' + i).val());
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("InnerPageDisplayOrder", "InnerPages")',
+            data: { DisplayOrder: DisplayOrder, InnerPageId: InnerPageId },
+            success: function (result) {
+                var div = '';
+                if (result.ok) {
+                    $("#divmessage").html(result.data);
+                    DetailsBind(1);
+                }
+                else {
+                    $("#divmessage").html(result.data);
+                }
+            }
+        });
+    }
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div> 
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+                 <thead>
+                    <tr>
+                        <th width="7%" align="center">S.No.</th>
+                        <th><a onclick="javascript:sortresult('Heading');" class="white-t-u">Page  Name @if (sortcolumn == "Heading")
+                        {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+                         <th><a onclick="javascript:sortresult('CategoryName');" class="white-t-u">Page Type @if (sortcolumn == "CategoryName")
+                        {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+                        <th width="15%">
+                            <a onclick="javascript:sortresult('DisplayOrder');" class="white-t-u">Order No @if (sortcolumn == "DisplayOrder")
+                                                                                                           {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="9%">View</th>
+                        <th width="9%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (lstDetails.Count != 0)
+                    {
+                        int i = 0;
+                        var location=ConfigurationManager.AppSettings["usersiteurl"];
+                        foreach (var item in lstDetails)
+                        { 
+                        <tr>
+                            <td>@item.RId</td>
+                            <td style="text-align: left">@item.Heading</td>
+                            <td>@item.CategoryName</td>
+                            <td>
+                                <input type="text" style="width:30px;margin-bottom:0px;" maxlength="3" id="DisplayOrder@(i)" value="@item.DisplayOrder" onkeypress ="return Common.isNumberKey(event)"/>
+                            <a onclick="UpdateDisplayOrder(@i,@item.InnerPageId);" title="Update"><i class="icon-refresh"></i></a>                   
+                                
+                            </td>
+                            <td>
+                                <a target="_blank" href="@location@WATS.BLL.Common.EncodeURL(item.Heading)-details.html" ><i class="icon-eye-open"></i></a>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("EditDetails", "InnerPages", new {InnerPageId=item.InnerPageId })" title="Edit"><i class="icon-pencil"></i></a>
+                                <a class="pagedelete" onclick="javascript:Delete(@item.InnerPageId);" id="1" title="Delete"><i class="icon-trash"></i></a>
+                                @*<a title="Delete" class="sepV_a disable-alpha"><i class="icon-trash"></i></a>*@
+                            </td>
+                        </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="6">No Pages Found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    </div>
+</div>
+@Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

@@ -1,0 +1,277 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#RegistrationCategoriesDropDown').addClass('active');
+        $('#wRegistrationCategoriesDropDown').addClass('active');
+        $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+        $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+        PagerClickBind();
+
+        $('#AddDonor-Category').dialog
+            ({
+                autoOpen: false,
+                width: 450,
+                modal: true
+            });
+
+    });
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            RegistrationCategoriesBind($(this).text());
+        });
+    }
+
+    function sortresult(sortcolumn) {
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        RegistrationCategoriesBind(1);
+    }
+
+    function Add() {
+        clearRegistrationCategoriesBind();
+        $('#AddDonor-Category').dialog("open");
+        $('#lbltitle').html('Add Registration Category');
+    }
+
+    function clearRegistrationCategoriesBind() {
+        $('#RegistrationCategoriesCategoryId').val('');
+        $('#CategoryName').val('');
+        $('#spanCategoryName').html('');
+        $('#Title').val('');
+        $('#spanTitle').html('');
+        $('#OrderNo').val('');
+        $('#spanOrderNo').html('');
+        $("#AddDonationCategories").dialog("close");
+        $('#CategoryName').focus().removeClass("validate");
+        $('#Title').focus().removeClass("validate");
+        $('#OrderNo').focus().removeClass("validate");
+
+    }
+
+
+    function RegistrationCategoriesBind(Pageno) {
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+        var Search = ($.trim($('#keyword').val()));
+
+        $.ajax({
+            url: '@Url.Action("RegistrationCategoriesDropDownList", "RegistrationCategoriesDropDown")',
+            type: 'GET',
+            cache: false,
+            data: { Search: Search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items },
+            success: function (result) {
+                $('#divRegistrationCategories').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+
+
+    function EditRegistrationCategories(RegistrationCategoriesCategoryId) {
+        $.ajax({
+            url: '@Url.Action("EditRegistrationCategories", "RegistrationCategoriesDropDown")',
+            type: 'POST',
+            data: { RegistrationCategoriesCategoryId: RegistrationCategoriesCategoryId },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objDonationCategories = result.data;
+                    $('#RegistrationCategoriesCategoryId').val(objDonationCategories.RegistrationCategoriesCategoryId);
+                    $('#CategoryName').val(objDonationCategories.CategoryName);
+                    $('#Title').val(objDonationCategories.Title);
+                    $('#OrderNo').val(objDonationCategories.OrderNo);
+
+                    $('#lbltitle').html('Edit Registration Category');
+
+                    $('#CategoryName').focus().removeClass("validate");
+
+                    $('#AddDonor-Category').dialog("open");
+                }
+                else {
+                    alert(result.data);
+                }
+            }
+        });
+    }
+
+
+
+    function Delete(RegistrationCategoriesCategoryId) {
+        var val2 = confirm("Do you want to delete this record?");
+        if (val2) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("DeleteRegistrationCategories", "RegistrationCategoriesDropDown")',  // the URL of the controller action method
+                data: { RegistrationCategoriesCategoryId: RegistrationCategoriesCategoryId }, // optional data
+                success: function (result) {
+                    $("#divmessage").html(result.data);
+                    $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                    RegistrationCategoriesBind($('#hdnPageNo').val());
+                },
+                error: function (req, status, error) {
+                    $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                    $("#divmessage").html(result.data);
+                }
+            });
+        }
+    }
+
+    function Validate() {
+
+        //Account Information
+        if ($.trim($('#CategoryName').val()) == '') { $('#CategoryName').focus().addClass("validate"); return false; } else { $('#CategoryName').focus().removeClass("validate"); }
+        if ($.trim($('#Title').val()) == '') { $('#Title').focus().addClass("validate"); return false; } else { $('#Title').focus().removeClass("validate"); }
+
+        return true;
+    } 
+
+    function ResetValidateClass() {
+        $('#CategoryName').removeClass("validate");
+        $('#Price').removeClass("validate");
+
+
+    }
+    function ClearSearch() {
+        $('#keyword').val('');
+        RegistrationCategoriesBind(1);
+    }
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="OrderNo" />
+<input id="hdnsortorder" type="hidden" value="DESC" />
+
+<!-- breadcumb -->
+@*<div class="content-header">
+        <h1>Registration Categories</h1>
+        <ol class="breadcrumb">
+            <li class="active"><i class="fa fa-bars"></i> Registration Categories</li>
+        </ol>
+    </div>*@
+<!--end breadcumb -->
+
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r">
+                    @*<a class="btn btn-primary r-m5" onclick="ExporttoExcel();">Export to Excel</a>*@
+                    <a class="btn btn-primary coursesMenu" onclick="Add();">Add Registration Category</a>
+                </div>
+                <h3 class="title">Registration Categories</h3>
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" class="main-text">
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="divmessage">
+                            @if (TempData["message"] != null)
+                            {@Html.Raw(TempData["message"].ToString())}
+
+                            @if (ViewBag.message != null)
+                            {@Html.Raw(ViewBag.message.ToString())}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="grayBackground nobL nobR">
+                            <div id="filterReg" class="ui-accordion">
+                                <h4><b>Search</b></h4>
+                                <div>
+                                    <div class="filedsetInner clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span4">
+                                                <label>Search </label>
+                                                <input type="text" name="keyword" id="keyword" class="span12" value="" placeholder="Category Name" />
+                                            </div>
+                                            <div class="span3">
+                                                <button class="btn btn-primary filterAction" onclick="RegistrationCategoriesBind(1);">Search</button>
+                                                @*<a class="btn btn-inverse filterAction wC" onclick="ClearSearch();">Clear</a>*@
+                                                <button class="btn btn-inverse filterAction wC" type="submit" onclick="ClearSearch();">Clear</button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="divRegistrationCategories">
+                            @{Html.RenderAction("RegistrationCategoriesDropDownList", "RegistrationCategoriesDropDown");}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+<div id="AddDonor-Category" style="display: none;">
+    @using (Html.BeginForm("AddRegistrationCategories", "RegistrationCategoriesDropDown", FormMethod.Post, new { style = "margin-bottom:0" }))
+    {
+        <input type="hidden" id="RegistrationCategoriesCategoryId" name="RegistrationCategoriesCategoryId" value="0" />
+        <div class="dialog-title"><span id="lbltitle"></span></div>
+        <div class="dialog-content">
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span5">Category Name :<span class="red-t">*</span></div>
+                    <div class="span7">
+                        <select class="inputstyle" name="CategoryName" id="CategoryName" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" type="text">
+                            <option value="">Category Name</option>
+                            <option value="Chess">Chess</option>
+                            @*<option value="VolleyBoll">VolleyBoll</option>*@
+                        </select>
+                        <span id="spanCategoryName" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Title :<span class="red-t">*</span></div>
+                    <div class="span7">
+                        <input type="text" id="Title" name="Title" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" placeholder="Title *" value="" class="inputstyle">
+                        <span id="spanTitle" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5"> Order No : </div>
+                    <div class="span7">
+                        <input type="text" id="OrderNo" name="OrderNo" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" placeholder="OrderNo " value="" class="inputstyle">
+                        <span id="spanOrderNo" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <div class="clearfix t-r t-p5">
+                    <input type="submit" onclick="return Validate();" class="btn btn-primary font-w7" value="Submit" />
+                    <a class="btn font-w7" onclick=" $('#AddDonor-Category').dialog('close')">Cancel</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+

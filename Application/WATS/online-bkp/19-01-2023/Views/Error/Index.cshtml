@@ -1,0 +1,27 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+<script>
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+    });
+</script>
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    <li><a href="@Url.Action("Index","Home")">Home</a> <span class="divider">/</span></li>
+    <li><a href="@Url.Action("Index","InnerPages")">Web Pages</a> <span class="divider">/</span></li>
+    <li class="active">Error</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+</ul></div>
+ <div id="maincontainer">
+        <div class="mainContent">
+                @Html.Partial("MainMenu", "SuperAdmin")
+@Html.Partial("LeftMenu", "SuperAdmin")
+            <div class="pageHeadingBlock ">
+                <div class="grayBackground">
+                    
+                    <h3 class="title">Sorry could not process your request.</h3>
+                    
+                </div>
+            </div>
+            </div></div>

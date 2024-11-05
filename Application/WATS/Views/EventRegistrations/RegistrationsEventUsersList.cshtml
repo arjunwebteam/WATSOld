@@ -1,0 +1,224 @@
+﻿  @{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+    var imglocNormal = System.Configuration.ConfigurationManager.AppSettings["baseurl"] + "Content/Culturals/";
+    var qrpreview = System.Configuration.ConfigurationManager.AppSettings["usersiteurl"] + "Content/TrainingQRCode/";
+    List<WATS.Entities.EventUserInfo> lstEventUserInfo = ViewBag.lstEventUserInfo;
+
+    
+}
+
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+    function EventUserInfoStatus(EventUserInfoId) {
+        $('#load' + EventUserInfoId + '').show();
+        $('#divStatus' + EventUserInfoId + '').hide();
+        
+        var type = 'Cultural';
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CulturalUserInfoStatus", "EventRegistrations")', // the URL of the controller action method
+            data: { EventUserInfoId: EventUserInfoId, type: type }, // optional data
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    Onload($('#hdnPageNo').val());
+                    $('#load' + EventUserInfoId + '').hide();
+                    $('#divStatus' + EventUserInfoId + '').show();
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                }
+            }
+        });
+    }
+
+    function ResendQR(EventUserInfoId) {
+        $('#loadQR' + EventUserInfoId + '').show();
+        $('#divQR' + EventUserInfoId + '').hide();
+        var type = 'Cultural';
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ResendQRCode", "EventRegistrations")', // the URL of the controller action method
+            data: { EventUserInfoId: EventUserInfoId, type: type }, // optional data
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    Onload($('#hdnPageNo').val());
+                    $('#loadQR' + EventUserInfoId + '').hide();
+                    $('#divQR' + EventUserInfoId + '').show();
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                }
+            }
+        });
+    }
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div> 
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+               <thead>
+                   <tr>
+                       @* <th class="table_checkbox"> <input type="checkbox" name="mainchk" onclick="javascript: Select('mainchk');" /></th>*@
+                       <th width="5%" align="center">S.No.</th>
+                       <th width="17%">
+                           <a onclick="javascript:sortresult('FirstName');" class="white-t-u">
+                               First Name @if (sortcolumn == "FirstName")
+                               {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                       </th>
+                       <th width="12%">
+                           <a onclick="javascript:sortresult('LastName');" class="white-t-u">
+                               Last Name @if (sortcolumn == "LastName")
+                               {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                       </th>
+                       <th width="12%">
+                           <a onclick="javascript:sortresult('EventCategory');" class="white-t-u">
+                               Category @if (sortcolumn == "EventCategory")
+                               {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                       </th>
+                       <th width="12%">
+                           <a onclick="javascript:sortresult('IsApproved');" class="white-t-u">
+                               Status @if (sortcolumn == "IsApproved")
+                               {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                       </th>
+
+                       <th width="12%">
+                           <a onclick="javascript:sortresult('Status');" class="white-t-u">
+                               Check-In Status @if (sortcolumn == "Status")
+                               {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                       </th>
+
+                       <th width="12%">
+                           <a onclick="javascript:sortresult('InsertedTime');" class="white-t-u">
+                               Posted Date @if (sortcolumn == "InsertedTime")
+                               {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                       </th>
+                       <th width="9%" style="text-align:center;">
+                           Resend
+                       </th>
+                       <th width="11%">Action</th>
+                   </tr>
+                </thead>
+                <tbody>
+                    @if (lstEventUserInfo.Count != 0)
+                    {
+                        Int64 i = 1;
+
+                        foreach (var item in lstEventUserInfo)
+                        {
+
+                    <tr>
+                        @* <td><input type="checkbox" name="checkbox" id="checkbox-@i" value= "@{@item.MemberId}" /></td>*@
+                        <td>@item.RId</td>
+                        @*  <td style="text-align: left">@(item.MemberId.ToString()=="0"?"":item.MemberId.ToString())</td>*@
+                        <td>
+                            @item.FirstName
+                        </td>
+
+                        <td>
+                            @item.LastName
+                        </td>
+                        <td>
+                            @(item.EventCategory)
+                        </td>
+                        <td>
+                            <div id="divStatus@(item.EventUserInfoId)">
+                                @{
+                                    var isactive = "";
+                                    var active = "";
+                                    var disable = "";
+                                    if (item.IsApproved == true)
+                                    {
+                                        isactive = "Verified";
+                                        disable = "style=\"cursor: pointer;\" onclick=\"javascript:EventUserInfoStatus(" + item.EventUserInfoId + ");\"";
+                                    }
+                                    else
+                                    {
+                                        isactive = "Un Verified";
+                                        active = "style=\"cursor: pointer;\" onclick=\"javascript:EventUserInfoStatus(" + item.EventUserInfoId + ");\"";
+                                    }
+                                    <div class="admin-active">
+                                        @isactive
+                                        <ul>
+                                            <li><a @Html.Raw(active)>Verified</a></li>
+                                            <li><a @Html.Raw(disable)>Un Verified</a></li>
+                                        </ul>
+                                    </div>
+                                }
+                            </div>
+                            <div id="load@(item.EventUserInfoId)" class="hide">
+                                <img alt="load" class="" src="Content/images/loader.gif" />
+                            </div>
+                        </td>
+                        <td style="text-align:center">
+                            @(item.Status != null && item.Status != "" ? item.Status : "--")
+                        </td>
+                        <td>
+                            @item.InsertedTime.ToString("MMM-dd yyyy")
+                        </td>
+                        <td style="text-align:center;">
+                            @if (item.IsApproved == true)
+                            {
+
+                            <div id="divQR@(item.EventUserInfoId)">
+                                <a title="Resend QR Code" onclick="javascript:ResendQR(@item.EventUserInfoId);"><img src="Content/images/resend.png" width="25" height="25" /></a>
+                            </div>
+                            <div id="loadQR@(item.EventUserInfoId)" class="hide">
+                                <img alt="load" class="" src="Content/images/loader.gif" />
+                            </div>
+                            }
+                        </td>
+                        <td>
+                            @if (item.IsApproved == true)
+                            {
+                                <a title="Preview for QR Code" href="@(qrpreview + "QR-of-WATS" + item.EventUserInfoId + ".jpg")" target="_blank"><img src="Content/images/preview.png" width="18" height="18" /></a>
+                            }
+                                <a download="@item.DocumentUrl" title="Download" target="_blank" href="@(imglocNormal + item.DocumentUrl)"><i class="icon-download-alt"></i></a>&nbsp; &nbsp;
+
+                                <a title="Send Mail" href="@Url.Action("SendMail", "Home", new { EventUserInfoId = item.EventUserInfoId })"><i class="icon-envelope"></i></a>
+                                @*<a href="@Url.Action("ViewEventUser", "EventRegistrations", new {EventUserInfoId=item.EventUserInfoId })" title="view" ><i class="icon-eye-open"></i></a>*@
+                                <a rel="colorbox" class="details cboxElement" href="@Url.Action("ViewCulturalUser", "EventRegistrations", new { EventUserInfoId = item.EventUserInfoId })" title="view"><i class="icon-eye-open"></i></a>
+                                <a href="@Url.Action("EditCulturalUser", "EventRegistrations", new { EventUserInfoId = item.EventUserInfoId })" title="Edit"><i class="icon-pencil"></i></a>
+                                <a class="pagedelete" onclick="javascript:Delete(@item.EventUserInfoId);" id="1" title="Delete"><i class="icon-trash"></i></a>
+                                @*<a title="Delete" class="sepV_a disable-alpha"><i class="icon-trash"></i></a>*@
+                            </td>
+                    </tr>
+                                        
+                                        i++;
+                                    }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="9">No Records Found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    </div>
+</div>
+ @Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

@@ -1,0 +1,177 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#StartDate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-10:+10", altFormat: 'mm/dd/yy' });
+        $("#EndDate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-10:+10", altFormat: 'mm/dd/yy' });
+        $('#MWebsite').addClass('active');
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+        PagerClickBind();
+
+    });
+
+    function sortresult(sortcolumn) {
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        YouthBind(1);
+    }
+
+    function YouthBind(Pageno) {
+
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+        var Search = $('#txtsearch').val();
+        var startdate = $('#StartDate').val();
+        var enddate = $('#EndDate').val();
+
+        if ($('#StartDate').val() != "" && $('#EndDate').val() != "") {
+            var startdate = new Date($('#StartDate').val());
+            var enddate = new Date($('#EndDate').val());
+            if (startdate > enddate) { $('#spanStartDate').html('From date should be less than to date.'); $('#spanStartDate'); return false; } else { $('#spanStartDate').html(''); }
+        }
+
+        $.ajax({
+            url: '@Url.Action("YouthList", "Youth")',
+            type: 'GET',
+            cache: false,
+            data: { Search: Search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items, StartDate: startdate, EndDate: enddate },
+            success: function (result) {
+                $('#divYouth').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+
+    function Delete(YouthUserInfoId) {
+        var val2 = confirm("Do you want to delete this record?");
+        if (val2) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("DeleteYouth", "Youth")',  // the URL of the controller action method
+                data: { YouthUserInfoId: YouthUserInfoId }, // optional data
+                success: function (result) {
+                    $("#divmessage").html(result.data);
+                    YouthBind(1);
+                },
+                error: function (req, status, error) {
+                    $("#divmessage").html(result.data);
+                }
+            });
+        }
+    }
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            YouthBind($(this).text());
+        });
+    }
+
+    function ClearSearch() {
+        $('#txtsearch').val('');
+        $('#StartDate').val('');
+        $('#EndDate').val('');
+        $('#spanStartDate').html('');
+        $('#hdnPageNo').val(1);
+        YouthBind(1);
+    }
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="YouthUserInfoId" />
+<input id="hdnsortorder" type="hidden" value="ASC" />
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    
+    <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+    <li class="active">Youth List</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+</ul></div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <h3 class="title">Youth</h3>
+               
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div class="grayBackground nobL nobR">
+
+            <div class="ui-accordion ui-widget ui-helper-reset" id="filterReg" role="tablist">
+                <h4 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-filterReg-header-0" aria-controls="ui-accordion-filterReg-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Filter Youth</b></h4>
+                <div class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-filterReg-panel-0" aria-labelledby="ui-accordion-filterReg-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                    <div class="filedsetInner clearfix">
+
+                        <div class="row-fluid">
+                            <div class="span12">
+                                <div class="span3">
+                                    <label>Keyword </label>
+                                    <input type="text" value="" placeholder="First Name/ Last Name" class="span12" id="txtsearch" name="txtsearch">
+                                </div>
+                                <div class="span5">
+                                    <label>Date of Registration</label>
+                                    <div class="row-fluid">
+                                    <span class="span5">
+                                        <input type="text" name="StartDate" id="StartDate" class="span12 datepicker date" placeholder="From" value="">
+                                        <span id="spanStartDate" class="field-validation-error"></span>
+                                    </span><span class="span2">
+                                        <div class="tC p_b sml">to</div>
+                                    </span><span class="span5">
+                                        <input type="text" name="EndDate" id="EndDate" class="span12 datepicker date1" placeholder="To" value="">
+                                    </span>
+                                </div>
+                                </div>
+                                <div class="span3">
+                                    <button onclick="javascript: YouthBind(1);" class="btn btn-primary filterAction">Search</button>
+                                    <a onclick="javascript: ClearSearch();" class="btn btn-inverse filterAction wC">Clear</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix sepH_b"></div>
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" class="main-text">
+                <tbody>
+                    <tr>
+                        <td>
+                            <div id="divmessage">
+                                @if (TempData["message"] != null)
+                                { @Html.Raw(TempData["message"].ToString())}
+
+                                @if (ViewBag.message != null)
+                                { @Html.Raw(ViewBag.message.ToString())}
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="divYouth">
+                                @{Html.RenderAction("YouthList", "Youth");}
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

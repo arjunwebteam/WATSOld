@@ -1,0 +1,72 @@
+﻿@{
+    Layout = null;
+
+    WATS.Entities.RegisterFields objRegisterFields = ViewBag.objRegisterFields;
+    int status = ViewBag.status;
+    var EventName = ViewBag.EventName;
+}
+
+@if (status != -1)
+{
+    <div class="row-fluid">
+        <div class="span2 f_error">
+            <label>Question Title</label>
+
+        </div>
+        <div class="span3 f_error">
+            @(objRegisterFields.Name)
+        </div>
+        <div class="span2 f_error">
+            <label>Help Text</label>
+        </div>
+        <div class="span3 f_error">
+            @(objRegisterFields.HelpText == "" || objRegisterFields.HelpText == null ? "N/A" : objRegisterFields.HelpText)
+        </div>
+        <div class="span2 f_error">
+            <div class="pull-right">
+                <a onclick="javascript:EditRegisterOption(@objRegisterFields.RegisterFieldId);" ><i class="icon-pencil"></i></a>
+                <a onclick="javascript:DeleteRegisterOption(@objRegisterFields.RegisterFieldId);" ><i class="icon-trash"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span2 f_error">
+            <label>Question Type</label>
+        </div>
+        <div class="span3 f_error">
+            @(objRegisterFields.QuestionType)
+        </div>
+        <div class="span2 f_error">
+            <label>Display Order</label>
+        </div>
+        <div class="span3 f_error">
+            @(objRegisterFields.DisplayOrder)
+        </div>
+    </div>
+    <div class="row-fluid">        
+        <div class="span2 f_error">
+            <label>Validation Type</label>
+        </div>
+        <div class="span3 f_error">
+            @(objRegisterFields.ValidationType == null || objRegisterFields.ValidationType == "" ? "N/A" : objRegisterFields.ValidationType)
+        </div>
+        <div class="span2 f_error">
+            <label>Is Required</label>
+        </div>
+        <div class="span3 f_error">
+            @(objRegisterFields.IsRequired == true ? "Yes": "No")
+        </div>
+    </div>
+    <div class="row-fluid">
+        @if (objRegisterFields.lstRegisterOptions.Count != 0)
+        {
+            <label>Options</label>
+            <ul class="list thumbnails">
+                @foreach (var item in objRegisterFields.lstRegisterOptions)
+                {
+                    <li class="span3">@(item.QOption)</li>
+                }
+            </ul>
+        }
+    </div> 
+}

@@ -1,0 +1,86 @@
+﻿@{
+    ViewBag.Title = "DonarsList";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    List<WATS.Entities.Donors> lstDonors = ViewBag.lstDonors;
+    ViewBag.heading = "DonarsList"; 
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        PagerClickBind();
+        $('#load').hide();
+        $('#MDonarsList').addClass('active');
+    });
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            DonorsBind($(this).text(), $('#hdnsorting').val());
+        });
+    }
+
+    function DonorsBind(Pageno) {
+        $('#load').show();
+        $('#divNewsList').hide();
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+
+        $.ajax({
+            url: '@Url.Action("NewsList", "Home")',
+            type: 'GET',
+            cache: false,
+            data: { PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items },
+            success: function (result) {
+                $('#divNewsList').html(result);
+                $('#load').hide();
+                $('#prolist').show();
+                $('#divNewsList').show();
+                PagerClickBind();
+            }
+        });
+    }
+
+</script>
+
+
+        <article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height:1150px;">
+            <article class="clearfix curve position-r t-m4n b-p15">
+                <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">Donation&nbsp<span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16">List</span></h2>
+            </article>
+             <article class="clearfix p30 t-p15 tabhorizontal-p10">
+            <article id="divNewsList" class="clearfix l-m5 r-m5">
+                <table cellspacing="0" cellpadding="0" width="100%" border="0" class="table b-m5 border0 t-m20 table-hover" id="childinfo">
+                    <tbody>
+                        <tr>
+                            <th align="left" width="320">S.No</th>
+                            <th align="left" width="320">Donor Name</th>
+                            <th align="left" width="270" style="min-width: 39px;">Email Id</th>
+                            <th align="left" width="270" style="min-width: 39px;">Amount</th>
+                            <th align="left" width="281" style="min-width: 39px;">P.Status</th>
+                        </tr>
+                        @if (lstDonors != null && lstDonors.Count != 0)
+                        {
+                            foreach (var item in lstDonors)
+                            {
+                            <tr>
+                               <td>@item.RId</td>
+                                <td>@item.FirstName</td>
+                                <td>@item.Email</td>
+                                <td><span class="black-t">$</span>@(item.Amount == 0 ? "N/A" : item.Amount.ToString())</td>
+                                <td>@item.PaymentStatus</td>
+                            </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td class="norecords" colspan="9">No Records Found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </article>
+                    </article>
+        </article>
+   

@@ -1,0 +1,63 @@
+﻿@{Layout = null;
+  var userroles = (List<WATS.Entities.Roles>)ViewBag.userRoleslst;
+  var roleslst = (List<WATS.Entities.Roles>)ViewBag.lstRoles;
+}
+<script>
+    function validateroles() {
+        var RoleIds = Common.GetCheckBoxValue('RoleNamecheckbox');
+        if (RoleIds == "") {
+            alert("Please select atleast one Item.");
+            return false;
+        }
+        $('#RoleIds').val(RoleIds);
+    }
+</script>
+<div id="divroles">
+    <div class="dialog-title"><span id="Rlbltitle"></span></div>
+    <div class="dialog-content">
+        @using (Html.BeginForm("UpdateUserAccess", "Users", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.Hidden("UserId")
+            @Html.Hidden("RoleIds")
+            <div class="row-fluid">
+                <ul class="clearfix m0 list">
+                    @{int j = 1;
+                      foreach (var role in roleslst)
+                      {
+                          int t1 = 0;
+                          if (userroles != null)
+                          {
+                              for (var x1 = 0; x1 < userroles.Count; x1++)
+                              {
+                                  if (role.RoleId == userroles[x1].RoleId)
+                                  {
+                                      t1 = 1;
+
+                                  }
+                              }
+                          }
+                          if (t1 == 1)
+                          {
+                        <li><span class="checkbox inline">
+                            <input type="checkbox" checked="checked" name="RoleNamecheckbox" id="RoleNamecheckbox-@j" value= "@{@role.RoleId}" />
+                            Manage @role.RoleName</span></li>
+                          }
+                          else
+                          {
+                        <li><span class="checkbox inline">
+                            <input type="checkbox" name="RoleNamecheckbox" id="RoleNamecheckbox-@j" value= "@{@role.RoleId}" />
+                            Manage @role.RoleName</span></li>
+                          }
+                          j++;
+                      }
+                    }
+                    <!--- CONTENT [end] ---->
+                </ul>
+            </div>
+             <div class="clearfix t-r t-p5">
+                <input type="submit" class="btn btn-primary font-w7" value="Update" onclick="return validateroles();" />
+                <a class="btn font-w7" onclick=" $('#divuserroles').dialog('close')">Cancel</a>
+            </div>
+        }
+    </div>
+</div>

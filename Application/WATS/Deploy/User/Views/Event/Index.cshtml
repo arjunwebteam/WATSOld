@@ -1,0 +1,102 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var lstEvents = (List<WATS.Entities.Events>)ViewBag.lstEvents;
+    var Type = ViewBag.Type;
+    string str = "";
+    var imglocEvent = System.Configuration.ConfigurationManager.AppSettings["adminimgurl"] + "events/banners/";
+    ViewBag.heading = "Events";
+}
+<script>
+    $(document).ready(function () {
+        if ('@ViewBag.str' == 'clogin-failed') {
+             /*CuturalLoginShow();*/
+             $('#ErrorMessage1').show();
+        }
+        $('#MEvents').addClass('active');
+    });
+</script>
+<article id="ErrorMessage1" class="clearfix red-t font13 p5 hide t-b-m10 l-r-m10 font-w-b">
+    <div class="border dkredborder" style="background-color: #fce9e9;">
+    @(TempData["message1"] != null ? TempData["message1"].ToString() : "")
+        </div>
+        </article>
+                  <article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height:1150px;">
+                   <article class="clearfix curve position-r t-m4n b-p15">
+     <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">@if (Type == "upcoming") { str = "Upcoming Events"; } else if (Type == "past") { str = "Past Events"; } else { str = "Current Events"; } @str</h2></article>
+                          <article class="clearfix p30 t-p15 tabhorizontal-p10">
+                       @if (lstEvents != null && lstEvents.Count != 0)
+                       {
+                     <ul class="clearfix list-pn list-f m0 event-list font12 ralewayregular">
+                           @foreach (var item in lstEvents)
+                        {
+                      <li class="hvr-rectangle-out" style="background:#fff;">
+                         
+                        <section class="clearfix p10 mobilev-p5 shadow overflow-h">
+                          <section class="clearfix part-row">
+                            <figure class="clearfix part-5">
+                              <article class="clearfix white-bg shadow p5 r-m20 tabhorizontal-r-m10 mobile-r-m0">
+                                       
+                                        <a href="@Url.Action("EventDetails", "Event", new { EventName = WATS.BLL.Common.EncodeURL(@item.EventName), Type = Type, eid = item.EventId })">
+                                                    @if (item.BannerUrl != null && item.BannerUrl != "")
+                                                    {
+                                                        <img src="@(imglocEvent + item.BannerUrl)" alt="@item.EventName" title="@item.EventName" width="100%" height="112" style="width:120px; height:86px;"/>
+                                                    }
+                                                    else
+                                                    {
+                                                        <img src="@(imglocEvent + "no-image.jpg")" alt="@item.EventName" title="@item.EventName" width="100%" height="112" style="width:120px; height:86px;"/>
+                                                    }
+                                                </a>
+
+                              </article>
+                            </figure>
+                            <article class="cleafix part-7">
+                              <h3 class="poppins-medium font14 l-h16 t-m0"><a class="black-t" href="@Url.Action("EventDetails", "Event", new { EventName = WATS.BLL.Common.EncodeURL(@item.EventName), Type = Type, eid = item.EventId })">@item.EventName</a></h3>
+                              <article class="clearfix t-p5"><span class="calender-icon l-h14 dis-inline l-p20">@if (item.StartDate != DateTime.MinValue && item.EndDate != DateTime.MinValue && (item.EndDate.Date - item.StartDate.Date).Days > 0)
+                                                                                      {
+                                                        @Html.Raw(@item.StartDate.ToString("dddd") + " , " + @item.StartDate.ToString("MM/dd/yyyy"))
+                                                      
+                                                                                      }
+                                                                                      else if (item.StartDate != DateTime.MinValue && item.EndDate != DateTime.MinValue)
+                                                                                      {
+                                                        @Html.Raw(@item.StartDate.ToString("dddd") + " , " + item.StartDate.ToString("MM/dd/yyyy"))
+                                                                                          if (item.StartDate.ToString("hh.mm tt") != "12.00 AM")
+                                                                                          {
+                                                        @Html.Raw(" " + @item.StartDate.ToString("hh.mm tt") + " - ")
+                                                        @Html.Raw(@item.EndDate.ToString("hh.mm tt"))
+                                                                                          }
+                                                                                      }</span> </article>
+                                <article class="clearifix cell-row t-p15">
+             <article class="clearfix cell-6">
+                                 @if (item.EventDetails != null && item.EventDetails.Trim() != "")
+                                                {
+                              <article class="clearfix t-m0"><a href="@Url.Action("EventDetails", "Event", new { EventName = WATS.BLL.Common.EncodeURL(@item.EventName), Type = Type, eid = item.EventId })" class="btn btn-sm black-t font12 poppins-medium border-radius10">Read More</a></article>
+                                 }
+                 </article>
+                                    <article class="clearfix cell-6">
+                                          <article class="clearfix mobilev-t-p5 tabhorizontal-t-p5">
+
+                               @*   @{
+                                                
+                                                if (item.IsRegistration == true && item.RegistrationStartDate.Date <= DateTime.UtcNow.Date && item.RegistrationEndDate.Date >= DateTime.UtcNow.Date)
+                                                {
+                                                    <a href="@Url.Action("EventRegistration", "Event", new { EventName = WATS.BLL.Common.EncodeURL(@item.EventName), eid = item.EventId })" class="btn btn-sm btn-danger white-t font12 poppins-medium border-radius10">Register Now </a> }
+                                                }*@
+                            </article>
+                            </article>
+                            </article>
+                                  </article>
+                          </section>
+                        </section>
+                       
+                      </li>
+                             }
+                    </ul>
+                       }
+
+                       else
+                       {
+                             <h5 class="kaushan_scriptregular t-c t-m3 b-m0 merunred-t l-h18 tbp20 font26">No Events Found.</h5>
+                       }
+                  </article>
+                      </article>
+           

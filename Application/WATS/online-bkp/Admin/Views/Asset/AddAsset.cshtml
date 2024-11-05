@@ -1,0 +1,160 @@
+﻿@{
+    ViewBag.Title = "AddAsset";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<script type="text/javascript">
+    function Validate() {
+        if ($('#AssetName').val() == "") { $('#AssetName').focus(); $('#spanAssetName').html('Required.'); return false; } else { $('#spanAssetName').html(''); }
+        if ($('#Quantity').val() == "") { $('#Quantity').focus(); $('#spanQuantity').html('Required.'); return false; } else { $('#spanQuantity').html(''); }
+        if (CKEDITOR.instances.Description.getData() == "") { $('#Description').focus(); $('#spanDescription').html('Required.'); return false; } else { $('#Description').val(CKEDITOR.instances.Description.getData()); $('#spanDescription').html(''); }
+        return true;
+    }
+    $(document).ready(function () {
+        $('#wAsset').addClass('active');
+        $('#MWebsite').addClass('active');
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+    });
+</script>
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+
+        <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+        <li><a href="@Url.Action("Index", "Asset")">Asset</a> <span class="divider">/</span></li>
+        <li class="active">Add Asset</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a>View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<script type="text/javascript" src="ckeditor/ckeditor.js"></script>
+<script type="text/javascript" src="ckfinder/ckfinder.js"></script>
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r p_b"><a class="clearfix"  href="@Url.Action("Index", "Asset")">← back to Asset</a> </div>
+                <h3 class="title">Add Asset</h3>
+                @Html.Partial("WebsiteMenu")
+            </div>
+        </div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            { @Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            { @Html.Raw(ViewBag.message.ToString())}
+        </div>
+
+        @using (Html.BeginForm("AddAsset", "Asset", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+ 
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Asset Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Asset Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="AssetName" value="" class="inputstyle" name="AssetName" />
+                                                <span class="field-validation-error" id="spanAssetName"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Quantity :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                 <input type="text" id="Quantity" value="" class="inputstyle" name="Quantity" />
+                                                <span class="field-validation-error" id="spanQuantity"></span>
+                                            </div>
+                                        </div>
+                                         <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Email :</label>
+                                            </div>
+                                            <div class="span6">
+                                                 <input type="text" id="Email" value="" class="inputstyle" name="Email" />
+                                                <span class="field-validation-error" id="spanQuantity"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Owner By :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="OwnerBy" value="" class="inputstyle" name="OwnerBy"></input>
+                                                <span class="field-validation-error" id="spanOwnerBy"></span>
+                                            </div>
+                                        </div>
+                                            <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Name :</label>
+                                            </div>
+                                            <div class="span6">
+                                                 <input type="text" id="Name" value="" class="inputstyle" name="Name" />
+                                                <span class="field-validation-error" id="spanName"></span>
+                                            </div>
+                                        </div>
+                                         <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Phone No :</label>
+                                            </div>
+                                            <div class="span6">
+                                                 <input type="text" id="PhoneNo" value="" class="inputstyle" name="PhoneNo" />
+                                                <span class="field-validation-error" id="spanPhoneNo"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Description</b><span style="font-size: 12px;" class="red-t">*</span></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <textarea rows="10" name="Description" id="Description" cols="80" style="visibility: hidden; display: none;"></textarea><br />
+                            <span class="field-validation-error" id="spanDescription"></span>
+                            <script type="text/javascript">
+                                CKEDITOR.replace('Description', { contentsCss: '../css/editor.css' });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <div class="actionButtons">
+                    <input type="submit" onclick="return Validate()" class="button2 btn btn-primary sepV_b" id="add" value="Submit" name="add">
+                    <a class="btn btn-inverse" href="@Url.Action("Index", "Asset")">Cancel</a>
+                </div>
+            </div>
+                                            
+        }
+
+    </div>
+</div>

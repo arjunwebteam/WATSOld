@@ -1,0 +1,161 @@
+﻿@{
+    ViewBag.Title = "Profile";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var objuser = (WATS.Entities.Users)ViewBag.objuser;
+}
+<script>
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+    });
+    function CheckProfileEmailAvailability(email, userid) {
+        var returnval = null;
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CheckProfileEmailAvailability", "Users")', // the URL of the controller action method
+            data: { UserId: userid, Email: email }, // optional data
+            datatype: "JSON",
+            async: false,
+            success: function (result) {
+                if (result.ok) {
+                    returnval = result.data;
+                }
+            }
+        });
+        return returnval;
+    }
+    function EValidateProfile() {
+        //Account Information
+        if ($.trim($('#EEmail').val()) == '') { $('#EspanEmail').removeClass(); $('#EspanEmail').addClass('field-validation-error'); $('#EspanEmail').html('Required.'); $('#EEmail').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); }
+        if (!Common.CheckEmail($.trim($('#EEmail').val()))) { $('#EspanEmail').html('Please enter valid email address.'); $('#EEmail').focus().addClass("red-border"); return false; } else { $('#EspanEmail').html(''); }
+        if (!CheckProfileEmailAvailability($.trim($('#EEmail').val()), $('#UserId').val())) { $('#EspanEmail').html('Email address is not available.'); $('#EEmail').focus().addClass("red-border"); return false; } else { $('#EspanEmail').html(''); }
+
+        return true;
+    }
+    function EditProfile() {
+        $('#ViewProfile').hide();
+        $('#EditProfile').show();
+        $('#btnEdit').hide();
+    }
+    function ShowProfile() {
+        $('#ViewProfile').show();
+        $('#EditProfile').hide();
+        $('#btnEdit').show();
+    }
+</script>
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    @*<li><a href="@Url.Action("Index","InnerPages")">Web Pages</a> <span class="divider">/</span></li>*@
+    <li class="active">Profile</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+</ul></div>
+<div id="maincontainer">
+    <div class="mainContent">
+        @Html.Partial("MainMenu", "SuperAdmin")
+        @Html.Partial("LeftMenu", "SuperAdmin")
+          @if (TempData["message"] != null)
+        { <div id="message" class="divmessage">@Html.Raw(TempData["message"].ToString())</div>}
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" class="text12">
+
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="pageHeadingBlock ">
+                            <div class="grayBackground">
+                                <div id="btnEdit" class="fR t-r">
+                                    <a class="btn btn-small btn-primary coursesMenu" onclick="EditProfile();">Edit Profile</a>
+                                </div>
+                                <h3 class="title">Profile</h3>
+
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="text9">
+                            <tbody>
+                                <tr>
+                                    <td align="right"></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div id="messages"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <br>
+                                        <table width="96%" cellspacing="0" cellpadding="4" border="0" align="center" id="ViewProfile">
+                                            <tbody>
+                                                <tr>
+                                                    <td width="13%">User Name</td>
+                                                    <td width="87%">@objuser.UserName</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Email</td>
+                                                    <td>@objuser.Email</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Phone</td>
+                                                    <td>@objuser.MobilePhone</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Designation</td>
+                                                    <td>@objuser.Designation</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <table width="96%" cellspacing="0" cellpadding="4" border="0" align="center" style="display: none;" id="EditProfile">
+                                            @using (Html.BeginForm("UpdateUser", "Users", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                            {
+                                                @Html.Hidden("UserId",@objuser.UserId)
+                                                 @Html.Hidden("Type","Profile")
+                                                <tbody>
+                                                    <tr>
+                                                        <td width="13%">User Name</td>
+                                                        <td width="87%">@objuser.UserName</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Email</td>
+                                                        <td>
+                                                            <input type="text" value="@objuser.Email" class="inputstyle" id="EEmail" name="Email">
+                                                            <span class="field-validation-error" id="EspanEmail"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Phone</td>
+                                                        <td>
+                                                            <input type="text" value="@objuser.MobilePhone" class="inputstyle" id="EMobilePhone" name="MobilePhone">
+                                                            <span class="field-validation-error" id="EspanMobilePhone"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Designation</td>
+                                                        <td>
+                                                            <input type="text" value="@objuser.Designation" class="inputstyle" id="EDesignation" name="Designation">
+                                                            <span class="field-validation-error" id="EspanDesignation"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                         <td>&nbsp;</td>
+                                                        <td>
+                                                            <div class="clearfix t-p5">
+                                                                <input type="submit" class="btn btn-primary font-w7" value="Submit" onclick="return EValidateProfile();" />
+                                                                <a class="btn btn-inverse" onclick="ShowProfile();">Cancel</a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            }
+                                        </table>
+                                        <br>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

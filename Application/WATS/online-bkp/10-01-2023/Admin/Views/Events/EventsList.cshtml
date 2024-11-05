@@ -1,0 +1,88 @@
+﻿@{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+    List<WATS.Entities.Events> Eventslist = ViewBag.Eventslist;
+      
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+</script>
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div> 
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+                 <thead>
+                    <tr>
+                        <th width="40">S.No.</th>
+                        <th><a onclick="javascript:sortresult('EventName');" class="white-t-u">Heading @if (sortcolumn == "EventName")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+                        <th width="110"><a onclick="javascript:sortresult('StartDate');" class="white-t-u">Date @if (sortcolumn == "StartDate")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+                        <th width="150"><a onclick="javascript:sortresult('EventCategory');" class="white-t-u">Category @if (sortcolumn == "EventCategory")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+                        <th width="135">
+                            <a onclick="javascript:sortresult('IsRegistration');" class="white-t-u">Registrations @if (sortcolumn == "IsRegistration")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+
+                        <th width="70">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Eventslist.Count != 0)
+                    {
+                        foreach (var item in Eventslist)
+                        {
+                        <tr>
+                            <td>@item.RId</td>
+                            <td>@item.EventName</td>
+                            <td>@(item.StartDate == DateTime.MinValue?"": item.StartDate.ToString("MM-dd-yyyy"))</td>
+                            <td>@item.EventCategory</td>
+                            <td>
+                                @if (item.IsRegistration == true)
+                                {
+                                    <a href="@Url.Action("Index", "EventRegistrations", new { EventId = item.EventId, EventName = item.EventName})">Registrations</a>
+                                }
+                                else
+                                {
+                                @Html.Raw("No Registrations")
+                                }
+                            </td>                          
+                            <td>
+                                <a title="View" href="@Url.Action("ViewEvent", "Events", new { EventId = item.EventId })"><i class="icon-eye-open"></i></a>
+                                <a title="Edit" href="@Url.Action("EditEvent", "Events", new { EventId = item.EventId })" class="sepV_a"><i class="icon-pencil"></i></a>
+                                <a title="Delete" id="54" class="eventdelete" onclick="javascript:Delete(@(item.EventId), '@(item.BannerUrl)')"><i class="icon-trash"></i></a>
+                                @*<a title="Delete" class="sepV_a disable-alpha"><i class="icon-trash"></i></a>*@
+                            </td>
+                        </tr>                       
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="6">No Events Found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

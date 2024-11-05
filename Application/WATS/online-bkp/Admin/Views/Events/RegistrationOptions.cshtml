@@ -1,0 +1,109 @@
+﻿@{
+    Layout = null;
+
+    List<WATS.Entities.RegisterFields> lstRegisterField = ViewBag.lstRegisterField;
+    int status = ViewBag.status;
+
+    var EventName = ViewBag.EventName;   
+}
+<script>
+    $(document).ready(function () {
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+    });
+    $('.closelink').click(function () {
+        $(this).parent().fadeOut('600', function () { $(this).remove(); });
+    });
+</script>
+<fieldset class="formFieldset">
+    <div class="filedsetInner clearfix">
+        @if (status != -1)
+        {
+            int i = 1;
+            if (lstRegisterField.Count != 0)
+            {
+
+            }
+            else
+            {
+            <p class="norecords">No items found</p>
+            }
+
+            foreach (var item in lstRegisterField)
+            {
+            <p>Field @i:</p>
+            <div style="padding-bottom: 0.5px" class="form-actions"></div>                                
+            <div class="formRow" id="divRegisterField@(item.RegisterFieldId)">
+                <div class="row-fluid">
+                    <div class="span2 f_error">
+                        <label>Question Title</label>
+                    </div>
+                    <div class="span3 f_error">
+                        @(item.Name)
+                    </div>
+                    <div class="span2 f_error">
+                        <label>Help Text</label>
+                    </div>
+                    <div class="span3 f_error">
+                        @(item.HelpText == "" || item.HelpText == null ? "N/A" : item.HelpText)
+                    </div>
+                    <div class="span2 f_error">
+                        <div class="pull-right">
+                           
+                            <a  onclick="javascript:EditRegisterOption(@item.RegisterFieldId);" ><i class="icon-pencil"></i></a>
+                            
+                            <a onclick="javascript:DeleteRegisterOption(@item.RegisterFieldId);" ><i class="icon-trash"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span2 f_error">
+                        <label>Question Type</label>
+                    </div>
+                    <div class="span3 f_error">
+                        @(item.QuestionType)
+                    </div>
+                    <div class="span2 f_error">
+                        <label>Display Order</label>
+                    </div>
+                    <div class="span3 f_error">
+                        @(item.DisplayOrder)
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span2 f_error">
+                        <label>Validation Type</label>
+                    </div>
+                    <div class="span3 f_error">
+                        @(item.ValidationType == null || item.ValidationType == "" ? "N/A" : item.ValidationType)
+                    </div>
+                    <div class="span2 f_error">
+                        <label>Is Required</label>
+                    </div>
+                    <div class="span3 f_error">
+                        @(item.IsRequired == true ? "Yes" : "No")
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    @if (item.lstRegisterOptions.Count != 0)
+                    {
+                        <label>Options</label>
+                        <ul class="list thumbnails">
+                            @foreach (var itemOptions in item.lstRegisterOptions)
+                            {
+                                <li class="span3">@(itemOptions.QOption)</li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+            <div style="padding-bottom: 0.5px" class="form-actions"></div>   
+                    i++;
+            }
+
+        }
+        else
+        {
+            <p>Sorry Failed processing your request.</p>
+        }
+    </div>
+</fieldset>

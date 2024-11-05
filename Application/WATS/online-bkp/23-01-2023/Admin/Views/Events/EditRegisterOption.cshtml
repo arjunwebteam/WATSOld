@@ -1,0 +1,192 @@
+﻿@{
+    Layout = null;
+
+    Int64 EventId = ViewBag.EventId;
+    WATS.Entities.RegisterFields objRegisterFields = ViewBag.objRegisterFields;
+    int status = ViewBag.status;
+    var EventName = ViewBag.EventName;
+    
+}
+
+<script>
+
+    function addRow() {
+
+        var table = document.getElementById("AddoptTable");
+
+        var rowCount = table.rows.length;
+
+        var row = table.insertRow(rowCount);
+        row.id = rowCount;
+
+        var cell2 = row.insertCell(0);
+        var element21 = document.createElement("input");
+        element21.type = "text";
+        element21.name = "[" + rowCount + "].QOption";
+        element21.id = "Name" + rowCount;
+        cell2.appendChild(element21);
+
+        var element22 = document.createElement("span");
+        element22.className = "field-validation-error";
+        element22.id = "spanName" + rowCount;
+        cell2.appendChild(element22);
+
+        var cell3 = row.insertCell(1);
+        cell3.innerHTML = '<a class="link" onclick="javascript:deleteRow(' + rowCount + ')" class="link"><i class="icon-trash"></i></a>';
+
+        $('#hdnRowCount').val(rowCount);
+    }
+
+    function deleteRow(i) {
+        try {
+            var row = document.getElementById(i);
+            row.parentNode.removeChild(row);
+        } catch (e) {
+            alert(e);
+        }
+    }
+
+    function AddOptions() {
+
+        if ($('#QuestionType').val() == "checkbox" || $('#QuestionType').val() == "radio" || $('#QuestionType').val() == "dropdown") {
+            $('#divRegOps').show();
+        }
+        else {
+            $('#divRegOps').hide();
+        }
+    }
+
+    function ValidateAddReg() {
+        if ($('#Name').val() == "") { $('#Name').focus(); $('#lblName').html('Required.'); $('#Name').focus().addClass("red-border"); return false; } else { $('#lblName').html(''); $('#Name').focus().removeClass("red-border"); }
+        if ($('#QuestionType').val() == "") { $('#QuestionType').focus(); $('#lblQuestionType').html('Required.'); return false; } else { $('#lblQuestionType').html(''); }
+        if ($('#QuestionType').val() == "checkbox" || $('#QuestionType').val() == "radio" || $('#QuestionType').val() == "dropdown") {
+
+            var rowcount = $('#hdnRowCount').val();
+            if ($('#QuestionType').val() == "checkbox" || $('#QuestionType').val() == "radio" || $('#QuestionType').val() == "dropdown") {
+                for (var i = 0; i < rowcount + 1; i++) {
+                    if ($('#' + i).length > 0) {
+                        if ($.trim($('#Name' + i).val()) == '') { $('#spanName' + i).html('Required.'); $('#Name' + i).focus().addClass("red-border"); return false; } else { $('#spanName' + i).html(''); $('#Name' + i).focus().removeClass("red-border"); }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+</script>
+@if (status != -1)
+{
+    using (Html.BeginForm("AddRegisterOption", "Events", FormMethod.Post))
+    {
+    <input type="hidden" id="EventId" name="EventId" value="@(objRegisterFields.EventId)" />
+    <input type="hidden" id="EventName" name="EventName" value="@EventName" />
+    <input type="hidden" id="RegisterFieldId" name="RegisterFieldId" value="@(objRegisterFields.RegisterFieldId)" />
+    <input type="hidden" id="hdnRowCount" name="hdnRowCount" value="1" />
+    <fieldset class="formFieldset">
+
+        <div class="row-fluid">
+            <div class="span2 f_error">
+                <label>Question Title<span class="fieldReq">*</span></label>
+            </div>
+            <div class="span4 f_error">
+                <input id="Name" name="Name" type="text" class="span12" value="@(objRegisterFields.Name)" />
+                <label for="reg_last_name" generated="true" class="field-validation-error" id="lblName"></label>
+            </div>
+            <div class="span2 f_error">
+                <label>Help Text</label>
+            </div>
+            <div class="span4 f_error">
+                <input id="HelpText" name="HelpText" type="text" class="span12" value="@(objRegisterFields.HelpText)" />
+                <label for="reg_last_name" generated="true" class="field-validation-error" id="lblHelpText"></label>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span2 f_error">
+                <label>Question Type<span class="fieldReq">*</span></label>
+            </div>
+            <div class="span4 f_error">
+                <select id="QuestionType" name="QuestionType" class="span12" onchange="javascript:AddOptions();">
+                    <option value="">Select</option>
+                    <option value="date">Date</option>
+                    <option value="time">Time</option>
+                    <option value="text">Text</option>
+                    <option value="textarea">TextArea</option>
+                    <option value="checkbox">Checkbox</option>
+                    <option value="radio">Radio</option>
+                    <option value="dropdown">Dropdown</option>
+                </select>
+                <label for="reg_last_name" generated="true" class="field-validation-error" id="lblQuestionType"></label>
+            </div>
+            <div class="span2 f_error">
+                <label>Display Order</label>
+            </div>
+            <div class="span4 f_error">
+                <input id="DisplayOrder" name="DisplayOrder" maxlength="3" type="text" class="span12" onkeypress="return Common.isNumberKey(event)" value="@(objRegisterFields.DisplayOrder)" />
+                <label for="reg_last_name" generated="true" class="field-validation-error" id="lblDisplayOrder"></label>
+            </div>
+        </div>
+        <div class="row-fluid">            
+            <div class="span2 f_error">
+                <label>ValidationType</label>
+            </div>
+            <div class="span4 f_error">
+                <select id="ValidationType" class="span12" name="ValidationType">
+                    <option value="">Select</option>
+                    <option value="email">Email</option>
+                    <option value="int">Integer</option>
+                    <option value="date">Date</option>
+                </select>
+            </div>
+            <div class="span2 f_error">
+                <label>Is Required</label>
+            </div>
+            <div class="span4 f_error">
+                @Html.CheckBox("IsRequired", objRegisterFields.IsRequired)
+            </div>
+        </div>
+        <script>
+            $(document).ready(function () {
+                $('#ValidationType').val('@(objRegisterFields.ValidationType)');
+                $('#QuestionType').val('@(objRegisterFields.QuestionType)');
+            });
+
+        </script>
+        <div class="row-fluid" id="divRegOps" @(objRegisterFields.QuestionType == "checkbox" || objRegisterFields.QuestionType == "radio" || objRegisterFields.QuestionType == "dropdown" ? "" : "style=display:none")>
+            <div class="field">
+                <label>
+                    <a onclick="javascript:addRow();" class="link">Add Option</a>
+                </label>
+            </div>
+
+            <table id="AddoptTable" name="AddoptTable" cellpadding="3" width="100%">
+                @if (objRegisterFields.lstRegisterOptions.Count != 0)
+                {
+                    var i = 0;
+                    foreach (var item in objRegisterFields.lstRegisterOptions)
+                    {
+                    <tr id="@(i)">
+                        <td>
+                            <input type="text" id="Name@(i)" name="[@(i)].QOption" value="@(item.QOption)" /><span class="field-validation-error" id="spanName@(i)"></span>
+                        </td>
+                        <td><a onclick="javascript:DeleteOption(@item.RegisterOptionId, @(objRegisterFields.RegisterFieldId));" ><i class="icon-trash"></i></a></td>
+                    </tr>
+                        i++;
+                    }
+                }
+            </table>
+        </div>
+
+    </fieldset>
+     
+    <div class="form-actions">
+        <div class="actionButtons">
+            <input type="submit" class="btn btn-primary" onclick="return ValidateAddReg();" value="Save" />
+            <a class="btn" onclick="javascript:ViewRegisterOption(@(objRegisterFields.RegisterFieldId));">Cancel</a>
+        </div>
+    </div>
+    }
+}
+else
+{
+    <p class="error-alert">Sorry Failed processing your request.</p>
+}

@@ -1,0 +1,181 @@
+﻿@{
+    Layout = null;
+}
+
+@{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+    List<WATS.Entities.RegistrationCategoriesDropDown> lstRegistrationCategoriesDropDown = ViewBag.lstRegistrationCategoriesDropDown;
+
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+    string userRole = null;
+    if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null)
+    {
+        authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+
+        userRole = authTicket.UserData;
+    }
+}
+
+
+<script type="text/javascript">
+    function RegistrationCategoriesStatus(RegistrationCategoriesCategoryId) {
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("RegistrationCategoriesStatus", "RegistrationCategoriesDropDown")', // the URL of the controller action method
+            data: { RegistrationCategoriesCategoryId: RegistrationCategoriesCategoryId }, // optional data
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    RegistrationCategoriesBind(1);
+                    $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                    $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                }
+            }
+        });
+    }
+
+
+     function UpdateOrderNo(i, RegistrationCategoriesCategoryId) {
+        var OrderNo = parseInt($('#OrderNo' + i).val());
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("RegistrationCategoriesDisplayOrder", "RegistrationCategoriesDropDown")',
+            data: { DisplayOrder: OrderNo, RegistrationCategoriesCategoryId: RegistrationCategoriesCategoryId },
+            success: function (result) {
+                var div = '';
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                    RegistrationCategoriesBind(1);
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                    $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                }
+            }
+        });
+    }
+
+</script>
+
+
+
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div>
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+                <thead>
+                    <tr>
+                        <th width="5%" style="text-align:center;">S.No.</th>
+                        <th width="40%">
+                            <a onclick="javascript:sortresult('CategoryName');" class="white-t-u">
+                                Category Name @if (sortcolumn == "CategoryName")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                            </a>
+                        </th>
+                        <th width="20%">
+                            <a onclick="javascript:sortresult('Title');" class="white-t-u">
+                                Title @if (sortcolumn == "Title")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                            </a>
+                        </th>
+
+                        <th width="10%">
+                            <a onclick="javascript:sortresult('OrderNo');" class="white-t-u">
+                                Order No @if (sortcolumn == "OrderNo")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+</th>
+                        <th width="8%">
+                            <a onclick="javascript:sortresult('IsActive');" class="white-t-u">
+                                IsActive @if (sortcolumn == "IsActive")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                            </a>
+                        </th>
+                        <th width="7%" style="text-align:center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (lstRegistrationCategoriesDropDown.Count != 0)
+                    {
+                        int i = 0;
+                        foreach (var item in lstRegistrationCategoriesDropDown)
+                        {
+                            <tr>
+                                <td style="text-align:center;" width="5">@item.RId</td>
+                                <td style="text-align: left" width="40">@item.CategoryName</td>
+                                <td style="text-align: left" width="20">@item.Title</td>
+
+                                <td>
+                                    <input type="text" style="width:30px;margin-bottom:0px;" maxlength="3" id="OrderNo@(i)" value="@item.OrderNo" onkeypress="return Common.isNumberKey(event)" />
+                                    <a onclick="UpdateOrderNo(@i,@item.RegistrationCategoriesCategoryId);" title="Update"><i class="fa fa-fw fa-refresh"></i></a>
+
+                                </td>
+
+
+                                <td width="10%">
+                                    @{
+                                        var isactive = "";
+                                        var active = "";
+                                        var disable = "";
+                                        if (item.IsActive == true)
+                                        {
+                                            isactive = "Active";
+                                            disable = "style=\"cursor: pointer;\" onclick=\"javascript:RegistrationCategoriesStatus(" + item.RegistrationCategoriesCategoryId + ");\"";
+                                        }
+                                        else
+                                        {
+                                            isactive = "Disabled";
+                                            active = "style=\"cursor: pointer;\" onclick=\"javascript:RegistrationCategoriesStatus(" + item.RegistrationCategoriesCategoryId + ");\"";
+                                        }
+                                        <div class="admin-active">
+                                            @isactive
+                                            <ul>
+                                                <li><a @Html.Raw(active)>Active</a></li>
+                                                <li><a @Html.Raw(disable)>Disabled</a></li>
+                                            </ul>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <a onclick="EditRegistrationCategories(@item.RegistrationCategoriesCategoryId);" title="Edit" class="r-p5"><i i class="icon-pencil"></i></a>
+                                    @if (userRole.Contains("SuperAdmin"))
+                                    {
+
+                                        <a class="themedelete" onclick="javascript:Delete(@item.RegistrationCategoriesCategoryId);" id="12" title="Delete"><i class="icon-trash"></i></a>
+
+                                    }
+                                </td>
+                            </tr>
+                            i++;
+                        }
+
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="9">No Records Found.</td>
+                        </tr>
+                    }
+            </table>
+        }
+        </div>
+</div>
+        @Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

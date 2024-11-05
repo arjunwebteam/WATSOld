@@ -1,0 +1,270 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#wWebsiteBanners').addClass('active');
+        $('#AddWebsiteBanner').dialog
+           ({
+               autoOpen: false,
+               width: 500,
+               modal: true
+           });
+
+        $('#ViewInnerPageCategory').dialog
+          ({
+              autoOpen: false,
+              width: 450,
+              modal: true
+          });
+        PagerClickBind();
+    });
+
+    function Onload(Pageno) {
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+        var Search = $('#txtsearch').val();
+
+        $.ajax({
+            url: '@Url.Action("BannersList", "WebsiteBanners")',
+            type: 'GET',
+            cache: false,
+            data: { Search: Search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items },
+            success: function (result) {
+                $('#divWebsiteBanner').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+
+    function sortresult(sortcolumn) {
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        Onload(1);
+    }
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            Onload($(this).text());
+        });
+    }
+
+    function WebsiteBannersEdit(Id) {
+        $.ajax({
+            url: '@Url.Action("EditBanner", "WebsiteBanners")',
+            type: 'POST',
+            data: { WebsiteBannerId: Id },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objWebsiteBanners = result.data;
+                    $('#BannerTitle').val(objWebsiteBanners.BannerTitle);
+                    $('#RedirectUrl').val(objWebsiteBanners.RedirectUrl);
+                    $('#OrderNo').val(objWebsiteBanners.OrderNo);
+                    $('#Target').val(objWebsiteBanners.Target);
+                    $('#WebsiteBannerId').val(objWebsiteBanners.WebsiteBannerId);
+                    $('#AddWebsiteBanner').dialog("open");
+                    $('#lbltitle').html('Edit Theme Banner');
+                    $('#Aspanfile').html('');
+
+                    $('#BannerTitle').focus().removeClass("red-border");
+                    $('#OrderNo').focus().removeClass("red-border");
+                    $('#RedirectUrl').focus().removeClass("red-border");
+
+                    $('#spanBannerUrl').html('');
+                    $('#spanBannerTitle').html('');
+                    $('#spanOrderNo').html('');
+                    $('#spanRedirectUrl').html('');
+                }
+                else {
+                    $('#divmessage').val(result.data);
+                }
+            }
+        });
+    }
+
+
+
+    function Add() {
+        clearInnerPageCategory();
+        $("#AddWebsiteBanner").dialog("open");
+        $('#lbltitle').html('Add Theme Banner');
+    }
+
+    function clearInnerPageCategory() {
+        $('#WebsiteBannerId').val('0');
+        $('#BannerUrl').val('');
+        $('#BannerTitle').val('');
+        $('#OrderNo').val('');
+        $('#RedirectUrl').val('');
+        $('#Target').val('');
+        $('#Aspanfile').html('');
+        $('#spanBannerUrl').html('');
+        $('#spanBannerTitle').html('');
+        $('#spanOrderNo').html('');
+        $('#spanRedirectUrl').html('');
+        $('#BannerTitle').focus().removeClass("red-border");
+        $('#OrderNo').focus().removeClass("red-border");
+        $('#RedirectUrl').focus().removeClass("red-border");
+
+    }
+    function Validate() {
+        if ($('#WebsiteBannerId').val() == "0") {
+            if ($('#BannerUrl').val() == "") { $('#Aspanfile').html('Required.'); $('#BannerUrl').focus(); return false; } else { $('#Aspanfile').html(' '); }
+            if (!Common.isImage($('#BannerUrl').val())) { $('#Aspanfile').html('Sorry image is invalid. Only allowed extensions are:<b>jpg, png, PNG, gif, jpeg, JPEG</b>.'); $('#BannerUrl').focus(); return false; } else { $('#Aspanfile').html(''); }
+            //if ($('#hdnimgvalidate').val() == '0') { $('#Aspanfile').html('Please select image with diemensions equal to 784 * 345.'); $('#BannerUrl').focus(); return false; } else { $('#Aspanfile').html(''); }
+
+        }
+        if ($('#BannerTitle').val() == "") { $('#spanBannerTitle').html('Required.'); $('#BannerTitle').focus().addClass("red-border"); return false; } else { $('#spanBannerTitle').html(''); $('#BannerTitle').focus().removeClass("red-border"); }
+               
+        //if ($('#Target').val() == "") { $('#spanTarget').html('Required.'); $('#Target').focus().addClass("red-border"); return false; } else { $('#spanTarget').html(''); $('#Target').focus().removeClass("red-border"); }
+        //if ($('#RedirectUrl').val() == "") { $('#spanRedirectUrl').html('Required.'); $('#RedirectUrl').focus().addClass("red-border"); return false; } else { $('#spanRedirectUrl').html(''); $('#RedirectUrl').focus().removeClass("red-border"); }
+        return true;
+    }
+
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="WebsiteBannerId" />
+<input id="hdnsortorder" type="hidden" value="ASC" />
+<input type="hidden" id="hdnimgvalidate" value="0" />
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+
+    <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+    <li class="active">Theme Banners</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+</ul></div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r spcT_c"><a onclick="Add();" class="btn btn-primary coursesMenu">Add Theme Banner</a> </div>
+                <h3 class="title">Theme Banners</h3>
+                @Html.Partial("WebsiteMenu")
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="text9">
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="divmessage">
+                            @if (TempData["message"] != null)
+                            { @Html.Raw(TempData["message"].ToString())}
+
+                            @if (ViewBag.message != null)
+                            { @Html.Raw(ViewBag.message.ToString())}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td height="10" colspan="2"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="divWebsiteBanner">
+                            @{Html.RenderAction("BannersList", "WebsiteBanners");}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div style="display: none;" id="AddWebsiteBanner">
+
+    @using (Html.BeginForm("AddWebsiteBanners", "WebsiteBanners", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <input type="hidden" id="WebsiteBannerId" name="WebsiteBannerId" value="0" />
+        <div class="dialog-title"><span id="lbltitle"></span></div>
+        <div class="dialog-content">
+            <div class="container-fluid">
+                <div class="row-fluid" id="brurl">
+                    <div class="span5">Image : <span class="red-t">*</span></div>
+                    <div class="span7">
+                        <input type="file" name="BannerUrl" id="BannerUrl" onchange="checkPhoto(this)" />
+                        <span style="padding-top: 7px;" class="field-validation-error" id="Aspanfile"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Banner Title : <span class="red-t">*</span></div>
+                    <div class="span7">
+                        <input type="text" name="BannerTitle" id="BannerTitle" value="" class="inputstyle">
+                        <span id="spanBannerTitle" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Order No :</div>
+                    <div class="span7">
+                        <input width="70px" maxlength="3" onkeypress="return Common.isNumberKey(event)" type="text" name="OrderNo" id="OrderNo" class="inputstyle">
+                        <span id="spanOrderNo" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Target :</div>
+                    <div class="span7">
+                        <select name="Target" class="input" id="Target">
+                            <option value="Select">--Select--</option>
+                            <option value="_blank">Blank</option>
+                            <option value="_parent">Parent</option>
+                        </select>
+                        <span id="spanTarget" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Redirect URL :</div>
+                    <div class="span7">
+                        <input type="text" name="RedirectUrl" id="RedirectUrl" value="" class="inputstyle">
+                        <span id="spanRedirectUrl" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <b style="color: #f00">Note</b>: 1. Enter the "Redirect URL" start with http:// <br />
+                    2. Image size should be maintained width * height (784 * 345)
+                </div>
+                <div class="clearfix t-r t-p5">
+                    <input type="submit" onclick="return Validate();" value="Submit" class="btn btn-primary font-w7">
+                    <a onclick=" $('#AddWebsiteBanner').dialog('close')" class="btn font-w7">Cancel</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    var _URL = window.URL || window.webkitURL;
+    $("#BannerUrl").change(function (e) {
+        var file, img;
+        if ((file = this.files[0])) {
+            img = new Image();
+            img.onload = function () {
+                if (this.width == 784 && this.height == 345) {
+                    $('#hdnimgvalidate').val('1');
+                }
+                else {
+                    $('#hdnimgvalidate').val('0');
+                }
+            };
+            img.src = _URL.createObjectURL(file);
+        }
+    });
+
+</script>

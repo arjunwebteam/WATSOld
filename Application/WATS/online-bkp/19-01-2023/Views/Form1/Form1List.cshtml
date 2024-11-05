@@ -1,0 +1,156 @@
+﻿@using System.Configuration
+@{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+
+    List<WATS.Entities.Form1> lstForm1 = ViewBag.lstForm1;
+
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+    string userRole = null;
+    if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null)
+    {
+        authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+
+        userRole = authTicket.UserData;
+    }
+
+}
+
+<link type="text/css" media="screen" rel="stylesheet" href="colorbox/colorbox.css" />
+<script type="text/javascript" src="colorbox/jquery.colorbox.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("a[rel]").colorbox({ transition: "fade" });
+        $(".viewdetails").colorbox({ iframe: true, innerWidth: 600, innerHeight: 400 });
+    });
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('#MWebsite').addClass('active');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+
+      function Form1Status(CompetitionRegistrationId) {
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Form1Status", "Form1")', // the URL of the controller action method
+            data: { CompetitionRegistrationId: CompetitionRegistrationId }, // optional data
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                    Form1Bind($('#hdnPageNo').val());
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                    $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                }
+            }
+        });
+    }
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div>
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+                <thead>
+                    <tr>
+                        <th width="5%">S.No.</th>
+                        <th width="20%">
+                            <a onclick="javascript:sortresult('Name');" class="white-t-u">
+                                Name @if (sortcolumn == "Name")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                            </a>
+                        </th>
+                        <th width="20%">
+                            <a onclick="javascript:sortresult('ContactPhone');" class="white-t-u">
+                                Contact Phone @if (sortcolumn == "ContactPhone")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                            </a>
+                        </th>
+                        <th width="20%">
+                            <a onclick="javascript:sortresult('ContactEmail');" class="white-t-u">
+                                Contact Email @if (sortcolumn == "ContactEmail")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                            </a>
+                        </th>
+                        <th width="15%">
+                            <a onclick="javascript:sortresult('InsertedDate');" class="white-t-u">
+                                Inserted Date @if (sortcolumn == "InsertedDate")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                            </a>
+                        </th>
+                        @* <th width="13%">
+            <a onclick="javascript:sortresult('IsApproved');" class="white-t-u">
+                Status @if (sortcolumn == "IsApproved")
+                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+            </a>
+        </th>*@
+
+                        <th width="7%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (lstForm1.Count != 0)
+                    {
+                        int i = 0;
+                        var location = ConfigurationManager.AppSettings["usersiteurl"];
+                        foreach (var item in lstForm1)
+                        {
+                            TimeZoneInfo Eastern_ZONE = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+                            DateTime EasternTime = TimeZoneInfo.ConvertTimeFromUtc(item.InsertedDate, Eastern_ZONE);
+                    <tr>
+                        <td style="text-align: center" width="5%">@item.Rid</td>
+                        <td style="text-align: left" class="t-t-c" width="20%">@item.FirstName</td>
+                        <td style="text-align: left" class="t-t-c" width="20%">@item.ContactPhone</td>
+                        <td style="text-align: left" class="t-t-c" width="20%">@item.ContactEmail</td>
+                        <td style="text-align: left" class="t-t-c" width="20%">@item.InsertedDate.ToString("MM-dd-yyyy")</td>
+                        <td>
+                            <a title="View" href="@Url.Action("ViewForm1", "Form1", new { CompetitionRegistrationId = item.CompetitionRegistrationId })" class='lightview rightmost' data-lightview-group='example' data-lightview-type='iframe' data-lightview-options="width: 800" >
+                                <i class="icon-eye-open"></i>
+                            </a>
+
+
+                            <a href="@Url.Action("EditForm1", "Form1", new {CompetitionRegistrationId=item.CompetitionRegistrationId })" title="Edit"><i class="icon-pencil"></i></a>
+
+                            <a class="Delete" onclick="javascript:Delete(@item.CompetitionRegistrationId);" id="66" title="Delete"><i class="icon-trash"></i></a>
+
+                        </td>
+                    </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="6">No Records Found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    </div>
+</div>
+
+@Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

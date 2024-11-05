@@ -1,0 +1,153 @@
+﻿@using System.Configuration;
+@{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+
+    List<WATS.Entities.Volunteers> lstVolunteers = ViewBag.lstVolunteers;    
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('#MMembers').addClass('active');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+
+    function Volunteerstatus(VolunteerId) {
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Volunteerstatus", "Volunteers")', // the URL of the controller action method
+            data: { VolunteerId: VolunteerId }, // optional data
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    Onload($('#hdnPageNo').val());
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                }
+            }
+        });
+    }
+
+    function DeleteVolunteer(VolunteerId, ImageUrl) {
+        var val2 = confirm("Do you want to delete this record?");
+        if (val2) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("DeleteVolunteer", "Volunteers")',  // the URL of the controller action method
+                data: { VolunteerId: VolunteerId, ImageUrl: ImageUrl }, // optional data
+                success: function (result) {
+                    if (result.ok) {
+                        $("#divmessage").html(result.data);
+                        Onload($('#hdnPageNo').val());
+                    }
+                    else {
+                        $("#divmessage").val(result.data);
+                    }
+                },
+            });
+        }
+    }
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div> 
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+                <thead>
+                    <tr>
+                        <th width="5%">S.No.</th>
+                        <th width="10%">
+                            <a onclick="javascript:sortresult('FirstName');" class="white-t-u">First Name @if (sortcolumn == "FirstName")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="10%">
+                            <a onclick="javascript:sortresult('LastName');" class="white-t-u">Last Name @if (sortcolumn == "LastName")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="7%">
+                            <a onclick="javascript:sortresult('Email');" class="white-t-u">Email @if (sortcolumn == "Email")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="10%">
+                            <a onclick="javascript:sortresult('PhoneNo');" class="white-t-u">Phone @if (sortcolumn == "PhoneNo")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="9%">Status</th>
+                        <th width="8%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (lstVolunteers.Count != 0)
+                    {
+                        foreach (var item in lstVolunteers)
+                        {
+                        <tr valign="top">
+                            <td>@item.RId
+                                </td>
+                            <td style="text-align: left">@item.FirstName</td>
+                            <td style="text-align: left">@item.LastName</td>
+                            <td>@item.Email</td>
+                            <td>@item.PhoneNo</td>
+                            <td>
+                                @{
+                            var isactive = "";
+                            var active = "";
+                            var disable = "";
+                            if (item.IsActive == true)
+                            {
+                                isactive = "Active";
+                                disable = "style=\"cursor: pointer;\" onclick=\"javascript:Volunteerstatus(" + item.VolunteerId + ");\"";
+                            }
+                            else
+                            {
+                                isactive = "Disabled";
+                                active = "style=\"cursor: pointer;\" onclick=\"javascript:Volunteerstatus(" + item.VolunteerId + ");\"";
+                            }
+                                    <div class="admin-active">@isactive
+                                        <ul>
+                                            <li><a @Html.Raw(active) >Active</a></li>
+                                            <li><a @Html.Raw(disable) >Disabled</a></li>
+                                        </ul>
+                                    </div>      
+                                }
+                            </td>
+                            <td>
+                                <a title="Send Mail" href="@Url.Action("SendMail", "Home", new { VolunteerId =  item.VolunteerId })"><i class="icon-envelope"></i></a>&nbsp;&nbsp;
+                                  <a title="View" href="@Url.Action("ViewVolunteer", "Volunteers", new { VolunteerId =  item.VolunteerId })" class='lightview rightmost' data-lightview-group='example' data-lightview-type='iframe' data-lightview-options="width: 850" data-lightview-caption="@item.FirstName" ><i class="icon-eye-open"></i></a>
+                                <a title="Edit" href="@Url.Action("EditVolunteer", "Volunteers", new { VolunteerId =  item.VolunteerId })"><i class="icon-pencil"></i>
+                            </a><a title="Delete" id="68" class="cmdelete" onclick="javascript:DeleteVolunteer(@item.VolunteerId);"><i class="icon-trash"></i></a>
+                                @*<a title="Delete" class="sepV_a disable-alpha"><i class="icon-trash"></i></a>*@
+                            </td>
+                        </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="8">No Records Found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    </div>
+</div>
+@Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.PageNo, "pagination pagination-centered"))

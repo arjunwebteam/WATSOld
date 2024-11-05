@@ -1,0 +1,46 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var heading = "";
+    var desc = "";
+    var dhd = "";
+    WATS.Entities.InnerPages innerpage = ViewBag.InnerPage;
+    if (innerpage != null)
+    {
+        heading = innerpage.Heading;
+        desc = innerpage.Description;
+        dhd = WATS.BLL.Common.EncodeURL(heading);
+    }
+
+    ViewBag.Title = heading;
+    if (innerpage != null)
+    {
+        ViewBag.Title = (innerpage.PageTitle == "" ? innerpage.Heading + "WATS" : innerpage.PageTitle);
+        ViewBag.MetaDescription = (innerpage.MetaDescription == "" ? innerpage.Heading : innerpage.MetaDescription);
+        ViewBag.MetaKeywords = (innerpage.MetaKeywords == "" ? innerpage.Heading : innerpage.MetaKeywords);
+    }
+    ViewBag.heading = innerpage.Heading;
+}
+@*<script type="text/javascript">
+    $(document).ready(function () {
+        $('#M' + '@WATS.BLL.Common.EncodeURL(innerpage.Heading)').addClass('active');
+    });
+</script>*@
+
+
+   <article class="clearfix border t-m1 Poppins-Regular font14 l-h24 black-t" style="min-height:1150px;">
+     <article class="clearfix curve position-r t-m4n b-p15">
+     <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">@innerpage.Heading@*<span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16">Us</span>*@</h2></article>
+     <article class="clearfix p30 t-p15 tabhorizontal-p10">
+@if (@desc != "")
+                  {
+                      @Html.Raw(desc.Replace("src=\"/content/", "src=\"" + System.Configuration.ConfigurationManager.AppSettings["adminsiteurl"].ToString() + "Content/").Replace("href=\"/content/", "href=\"" + System.Configuration.ConfigurationManager.AppSettings["adminsiteurl"].ToString() + "Content/"))
+                  }
+                  else
+                  {
+    
+    <h4 class="clearfix kaushan_scriptregular font24 merunred-t">Content Will Update Soon..</h4>
+                 }
+</article>
+
+         </article>
+         

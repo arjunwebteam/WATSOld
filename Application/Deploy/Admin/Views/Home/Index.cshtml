@@ -1,0 +1,507 @@
+﻿@using System.Configuration
+@{
+    Layout = null;
+    var objuser = new WATS.Entities.Users();
+    var userRole = "";
+
+
+}
+@{
+    //ViewBag.Title = "Index";
+    //Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    Int64 TotalCount = ViewBag.TotalCount;
+    Int64 WeeklyCount = ViewBag.WeeklyCount;
+    Int64 MonthlyCount = ViewBag.MonthlyCount;
+    Int64 LifeFamilyCount = ViewBag.LifeFamilyCount;
+    Int64 AnnualFamilyCount = ViewBag.AnnualFamilyCount;
+    Int64 AnnualSingleCount = ViewBag.AnnualSingleCount;
+    Int64 LifeSingleCount = ViewBag.LifeSingleCount;
+    Int64 DonorsWeeklyCount = ViewBag.DonorsWeeklyCount;
+    Int64 DonorsMonthlyCount = ViewBag.DonorsMonthlyCount;
+    Int64 DonorsTotalCount = ViewBag.DonorsTotalCount;
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    @{var baseurl = ConfigurationManager.AppSettings["baseurl"];}
+    <base href="@(baseurl)" />
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>WATS - Admin Panel</title>
+    <link rel="shortcut icon" href="Content/images/favicon.ico" />
+    <!-- WATS admin Css -->
+    <link href="Content/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" type="text/css" href="Content/jquery-ui.css" />
+    <link href="Content/admin-style.css" rel="stylesheet" media="screen">
+    <link href="Content/admin-comman-styles.css" rel="stylesheet" media="screen">
+    <!-- WATS admin Css -->
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700' rel='stylesheet' type='text/css'>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
+    <!-- WATS admin JS -->
+    <script src="Scripts/jquery-1.8.3.js" type="text/javascript"></script>
+    <script src="Scripts/jquery-ui-1.9.2.custom.min.js" type="text/javascript"></script>
+    <script src="Scripts/jquery.ui.widget.js"></script>
+    <script src="Scripts/jquery.ui.accordion.js"></script>
+    <script src="Scripts/delete_item.js" type="text/javascript"></script>
+    <script type="text/javascript" src="Scripts/jquery-ui-timepicker-addon.js"></script>
+    <script type="text/javascript" src="Scripts/jquery-ui-sliderAccess.js"></script>
+
+    <script src="Scripts/Common.js" type="text/javascript"></script>
+    <!-- WATS admin JS -->
+
+    <script type="text/javascript">
+
+        function DropDown(el) {
+            this.dd = el;
+            this.initEvents();
+        }
+        DropDown.prototype = {
+            initEvents: function () {
+                var obj = this;
+
+                obj.dd.on('click', function (event) {
+                    $(this).toggleClass('active');
+                    event.stopPropagation();
+                });
+            }
+        }
+
+        $(function () {
+
+            var dd = new DropDown($('#dd'));
+
+            $(document).click(function () {
+                // all dropdowns
+                $('.wrapper-dropdown-3').removeClass('active');
+            });
+
+        });
+
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            $(".ui-accordion").accordion({
+                collapsible: true,
+                heightStyle: "content"
+            });
+
+            // date picker
+            $(function () {
+                $(function () {
+                    $(".datepicker").datepicker({
+                        altField: "#alternate",
+                        altFormat: "DD, d MM, yy"
+                    });
+                });
+            });
+        });
+        $(document).ready(function () {
+            $('.closable').append('<span class="closelink" title="Close"></span>');
+            $('.closelink').click(function () {
+                $(this).parent().fadeOut('600', function () { $(this).remove(); });
+            });
+            Common.mfadeout();
+
+        });
+    </script>
+    <script type="text/javascript" src="Scripts/IE9.js"></script>
+
+    <script type="text/javascript" src="Content/bootstrap/js/bootstrap.js"></script>
+    <link rel="stylesheet" type="text/css" href="Content/lib/lightview/css/lightview/lightview.css" />
+    <script type="text/javascript" src="Content/lib/lightview/js/spinners/spinners.js"></script>
+    <script type="text/javascript" src="Content/lib/lightview/js/lightview/lightview.js"></script>
+
+</head>
+<body>
+    @{ HttpContext ctx = HttpContext.Current;
+        HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+        FormsAuthenticationTicket authTicket;
+
+        if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null)
+        {
+            authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+
+            userRole = authTicket.UserData;
+
+            WATS.BLL.Users _user = new WATS.BLL.Users();
+            int status = 0;
+            objuser = _user.GetUserByUserName(this.User.Identity.Name, ref status);
+            //ViewBag.userRole = userRole;
+        }
+    }
+        <script>
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+    });
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            EventBind($(this).text());
+        });
+    }
+
+    function sortresult(sortcolumn) {
+
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        EventBind(1);
+    }
+
+    function EventBind(Pageno) {
+        var pageno = Common.Pageno(Pageno);
+        var search = $('#keyword').val();
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();;
+
+        $.ajax({
+            url: '@Url.Action("EventsList", "Events")',
+            type: 'GET',
+            cache: false,
+            data: { search: search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items, EventType: 'upcoming' },
+            success: function (result) {
+                $('#divEventsList').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+        </script>
+        <div class="clearfix" style="min-height: 100px;"></div>
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="brand" href="@Url.Action("Index", "Home")">
+                        <img width="200" title="WATS" src="Content/images/logo.png" alt="WATS" />
+                    </a>
+
+
+                    <div class="userMenuBlock t-t-c">
+                        <div id="dd" class="wrapper-dropdown-3">
+                            <a class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user icon-white"></i>@objuser.UserName <b class="caret"></b></a>
+                            <ul class="dropdown">
+                                <li><a href="@Url.Action("Profile", "Account")"><i class="icon-user"></i>My Profile</a></li>
+                                @if (objuser.RoleName.Contains("SuperAdmin"))
+                                {
+                                    <li><a href="@Url.Action("Index", "PaymentSettings")"><i class="icon-cog"></i>Settings</a></li>
+                                }
+                                <li class="divider"></li>
+                                <li><a href="@Url.Action("LogOff", "Account")"><i class="icon-off"></i>Log Out</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <a href="@Url.Action("Index","InnerPages")" style="background-color:#ff6a00" class="t-b-p10 l-r-p20 pull-right t-b-m10 font14 font-w-b white-t">
+                        Go To Home
+                    </a>
+                </div>
+            </div>
+        </div>
+        <input id="hdnPageNo" type="hidden" value="1" />
+        <input id="hdnsortorder" name="hdnsortorder" value="" type="hidden" />
+        <input id="hdnsortcolumn" name="hdnsortcolumn" value="EventId" type="hidden" />
+        @*<div id="maincontainer2" class="">
+                <div class="mainContent" style="min-height: 10px;padding: 1px;">
+                    @Html.Partial("MainMenu", "SuperAdmin")
+                </div>
+            </div>*@
+        <div class="wrapper clearfix">
+            <div class="clearfix">
+               
+                <div class="clearfix lrp5">
+                    <!--- Dashborad [start] ------>
+
+                    <div class="clearfix white-bg shadow l-r-p35 border-radius5">
+
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <div class="clearfix p10"></div>
+                                <div class="clearfix ligray-bg ligraybor l-r-p30 b-p20">
+                                    <h3 class="title font20 font-w-b">Members</h3>
+                                    <div class="row-fluid open_sanssemibold">
+                                        <div class="span4">
+                                            <div class="green-bg t-c p15">
+                                                <span class="white-t ahover-c-n font-w-b font16">
+                                                    This Weekly
+                                                    <h3 class="m0 l-h26">
+                                                        <a class="font-w-b" style="color:#ffffff" href="@Url.Action("Index", "Members", new { LType = "week" })">@WeeklyCount</a>
+                                                    </h3>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="span4">
+                                            <div class="orange-bg t-c p15">
+                                                <span class="white-t ahover-c-n font-w-b font16">
+                                                    This Monthly
+                                                    <h3 class="m0 l-h26">
+                                                        <a class="font-w-b" style=" color:#ffffff" href="@Url.Action("Index", "Members", new { LType = "month" })">@MonthlyCount</a>
+                                                    </h3>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="span4 black-box t-c">
+                                            <div class="black-bg t-c p15">
+                                                <span class="white-t ahover-c-n font-w-b font16">
+                                                    Total
+                                                    <h3 class="m0 l-h26">
+                                                        <a class="font-w-b" style=" color:#ffffff" href="@Url.Action("Index", "Members", new { LType = "total" })">@TotalCount</a>
+                                                    </h3>
+
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="clearfix p10"></div>
+
+                                <div class="clearfix ligray-bg ligraybor l-r-p30 b-p20">
+                                    <h3 class="title font20 font-w-b">Donors</h3>
+                                    <div class="row-fluid open_sanssemibold">
+                                        <div class="span4">
+                                            <div class="green-bg t-c p15" style="background-color:#00a65a;">
+                                                <span class="white-t ahover-c-n font-w-b font16">
+                                                    This Weekly
+                                                    <h3 class="m0 l-h26">
+                                                        <a class="font-w-b" style="color:#ffffff" href="@Url.Action("Index", "Donors", new { LType = "week" })">@DonorsWeeklyCount</a>
+                                                    </h3>
+
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="span4">
+                                            <div class="orange-bg t-c p15" style="background-color:#00c0ef;">
+                                                <span class="white-t ahover-c-n font-w-b font16">
+                                                    This Monthly
+                                                    <h3 class="m0 l-h26">
+                                                        <a class="font-w-b" style="color:#ffffff" href="@Url.Action("Index", "Donors", new { LType = "week" })">@DonorsMonthlyCount</a>
+                                                    </h3>
+
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="span4 black-box t-c">
+                                            <div class="black-bg t-c p15" style="background-color:#0073b7;">
+                                                <span class="white-t ahover-c-n font-w-b font16">
+                                                    Total
+                                                    <h3 class="m0 l-h26">
+                                                        <a class="font-w-b" style="color:#ffffff" href="@Url.Action("Index", "Donors", new { LType = "week" })">@DonorsTotalCount</a>
+                                                    </h3>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="clearfix p10"></div>
+
+                                <div class="clearfix ligray-bg ligraybor l-r-p30">
+                                    <h3 class="title font20 font-w-b">Latest Events </h3>
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" class="text12">
+
+                                        <tr>
+                                            <td>
+                                                <div id="divEventsList">
+                                                    @{Html.RenderAction("EventsList", "Events", new { Type = "dashboard", EventType = "upcoming" });}
+                                                </div>
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 0"></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="span6">
+                                <div class="clearfix p10"></div>
+                                <div class="clearfix ligraybor ligray-bg">
+                                    <div class="clearfix box-row normalgray-bg open_sanssemibold black-t">
+                                        <div class="box-5">
+                                            <div class="clearfix l-p15">
+                                                <h5 class="t-b-m8">Members</h5>
+                                            </div>
+                                        </div>
+                                        <div class="box-7">
+                                            <div class="clearfix borwhite-l l-r-p15">
+                                                <h5 class="t-b-m8">
+                                                    Total Members <span class="pull-right font18">
+                                                        <a class="font-w-b" style="" href="@Url.Action("Index", "Members", new { LType = "total" })">@TotalCount</a>
+                                                    </span>
+                                                </h5>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="clearfix p20 open_sanssemibold">
+                                        <div class="row-fluid t-b-p5">
+                                            <div class="span12">
+                                                <div class="clearfix white-bg ligraybor lrp5 t-b-p10">
+                                                    Life Family Membership
+                                                    <a class="red-t" href="@Url.Action("Index", "Members", new { LType = "life-family" })">
+                                                        <span class="pull-right font18">
+                                                            @LifeFamilyCount
+                                                        </span>
+                                                    </a>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row-fluid t-b-p5">
+                                            <div class="span12">
+                                                <div class="clearfix white-bg ligraybor lrp5 t-b-p10">
+                                                    Life Membership Single <span class="pull-right font18">
+                                                        <a class="red-t" href="@Url.Action("Index", "Members", new { LType = "life-single" })">@LifeSingleCount</a>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row-fluid t-b-p5">
+                                            <div class="span12">
+                                                <div class="clearfix white-bg ligraybor lrp5 t-b-p10">
+                                                    Annual Family Membership
+                                                    <a class="red-t" href="@Url.Action("Index", "Members", new { LType = "annual-family" })">
+                                                        <span class="pull-right font18">
+                                                            @AnnualFamilyCount
+                                                        </span>
+                                                    </a>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row-fluid t-b-p5">
+                                            <div class="span12">
+                                                <div class="clearfix white-bg ligraybor lrp5 t-b-p10">
+
+                                                    Annual Single Membership
+                                                    <a class="red-t" href="@Url.Action("Index", "Members", new { LType = "annual-single" })">
+                                                        <span class="pull-right font18">
+                                                            @AnnualSingleCount
+                                                        </span>
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+                                <div class="clearfix p10"></div>
+
+                                <div class="clearfix ligraybor ligray-bg">
+                                    <div class="clearfix box-row normalgray-bg open_sanssemibold black-t">
+                                        <div class="clearfix l-p15">
+                                            <h5 class="t-b-m8">Quick Links</h5>
+                                        </div>
+                                    </div>
+
+                                    <div class="clearfix p20" style="font-family:Open Sans;">
+                                        <div class="row-fluid t-b-p5">
+                                            <ul class="clearfix list links thumbnails m0">
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a class="dark-t" href="@Url.Action("Index", "CommitteeMaster")">Committees</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a class="dark-t" href="@Url.Action("Index", "PhotoGallery")">Photo Gallery</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a class="dark-t" href="@Url.Action("Videos", "VideoGallery")">Video Gallery </a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a id="Banners" href="@Url.Action("Index", "Sponsors")">Sponsors</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a id="News" href="@Url.Action("Index", "News")">News</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a id="LocateStores" href="@Url.Action("Index", "EventCompetitions")">Event Competitions</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a id="RequestCalls" href="@Url.Action("Index", "DonationCategories")">Donation Categories</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a id="Templatess" href="@Url.Action("Index", "Donors")">Donors</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a id="NewsLetters" href="@Url.Action("Index", "SponsorRegistrationCategories")">Sponsor Registration Categories</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a href="@Url.Action("Index", "SponsorRegistrations")">Sponsor Registration</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a href="@Url.Action("Index", "VolunteerCategories")">Volunteer Categories</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a href="@Url.Action("Index", "Volunteers")">Volunteers</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a href="@Url.Action("Index", "Enquiry")">Enquiries</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a href="@Url.Action("Index", "Asset")">Asset Management</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a href="@Url.Action("Index", "NewsLetter")">News Letter Subscribers</a>
+                                                </li>
+                                                <li class="span6">
+                                                    <span class="dis-in r-p2">
+                                                        <img src="Content/images/arrow-list.png">
+                                                    </span> <a href="@Url.Action("Index", "RegistrationCategories")">Registration Categories</a>
+                                                </li>
+
+
+                                            </ul>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+                                                        
+
+    </body>
+</html>

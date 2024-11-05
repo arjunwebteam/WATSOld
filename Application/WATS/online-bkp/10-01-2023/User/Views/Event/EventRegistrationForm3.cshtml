@@ -1,0 +1,432 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var objEvents = (WATS.Entities.Events)ViewBag.objEvents;
+    var Memberdetails = (WATS.Entities.Members)ViewBag.Memberdetails;
+    var desc = "";
+    var innerpage = (WATS.Entities.InnerPages)ViewBag.InnerPage;
+    if (innerpage != null)
+    {
+        desc = innerpage.Description;
+    }
+
+    Int64 cid = ViewBag.cid;
+
+    int status = 0;
+    WATS.Entities.InnerPages objForm3InnerPages = new WATS.Entities.InnerPages();
+    WATS.BLL.InnerPages _InnerPages = new WATS.BLL.InnerPages();
+
+    if (objEvents.CategoryName == "Meet & Greet")
+    {
+        objForm3InnerPages = _InnerPages.GetInnerPagesListById(0, "Meet & Greet Guidelines", ref status);
+    }
+
+    if (objEvents.CategoryName == "Event")
+    {
+        objForm3InnerPages = _InnerPages.GetInnerPagesListById(0, "Event Guidelines", ref status);
+    }
+
+    else if (objEvents.CategoryName == "Muggula Potilu")
+    {
+        objForm3InnerPages = _InnerPages.GetInnerPagesListById(0, "Muggula Potilu Guidelines", ref status);
+    }
+    else if (objEvents.CategoryName == "Mehandi")
+    {
+        objForm3InnerPages = _InnerPages.GetInnerPagesListById(0, "Mehandi Guidelines", ref status);
+    }
+    else if (objEvents.CategoryName == "Seminar")
+    {
+        objForm3InnerPages = _InnerPages.GetInnerPagesListById(0, "Seminar Guidelines", ref status);
+    }
+    else
+    {
+        objForm3InnerPages = _InnerPages.GetInnerPagesListById(0, "Event Form3 Guidelines", ref status);
+    }
+}
+
+<script src="Scripts/User/jquery.validate.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //$("#Mobile").mask("(999) 999-9999");
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+        calculate_total();
+    });
+
+    function Validate() {
+
+        if ($('#FirstName').val() == "") { $('#FirstName').focus().addClass("validate"); document.getElementsByName('FirstName')[0].placeholder = 'Required'; return false; } else { $('#FirstName').focus().removeClass("validate"); }
+        if ($('#LastName').val() == "") { $('#LastName').focus().addClass("validate"); document.getElementsByName('LastName')[0].placeholder = 'Required'; return false; } else { $('#LastName').focus().removeClass("validate"); }
+
+        if ($('#ContactPhone').val() == "") { $('#ContactPhone').focus().addClass("validate"); document.getElementsByName('ContactPhone')[0].placeholder = 'Required'; return false; } else { $('#ContactPhone').focus().removeClass("validate"); }
+
+        if ($.trim($('#ContactEmail').val()) == '') { $('#ContactEmail').focus().addClass('validate'); document.getElementsByName('ContactEmail')[0].placeholder = 'Required'; return false; } else { $('#ContactEmail').removeClass("validate"); }
+        if (!Common.CheckEmail($.trim($('#ContactEmail').val()))) { document.getElementsByName('ContactEmail')[0].placeholder = 'Please enter valid email address'; $('#ContactEmail').focus().addClass("validate"); return false; } else { $('#ContactPhone').focus().removeClass("validate"); }
+
+        if ($('#Notes').val() == "") { $('#Notes').focus().addClass("validate"); document.getElementsByName('Notes')[0].placeholder = 'Required'; return false; } else { $('#Notes').focus().removeClass("validate"); }
+
+        if ($('#Terms').prop("checked") == true) {
+            $('#spanTerms').hide().html(''); $('#spanTerms').html('');
+        } else { $('#spanTerms').show().html('Required.'); $('#Terms').focus().addClass("validate"); return false; }
+
+        if ($.trim($('#txtCaptcha').val()) == '') { $('#txtCaptcha').focus().addClass('validate'); document.getElementsByName('txtCaptcha')[0].placeholder = 'Captcha Required'; return false; } else { $('#txtCaptcha').removeClass('validate'); }
+        //if ($('#txtCaptcha').val() == '') { $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+        var str = Common.GetCaptcha();
+
+        if ($('#txtCaptcha').val() != str) { $('#txtCaptcha').val(''); document.getElementsByName('txtCaptcha')[0].placeholder = 'You entered wrong captcha.'; $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+
+        return true;
+    }
+
+    function ResetValidateClass() {
+        $('#ItemName').removeClass("validate");
+        $('#ItemCategory').removeClass("validate");
+        $('#ItemDuration').removeClass("validate");
+        $('#ItemDescription').removeClass("validate");
+        $('#FirstName').removeClass("validate");
+        $('#LastName').removeClass("validate");
+        $('#EmailId').removeClass("validate");
+        $('#Mobile').removeClass("validate");
+        $('#City').removeClass("validate");
+        $('#State').removeClass("validate");
+        $('#txtCaptcha').removeClass("validate");
+
+    }
+    function CreloadCaptcha() {
+        document.getElementById('CUcaptcha').src = document.getElementById('CUcaptcha').src + '/';
+    }
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    specialKeys.push(9); //Tab
+    specialKeys.push(32); //Space
+    specialKeys.push(46); //Delete
+    specialKeys.push(36); //Home
+    specialKeys.push(35); //End
+    specialKeys.push(37); //Left
+    specialKeys.push(39); //Right
+
+
+    function onlyAlphabets(e, t) {
+        try {
+            if (window.event) {
+                var charCode = window.event.keyCode;
+            }
+            else if (e) {
+                var charCode = e.which;
+            }
+            else { return true; }
+            if ((charCode == 32) || (charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || (specialKeys.indexOf(e.keyCode) != -1 && e.charCode != e.keyCode))
+                return true;
+            else
+                return false;
+        }
+        catch (err) {
+            alert(err.Description);
+        }
+    }
+    function phonenochange(event) {
+        if (event.keyCode == 8 || event.keyCode == 46) {
+        }
+        else {
+            var ph = $('#ContactPhone').val();
+            if (ph.length == 3) { $('#ContactPhone').val(ph + '-'); }
+            if (ph.length == 7) { $('#ContactPhone').val(ph + '-'); }
+        }
+    }
+
+     function calculate_total() {
+        total5 = 0;
+        total5 = '@objEvents.MemberAmount';
+        total5 = parseInt(total5);
+        total5 = parseFloat(total5).toFixed(2);
+        document.getElementById("total").innerHTML = "$" + (total5);
+        $('#AmountPaid').val(total5);
+    }
+    function closeValidation(field) {
+        $(field).parent().hide();
+    }
+
+    function closeValidationOnClick(field) {
+        $(field).next('span').hide();
+    }
+    function checkhide() {
+        document.getElementById("mailed").checked = false;
+        document.getElementById("rpaymentby").checked = false;
+        $('#PaymentBy').show();
+        $('#check').hide();
+        $('#PaymentMethod').val('PayPal');
+        $('#paypaldiv').show();
+    }
+    function checkshow() {
+        document.getElementById("mailed").checked = false;
+        document.getElementById("rpaymentby").checked = true;
+        $('#PaymentBy').show();
+        $('#check').show();
+        $('#PaymentMethod').val('Cash/Cheque');
+        $('#paypaldiv').hide();
+    }
+    function paymentbyhide() {
+        $('#PaymentBy').val('');
+        $('#PaymentBy').hide();
+    }
+    function paymentbyshow() {
+        $('#PaymentBy').val('');
+        $('#PaymentBy').show();
+    }
+</script>
+
+<article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height: 1150px;">
+    <article class="clearfix curve position-r t-m4n b-p15">
+        <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">@objEvents.EventName - 
+            @*<span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16">@(objEvents.EventName.Contains(objEvents.CategoryName) ? "" : objEvents.CategoryName) Registration</span>*@
+            <span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16">Competition Registrations</span>
+
+        </h2>
+    </article>
+
+    <article class="clearfix white-bg l-r-p30 border-b dkgray-border3 t-b-p4 tablet-l-r-p10 tabhorizontal-l-r-p15">
+        <h1 class="clearfix l-h24 font16 montserratregular light-blue-t"><span class="red-t">Event Name:</span><b> @objEvents.EventName</b></h1>
+        <article class="clearfix dis-b">
+            <span class="regular font16 l-h14">
+                <span class="red-t">Location:</span>
+                <b>@(objEvents.Location == null ? "N/A" : objEvents.Location)</b>
+            </span>
+            <span class="font15 green-t mobile-r-p0 mulisemibold pull-right t-m0">
+                <span class="red-t">Event On:</span>
+                <b>@(objEvents.StartDate == DateTime.MinValue ? "N/A" : objEvents.StartDate.ToString("MM/dd/yyyy"))</b>
+            </span>
+        </article>
+    </article>
+    <article class="clearfix p30 t-p15 tabhorizontal-p10 l-r-m-auto" style="max-width: 950px;">
+        <article class="clearfix font16 black-t l-h24 Poppins-Regular validation">
+            <article class="clearfix t-p10">
+                <article class="clearfix explore b-m10">
+                    @using (Html.BeginForm("EventRegistrationForm3", "Event", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        <input type="hidden" value="@objEvents.EventName" id="EventName" name="EventName" />
+                        <input type="hidden" value="@objEvents.EventId" id="EventId" name="EventId" />
+                        <input type="hidden" value="@ViewBag.MemberId" id="MemberId" name="MemberId" />
+                        <input type="hidden" value="PayPal" id="PaymentMethod" name="PaymentMethod" />
+                        <input type="hidden" value="@cid" id="RegistrationCategoryId" name="RegistrationCategoryId" />
+
+                        <input type="hidden" id="AmountPaid" name="AmountPaid" />
+
+                        @*<h3 class="clearfix m0 font24 l-h26 b-p15 t-c Roboto-Medium violet-t">@objEvents.EventCategory - Registration Form</h3>*@
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-6">
+                                <h3 class="clearfix m0 Montserrat-Regular font16 black-t1 l-h26 tie-bor b-p5">Participant Details</h3>
+                            </article>
+                            <article class="clearfix part-6"></article>
+                        </article>
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 t-p20 black-t1 b-m2"> First Name <span class="red-t">*</span> </label>
+                                <article class="clearfix r-m5 mobile-r-m0">
+                                    <input id="FirstName" class="form-control get-a-loan" name="FirstName" type="text" onkeypress="closeValidationOnClick(this);">
+                                    <span class="error3" id="spanFirstName"></span>
+                                </article>
+                            </article>
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 t-p20 black-t1 b-m2 l-p5"> Last Name <span class="red-t">*</span> </label>
+                                <article class="clearfix l-m5 mobile-r-m0 mobile-l-m0">
+                                    <input id="LastName" class="form-control get-a-loan" name="LastName" type="text" onkeypress="closeValidationOnClick(this);">
+                                    <span class="error3" id="spanLastName"></span>
+                                </article>
+                            </article>
+                        </article>
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2"> Contact Phone <span class="red-t">*</span> </label>
+                                <article class="clearfix r-m5 mobile-r-m0">
+                                    <input id="ContactPhone" class="form-control get-a-loan" onkeypress="phonenochange(event); closeValidationOnClick(this);return Common.isNumberKey(event);" maxlength="12" name="ContactPhone" type="text">
+                                    <span class="error3" id="spanContactPhone"></span>
+                                </article>
+                            </article>
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2 l-p5"> Contact Email <span class="red-t">*</span> </label>
+                                <article class="clearfix l-m5 mobile-r-m0 mobile-l-m0">
+                                    <input id="ContactEmail" name="ContactEmail" class="form-control get-a-loan" type="text" onkeypress="closeValidationOnClick(this);">
+                                    <span class="error3" id="spanContactEmail"></span>
+                                </article>
+                            </article>
+                        </article>
+                        <article class="clearfix part-row position-r">
+                            <article class="clearfix part-6 position-r">
+                            <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2"> Competitions * </label>
+                            <article class="clearfix r-m5 mobile-r-m0">                                
+                                <article class="clearfix dropdown">
+                                    <select class="dropdown-select ralewayregular" onchange="closeValidationOnClick(this);" id="Notes" name="Notes" type="text">
+                                        <option value="">--Select--</option>
+                                        <option value="Flag Hoisting">Flag Hoisting</option>
+                                        <option value="Muggula Potilu">Muggula Potilu</option>
+                                        <option value="Fashion Show for Kids">Fashion Show for Kids</option>
+                                    </select>
+                                </article>
+
+                                <span class="error3" id="spanNotes"></span>
+                            </article>
+                                </article>
+                        </article>
+                        <label class="font15 black-t3 checkboxstyle b-p3 t-p20 position-r">
+                            <input name="TermsandConditions" id="Terms" value="true" type="checkbox">
+                            <span for="checkbox" class="dis-in"><span class="font14 blac-t Roboto-Regular mobile-font14 v-align-m l-h26 l-p5">I hereby agree that I have read all the <span class="pink-t">guidelines / rules</span> and adhere to the same.</span></span>
+                            <span class="error3" id="spanTerms"></span>
+                        </label>
+                        <article class="clearfix @(objEvents.MemberAmount == 0 ? "hide" : "")">
+                            <h4 class="t-m0 Roboto-Medium pink-t font16 dis-in tabhorizontal-l-r-p10 mobile-font16 tabhorizontal-font14 b-p10">PayPal Payment Method *</h4>
+                            <!--<article class="clearfix">
+    <article class="clearfix cell-row">
+        <article class="clearfix cell-7">
+            <article class="clearfix p10 b-p5 tablet-dis-in">
+                <label class="latobold_italic font15 dkblack-t3 radiostyle">
+                    <input onclick="checkhide();" checked="checked" name="pmethod" value="1" type="radio">
+                    <span for="radio1" class="dis-in">Instant Check-out through PayPal </span>
+                </label>
+            </article>
+        </article>
+    </article>
+    <article id="check2" class="clearfix t-m30">
+        <article class="clearfix tabhorizontal-t-m10">
+            <article class="clearfix t-b-p10">
+                <article class="clearfix pay-bg">
+                    <article class="clearfix part-row">
+                        <article class="clearfix part-4">
+                            <article class="clearfix t-b-p20 mobile-b-p0 l-p50 mobile-t-l mobile-l-p0">
+                                <img src="Content/images/paypal.jpg" class="" alt="paypal" width="150" height="30">
+                            </article>
+                        </article>
+                        <article class="clearfix part-4 t-p10 mobile-t-p0">
+                            <article class="part-4 t-p5 tablet-t-p10 mobile-t-p0 mobile-t-c">
+                                <span class="v-align-m font14 mobilev-font12"> Amount : </span>
+                            </article>
+                            <article class="part-6 t-p5 t-l tablet-t-p10 mobile-t-c">
+                                <b class="font16 red-t">
+                                    <span id="totalamount">$ @objEvents.MemberAmount</span>
+                                </b>
+                            </article>-->
+                            @*<span class="v-align-m font14 t-p5 blue-t">Service charge : 2%</span>*@
+                            <!--</article>
+                            <article class="clearfix part-4 t-p15 r-p10 mobile-r-p0">
+                                <h4 class="clearfix m0 Poppins-Medium font14 black-t l-h13 border p10 dis-f mobile-dis-f mobile-t-p0 mobile-b-p10 mobile-l-m20 mobile-t-r">
+                                    Total Amount : <span class="font22 Impact red-t l-p5 t-m1n"><span id="total">0</span></span>
+                                </h4>
+                            </article>
+                        </article>
+                    </article>
+                </article>
+            </article>
+        </article>
+    </article>-->
+
+                            <article class="clearfix">
+                                <article class="clearfix cell-7">
+                                    <article class="clearfix p10 b-p5 tablet-dis-in">
+                                        <label class="latobold_italic font15 dkblack-t3 radiostyle">
+                                            <input onclick="checkhide();" checked="checked" name="pmethod" value="1" type="radio">
+                                            <span for="radio1" class="dis-in">Instant Check-out through PayPal </span>
+                                        </label>
+                                    </article>
+
+                                </article>
+                                <article class="clearfix cell-5">
+                                    <article class="clearfix p10 b-p5 tablet-dis-in">
+                                        <label class="font14 dkdark-t radiostyle b-m0">
+                                            <input type="radio" value="0" name="pmethod" onclick="checkshow();">
+                                            <span class="dis-in" for="radio1">Cash/Cheque</span>
+                                        </label>
+                                    </article>
+
+                                </article>
+                            </article>
+                            <article style="display: none;" class="Poppins-Regular font14" id="check">
+
+                                <article class="clearfix border2 border-radius10 bluegrayborder t-b-m10 p10 l-m5 shadow" style="border-color: #396dad;">
+                                    <article class="black-t l-h22 b-p5">
+                                        You will receive a confirmation email once the payment is credited to WATSWEB account.<br>
+                                        <span class="latoitalic font13 red-t2">Check should be payable to “WATSWEB” and mail it to “</span>P.O. Box No : 3322, 1171 Bellevue Way NE, Bellevue, WA 98004.<span class="latoitalic font13 red-t2">
+                                            ”<br>
+                                            Phone:
+                                        </span>425-985-2035<span class="latoitalic font13 red-t2">, &nbsp; Email: <a href="mailto:board@watsweb.org">board@watsweb.org</a>.</span>
+                                    </article>
+                                    <article class="clearfix b-p10 row-fluid">
+                                        <label class="dkdark-t radiostyle b-m0">
+                                            <input type="radio" onclick="paymentbyhide();" name="Cash/Cheque" id="mailed">
+                                            <span class="dis-in" for="radio1">Mailed the cheque already to Washington Telugu Samithi (WATS)</span>
+                                        </label>
+                                    </article>
+                                    <article class="clearfix part-row b-p10">
+                                        <article class="clearfix part-4">
+                                            <label class="dkdark-t radiostyle">
+                                                <input type="radio" onclick="paymentbyshow();" id="rpaymentby" name="Cash/Cheque">
+                                                <span class="dis-in t-p10" for="radio1">Handed the cash/cheque to - </span>
+                                            </label>
+                                        </article>
+                                        <article class="clearfix part-4">
+                                            <input type="text" placeholder="Handed the cash/cheque to" name="PaymentBy" id="PaymentBy" class="b-m0 input-block-level">
+                                        </article>
+                                    </article>
+                                </article>
+                            </article>
+                            <article id="paypaldiv" class="clearfix t-m10">
+                                <article class="clearfix tabhorizontal-t-m10">
+                                    <article class="clearfix t-b-p10">
+                                        <article class="clearfix pay-bg">
+                                            <article class="clearfix part-row">
+                                                <article class="clearfix part-4">
+                                                    <article class="clearfix t-b-p20 mobile-b-p0 l-p50 mobile-t-l mobile-l-p0">
+                                                        <img src="Content/images/paypal.jpg" class="" alt="paypal" width="150" height="30">
+                                                    </article>
+                                                </article>
+                                                <article class="clearfix part-4 t-p10 mobile-t-p0">
+                                                  
+                                                </article>
+                                                <article class="clearfix part-4 t-p30 r-p10 mobile-r-p0">
+                                                    <h4 class="clearfix m0 Poppins-Medium font14 black-t l-h13 border p10 dis-f mobile-dis-f mobile-t-p0 mobile-b-p10 mobile-l-m20 mobile-t-r">
+                                                        Total Amount : <span class="font22 Impact red-t l-p5 t-m1n"><span id="total">0</span></span>
+                                                    </h4>
+                                                </article>
+                                            </article>
+                                        </article>
+                                    </article>
+                                </article>
+                            </article>
+                        </article>
+                        <article class="clearfix t-p10">
+                            <h4 class="t-b-m10 Roboto-Medium black-t font14 dis-in tabhorizontal-l-r-p10 mobile-font16 tabhorizontal-font14">Type the following text as shown <span class="red-t">*</span></h4>
+                            <article class="part-row b-p3">
+                                <article class="part-9">
+                                    <article class="box-row">
+                                        <article class="box-5 r-p15 position-r">
+                                            <input type="text" onkeypress="ResetValidateClass(); return closeValidationOnClick(this);" placeholder="Code" onclick="ResetValidateClass();" id="txtCaptcha" name="txtCaptcha" class="form-control border-radius0" style="min-height: 45px;background-color:#fcfcfc; border-color:#bdbdbd;" />
+                                            <span class="error3" id="spantxtCaptcha"></span>
+                                        </article>
+                                        <article class="box-6 font24 t-b-p5 roboto_condensedbold_italic black-t ">
+                                            <img title="captcha" alt="captcha" id="CUcaptcha" src="Members/ShowCaptchaImage" height="28" width="120" />
+                                            <a href="javascript:CreloadCaptcha();">
+                                                <img title="Refresh" src="Content/images/refresh.png" alt="Refresh" />
+                                            </a>
+                                        </article>
+                                    </article>
+                                </article>
+                                <article class="part-3 t-r">
+                                    <article class="clearfix mtbp50 pull-right">
+                                        <input type="submit" class="btn btn-danger btn-large font18 poppinssemibold t-t-u border-radius" onclick="return Validate()" value="Submit" />
+                                    </article>
+                                </article>
+                            </article>
+                        </article>
+                    }
+                </article>
+
+                @if (innerpage != null && innerpage.Description != "")
+                {
+                    @Html.Raw(innerpage.Description)
+                }
+
+            </article> 
+        </article>
+    </article>
+</article>

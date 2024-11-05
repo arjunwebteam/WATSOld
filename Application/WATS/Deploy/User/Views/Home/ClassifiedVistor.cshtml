@@ -1,0 +1,1437 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    DesiCharmsMD2017.Entities.Classifieds objClassifieds = ViewBag.objClassifieds;
+    List<DesiCharmsMD2017.Entities.Photos> lstPhotos = ViewBag.lstPhotos;
+    List<DesiCharmsMD2017.Entities.Classifieds> lstRecClassifieds = ViewBag.lstRecClassifieds;
+    DesiCharmsMD2017.Entities.Users objuser = ViewBag.objuser;
+    List<DesiCharmsMD2017.Entities.Reviews> lstReviews = ViewBag.lstReviews;
+    List<DesiCharmsMD2017.Entities.AdvertiseWithUs> lstAdvertiseWithUs = ViewBag.lstAdvertiseWithUs;
+    List<DesiCharmsMD2017.Entities.ClassifiedsAccess> lstClassifiedsAccess = ViewBag.lstClassifiedsAccess;
+    List<DesiCharmsMD2017.Entities.Videos> lstVideos = ViewBag.lstVideos;
+    List<DesiCharmsMD2017.Entities.ClassifiedBeneifits> lstClassifiedBeneifits = ViewBag.lstClassifiedBeneifits;
+
+    var imgloc = System.Configuration.ConfigurationManager.AppSettings["userimgurl"] + "photogallery/normalphoto/";
+    var timgloc = System.Configuration.ConfigurationManager.AppSettings["userimgurl"] + "photogallery/thumb/";
+    System.Globalization.CultureInfo india = new System.Globalization.CultureInfo("hi-IN");
+    ViewBag.Title = "DesiCharms - " + objClassifieds.Heading;
+
+    var location = System.Configuration.ConfigurationManager.AppSettings["userimgurl"] + "MemberProfileImages/";
+    var imgAdversise = System.Configuration.ConfigurationManager.AppSettings["userimgurl"] + "advertisewithus/normalimages/";
+
+    ViewBag.PageUrl = Request.Url.AbsoluteUri;
+    ViewBag.Title = objClassifieds.Heading;
+    ViewBag.ImgUrl = imgloc + objClassifieds.ImageUrl;
+    ViewBag.Description = objClassifieds.Heading;
+    var PostedOn = System.Configuration.ConfigurationManager.AppSettings["PostedOn"];
+
+    int HostCount = 0;
+    int Status = 0;
+    if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Session["username"] != null)
+    {
+        DesiCharmsMD2017.BLL.Classifieds _Classifieds = new DesiCharmsMD2017.BLL.Classifieds();
+        Status = _Classifieds.FEClassifiedsAccessEmailExist(objClassifieds.ClassifiedId, this.User.Identity.Name, ref HostCount);
+    }
+    ViewBag.Title = (objClassifieds.PageTitle == "" ? objClassifieds.Heading + " NRIDesiCharms " : objClassifieds.PageTitle);
+    ViewBag.MetaDescription = (objClassifieds.MetaDescription == "" ? objClassifieds.Heading : objClassifieds.MetaDescription);
+    ViewBag.MetaKeywords = (objClassifieds.MetaKeywords == "" ? objClassifieds.Heading : objClassifieds.MetaKeywords);
+}
+<input type="hidden" id="VideoCount"  value="@lstVideos.Count" />
+<script src="Scripts/jquery.simpleGal.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#enquaryform').dialog
+            ({
+                autoOpen: false,
+                width: 500,
+                modal: true
+            });
+        $('#WriteaReview').dialog
+         ({
+             autoOpen: false,
+             width: 555,
+             modal: true
+         });
+
+        $('#participants').dialog
+        ({
+            autoOpen: false,
+            width: 550,
+            modal: true
+        });
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+        // bind filter on select change
+        $('.thumbs').simpleGal({
+            mainImage: '.largeimg'
+        });
+    });
+
+    function EValidate() {
+        var returnvalue = true;
+        if ($.trim($('#EFirstName').val()) == '') { $('#EFirstName').focus().addClass("validate"); returnvalue = false; } else { $('#EFirstName').focus().removeClass("validate"); }
+        if ($.trim($('#ELastName').val()) == '') { $('#ELastName').focus().addClass("validate"); returnvalue = false; } else { $('#ELastName').focus().removeClass("validate"); }
+
+        if ($('#EEmail').val() == "") { $('#EEmail').focus().addClass("validate"); returnvalue = false; } else { $('#EEmail').removeClass("validate"); }
+        if ($('#EEmail').val() != "") {
+            if (!Common.CheckEmail($('#EEmail').val())) { $('#EEmail').val(''); document.getElementsByName('Email')[0].placeholder = 'Invalid email address'; $('#EEmail').focus().addClass("validate"); returnvalue = false; } else { $('#EEmail').removeClass("validate"); }
+        }
+
+        if (Common.getCheckedRadio('Going') == 'Yes') {
+            if ($.trim($('#EAdults').val()) == '') { $('#EAdults').focus().addClass("validate"); returnvalue = false; } else { $('#EAdults').focus().removeClass("validate"); }
+        }
+        if ($.trim($('#EDescription').val()) == '') { $('#EDescription').focus().addClass("validate"); returnvalue = false; } else { $('#EDescription').focus().removeClass("validate"); }
+        if (returnvalue == true) {
+            $('#Eload').show();
+            $('#EAload').hide();
+        }
+        return returnvalue;
+    }
+
+    function EnquirySubmit() {
+        if (EValidate()) {
+            var objUserEnquiries = {};
+            objUserEnquiries.ClassifiedId = $('#EClassifiedId').val();
+            objUserEnquiries.FirstName = $('#EFirstName').val();
+            objUserEnquiries.LastName = $('#ELastName').val();
+            objUserEnquiries.Email = $('#EEmail').val();
+            objUserEnquiries.Description = $('#EDescription').val();
+            objUserEnquiries.PhoneNo = $('#EPhoneNo').val();
+            objUserEnquiries.Heading = '@objClassifieds.Heading';
+            objUserEnquiries.CategoryName = $('#ECategoryName').val();
+
+            $.ajax({
+                url: '@Url.Action("EnquiryPostForm", "Classifieds")',
+                type: 'POST',
+                data: JSON.stringify(objUserEnquiries),
+                datatype: "JSON",
+                contentType: 'application/json',
+                success: function (result) {
+                    $('#divmessage').html(result.data);
+                    $('.closable').append('<span class="closelink" title="Close"></span>');
+                    $('.closelink').click(function () {
+                        $(this).parent().fadeOut('600', function () { $(this).remove(); });
+                    });
+                    Common.closedialog('enquaryform');
+                }
+            });
+        }
+    }
+
+    function OpenEnquiry(id, cname, IsRegister) {
+        if (IsRegister == 'True') {
+            $('#divEvents').show();
+        }
+        else { $('#divEvents').hide(); }
+
+        $('#Eload').hide();
+        $('#EAload').show();
+        $('input:radio[name=Going]').each(function () { $(this).prop('checked', false); });
+
+        $('#EClassifiedId').val(id);
+        $('#ECategoryName').val(cname);
+        //$('#EFirstName').val('');
+        //$('#ELastName').val('');
+        //$('#EEmail').val('');
+        //$('#EDescription').val('');
+        //$('#EPhoneNo').val('');
+        //$('#EAdults').val('');
+        //$('#EKids').val('');
+
+        $('#EFirstName').focus().removeClass("validate");
+        $('#ELastName').focus().removeClass("validate");
+        $('#EEmail').focus().removeClass("validate");
+        $('#EDescription').focus().removeClass("validate");
+        $('#EPhoneNo').focus().removeClass("validate");
+        $('#EAdults').focus().removeClass("validate");
+        $('#EKids').focus().removeClass("validate");
+        $('#enquaryform').dialog('open');
+    }
+
+    function AddToWishlist() {
+        var conf = confirm('Please login to continue');
+        if (conf) {
+            loginshow();
+        }
+    }
+
+    function ViewPhoto() {
+        var Count = $('#VideoCount').val();
+        for (var i = 0; i <= Count; i++) {
+            $('#player' + i).attr('src', '');
+        }
+        $('#spanPhoto').show();
+        $('#spanVideo').hide();
+    }
+
+    function ViewVideo(id, url) {
+
+        var Count = $('#VideoCount').val();
+        for (var i = 0; i <= Count; i++) {
+            $('#player' + i).hide();
+            $('#player' + i).attr('src', '');
+        }
+        $('#player' + id).show();
+        $('#player' + id).attr('src', 'https://www.youtube.com/embed/' + url + '?rel=0&autoplay=1');
+        $('#spanPhoto').hide();
+        $('#spanVideo').show();
+    }
+
+    function AddFavorite(str) {
+        var ClassifiedId = '@objClassifieds.ClassifiedId'
+        //var Heading = '@objClassifieds.Heading'
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("AddFavorite", "Members")',  // the URL of the controller action method
+            data: { ClassifiedId: ClassifiedId }, // optional data
+            success: function (result) {
+                $("#divmessage").html(result.data);
+                $('.closable').append('<span class="closelink" title="Close"></span>');
+                $('.closelink').click(function () {
+                    $(this).parent().fadeOut('600', function () { $(this).remove(); });
+                });
+                if (str == 'A') {
+                    $('#A1').hide();
+                    $('#A0').show();
+                }
+                if (str == 'D') {
+                    $('#A1').show();
+                    $('#A0').hide();
+                }
+            },
+            error: function (req, status, error) {
+                $("#divmessage").html(result.data);
+                $('.closable').append('<span class="closelink" title="Close"></span>');
+                $('.closelink').click(function () {
+                    $(this).parent().fadeOut('600', function () { $(this).remove(); });
+                });
+            }
+        });
+    }
+
+    //function ReviewsPosition()
+    //{
+    //    $('.scrollup').click(function () {
+    //        $("html, body").animate({ scrollTop: 100 }, 100);
+    //        return false;
+    //    });
+    //}
+    function PostReviewValidate() {
+        var returnvalue = true;
+        if (Common.getCheckedRadio('Rating') == '0') { $('#spanRating').html('Required.'); return_val = false; } else { $('#spanRating').html(''); }
+        if ($.trim($('#FirstName').val()) == '') { $('#FirstName').focus().addClass("validate"); returnvalue = false; } else { $('#FirstName').focus().removeClass("validate"); }
+        if ($.trim($('#Comments').val()) == '') { $('#Comments').focus().addClass("validate"); returnvalue = false; } else { $('#Comments').focus().removeClass("validate"); }
+
+        return returnvalue;
+    }
+
+    function ReviewsSubmit() {
+        if (PostReviewValidate()) {
+            var objReviews = {};
+            objReviews.ClassifiedId = '@objClassifieds.ClassifiedId';
+            objReviews.UserId = '@objuser.UserId';
+            objReviews.FirstName = $('#FirstName').val();
+            objReviews.Comments = $('#Comments').val();
+            objReviews.Rating = Common.getCheckedRadio('Rating');
+
+            $.ajax({
+                url: '@Url.Action("ReviewPostForm", "Classifieds")',
+                type: 'POST',
+                data: JSON.stringify(objReviews),
+                datatype: "JSON",
+                contentType: 'application/json',
+                success: function (result) {
+                    $('#divmessage').html(result.data);
+                    $('.closable').append('<span class="closelink" title="Close"></span>');
+                    $('.closelink').click(function () {
+                        $(this).parent().fadeOut('600', function () { $(this).remove(); });
+                    });
+                    ReviewsBind();
+                    Common.closedialog('WriteaReview');
+                }
+            });
+        }
+    }
+    function OpenReview() {
+        $('.star-rating-live').removeClass('star-rating-on');
+        $('#FirstName').val('');
+        $('#Comments').val('');
+        $('#spanRating').html('');
+        $('#FirstName').removeClass("validate");
+        $('#Comments').removeClass("validate");
+        $('input:radio[name=Rating]').each(function () { $(this).prop('checked', false); });
+        $('#WriteaReview').dialog('open');
+    }
+    function ReviewsBind() {
+        var ClassifiedId = '@objClassifieds.ClassifiedId';
+        $.ajax({
+            type: "GET",
+            cache: false,
+            url: '@Url.Action("ReviewsList", "Classifieds")',
+            data: { ClassifiedId: ClassifiedId }, // optional data
+            success: function (result) {
+                $('#divReviewsList').html(result);
+            }
+        });
+    }
+    function phoneC() {
+        var Ph1 = $('#EPhoneNo').val();
+        if ($('#EPhoneNo').val() != '') {
+            if (Ph1.length != 10) {
+                alert('Please enter a 10 digit phone number');
+                $('#EPhoneNo').val('');
+                $('#EPhoneNo').addClass("validate");
+            }
+            else {
+                var newNum = Ph1.substring(0, 3) + '-' + Ph1.substring(3, 6) + '-' + Ph1.substring(6, 10);
+                $('#EPhoneNo').val(newNum);
+                $('#EPhoneNo').removeClass("validate");
+            }
+        }
+    }
+
+    function CouponSubmit() {
+        $('#load').show();
+        $('#divsubmit').hide();
+        var objCoupon = {};
+        objCoupon.ClassifiedId = '@objClassifieds.ClassifiedId';
+        objCoupon.CouponPrice = '@objClassifieds.CouponPrice';
+        objCoupon.CouponDiscount = '@objClassifieds.CouponDiscount';
+        objCoupon.Heading = '@objClassifieds.Heading';
+
+        if ('@objClassifieds.CouponVisible' == 'True' && '@objClassifieds.CouponCode' != "") {
+            objCoupon.CouponCode = '@objClassifieds.CouponCode';
+            objCoupon.Type = 'no';
+        }
+        else { objCoupon.Type = 'yes'; }
+
+        $.ajax({
+            url: '@Url.Action("CouponSubmit", "Classifieds")',
+            type: 'POST',
+            data: JSON.stringify(objCoupon),
+            datatype: "JSON",
+            contentType: 'application/json',
+            success: function (result) {
+                $('#divmessage').html(result.data);
+                $('.closable').append('<span class="closelink" title="Close"></span>');
+                $('.closelink').click(function () {
+                    $(this).parent().fadeOut('600', function () { $(this).remove(); });
+                });
+                if ('@objClassifieds.CouponVisible' == 'True' && '@objClassifieds.CouponCode' != "") {
+                    $('#btnCoupon').hide();
+                    $('#spanCoupon').show();
+                }
+                Common.closedialog('enquaryform');
+                $('#load').hide();
+                $('#divsubmit').show();
+            }
+        });
+
+    }
+</script>
+<script type="text/javascript" src="Scripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        /*
+         *  Simple image gallery. Uses default settings
+         */
+
+        $('.fancybox').fancybox();
+        $('.fancybox').fancybox();
+        $("#fancybox-manual-b").click(function () {
+            $.fancybox.open({
+                href: 'iframe.html',
+                type: 'iframe',
+                padding: 5
+            });
+        });
+
+        $("#fancybox-manual-c").click(function () {
+            $.fancybox.open([
+                {
+                    href: '1_b.jpg',
+                    title: 'My title'
+                }, {
+                    href: '2_b.jpg',
+                    title: '2nd title'
+                }, {
+                    href: '3_b.jpg'
+                }
+            ], {
+                helpers: {
+                    thumbs: {
+                        width: 75,
+                        height: 50
+                    }
+                }
+            });
+        });
+        $(".various").fancybox({
+            maxWidth: 1200,
+            maxHeight: 750,
+            fitToView: false,
+            width: '100%',
+            height: '70%',
+            autoSize: false,
+            closeClick: false,
+            openEffect: 'elastic',
+            closeEffect: 'none'
+        });
+    });
+
+
+</script>
+<!---  fancybox [end] ------>
+<article class="clearfix wrapper">
+    <article class="clearfix inner-wrapper t-b-p10">
+        <ul class="breadcrumb b-radius0 m0 background-n p0 muliregular font12 l-h24">
+            <li><a href="index.html">Home</a></li>
+            <li><span class="articleider"></span><a>Search</a></li>
+            <li><span class="articleider"></span><a href="@Url.Action("Index", "Classifieds", new { Heading = DesiCharmsMD2017.BLL.Common.EncodeURL(objClassifieds.CategoryName) })">@objClassifieds.CategoryName</a></li>
+            <li class="active"><span class="articleider"></span>@objClassifieds.CategoryName Details
+                <img src="Content/images/gray-arrow.png" alt="" title="" width="5" height="8" border="0"></li>
+        </ul>
+    </article>
+</article>
+
+<article class="clearfix wrapper">
+    <article class="clearfix inner-wrapper">
+        <article class="clearfix border dkgray-border shadow4">
+            <article class="clearfix white-bg l-r-p30 border-b dkgray-border t-b-p4 tablet-l-r-p10 tabhorizontal-l-r-p15">
+                <article class="clearfix part-row">
+                    <article class="clearfix part-5">
+                        <h1 class="clearfix l-h24 font16 montserratregular light-blue-t t-m3">
+                            <span class="dis-in v-align-text-b">
+                                <img src="Content/images/search-icon-b.png" alt="" title="" width="25" height="22" border="0"></span> <span class="light-blue-t">Classifieds:</span> <span class="l-p5 orange-t">@objClassifieds.CategoryName Details</span></h1>
+                    </article>
+                    <article class="clearfix part-7 t-r t-p6">
+                        <script type="text/javascript">
+                            (function () {
+                                var dr = document.createElement('script');
+                                dr.type = 'text/javascript'; dr.async = true;
+                                dr.src = '//share.donreach.com/buttons.js';
+                                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dr);
+                            })();
+                        </script>
+                        <article class="clearfix Poppins-Regular font14 l-h18 mobile-t-c tablet-t-r">
+                            <span style="position: relative;" class="font-w-b dis-in v-align-t t-p5">Share On : </span>
+                            <div class="a2a_kit a2a_kit_size_32 a2a_default_style v-align-m" style="display: inline-block;">
+                                <a class="a2a_button_facebook"></a>
+
+                                <a class="a2a_button_twitter"></a>
+                                <a class="a2a_button_google_plus"></a>
+                                <a class="a2a_button_whatsapp"></a>
+                                <a class="a2a_button_email"></a>
+                            </div>
+                            <script type="text/javascript" src="//static.addtoany.com/menu/page.js"></script>
+                            <!-- AddToAny END -->
+                            @*<span style="top: -10px; position: relative;" class="font-w-b">Share On : </span>
+                        <span class='st_facebook_large' displaytext='Facebook'></span>
+                        <span class='st_twitter_large' displaytext='Tweet'></span>
+                        <span class='st_googleplus_large' displaytext='Google +'></span>
+                        <span class='st_pinterest_large' displaytext='Pinterest'></span>
+                        <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+                        <script type="text/javascript">stLight.options({ publisher: "27e22f32-d1a7-400d-8de5-3d2e5f619f4d", doNotHash: false, doNotCopy: false, hashAddressBar: false });</script>*@
+                            <script type="text/javascript" src="https://addevent.com/libs/1.5.8/ate.min.js"></script>
+                            @{string Description = "";
+                              Description = (objClassifieds.Address == null ? "" : objClassifieds.Address);
+                              Description = Description + (objClassifieds.City == null ? "" : (objClassifieds.Address == null ? "" : ", ") + objClassifieds.City);
+                              Description = Description + (objClassifieds.State == null ? "" : (objClassifieds.City == null ? "" : ", ") + objClassifieds.State);
+                              Description = Description + (objClassifieds.Country == null ? "" : (objClassifieds.State == null ? "" : ", ") + objClassifieds.Country);
+                              Description = Description + (objClassifieds.ZipCode == null ? "" : (objClassifieds.Country == null ? "" : ", ") + objClassifieds.ZipCode);
+                            }
+                            @if (objClassifieds.StartDate == DateTime.MinValue || objClassifieds.EndDate == DateTime.MinValue)
+                            {
+                                <a class="mobilev-b-m5 mobile-t-m10 tablet-hide" onclick="Search('Dates are not available for this ad.');">
+                                    <img src="Content/images/add-to-calendar-alpa.jpg" alt="" title="Dates are not available for this ad" class="t-m5n tablet-t-m0" /></a>
+                            }
+                            else
+                            { 
+                                <a href="@System.Configuration.ConfigurationManager.AppSettings["baseurl"]@(DesiCharmsMD2017.BLL.Common.EncodeURL(objClassifieds.Heading))-details.html?cid=@objClassifieds.ClassifiedId" title="Add to Calendar" class="addthisevent  tablet-hide">Add to Calendar
+                            <span class="_start">@(objClassifieds.StartDate == DateTime.MinValue ? "" : objClassifieds.StartDate.ToString("MM/dd/yyyy hh:mm tt"))</span>
+                                    <span class="_end">@(objClassifieds.EndDate == DateTime.MinValue ? "" : objClassifieds.EndDate.ToString("MM/dd/yyyy hh:mm tt"))</span>
+                                    <span class="_zonecode">15</span>
+                                    <span class="_summary">@objClassifieds.Heading</span>
+                                    <span class="_description">@objClassifieds.ShortDescription</span>
+                                    <span class="_location">
+                                        @Description
+                                    </span>
+                                    <span class="_organizer">DesiCharms</span>
+                                    <span class="_organizer_email">@objClassifieds.Email</span>
+                                    <span class="_facebook_event"></span>
+                                    <span class="_all_day_event">false</span>
+                                    <span class="_date_format">MM/DD/YYYY</span>
+                                </a> 
+                            }
+                        </article>
+                    </article>
+                </article>
+            </article>
+            <article class="clearfix block-row">
+                <article class="clearfix left-block3">
+                    <article class="clearfix p30 tablet-p10 tabhorizontal-p15">
+                        <article class="clearfix tablet-visible">
+                            <article class="clearfix">
+                            @if (objClassifieds.StartDate == DateTime.MinValue || objClassifieds.EndDate == DateTime.MinValue)
+                            {<span class="pull-left">
+                                <a class="mobilev-b-m5 mobile-t-m10 tablet-visible" onclick="Search('Dates are not available for this ad.');">
+                                    <img src="Content/images/add-to-calendar-alpa.jpg" alt="" title="Dates are not available for this ad" class="t-m5n tablet-t-m0" /></a></span>
+                            }
+                            else
+                            { 
+                                <span class="pull-left">
+                                    <a href="@System.Configuration.ConfigurationManager.AppSettings["baseurl"]@(DesiCharmsMD2017.BLL.Common.EncodeURL(objClassifieds.Heading))-details.html?cid=@objClassifieds.ClassifiedId" title="Add to Calendar" class="addthisevent tablet-visible">Add to Calendar
+                            <span class="_start">@(objClassifieds.StartDate == DateTime.MinValue ? "" : objClassifieds.StartDate.ToString("MM/dd/yyyy hh:mm tt"))</span>
+                                        <span class="_end">@(objClassifieds.EndDate == DateTime.MinValue ? "" : objClassifieds.EndDate.ToString("MM/dd/yyyy hh:mm tt"))</span>
+                                        <span class="_zonecode">15</span>
+                                        <span class="_summary">@objClassifieds.Heading</span>
+                                        <span class="_description">@objClassifieds.ShortDescription</span>
+                                        <span class="_location">
+                                            @Description
+                                        </span>
+                                        <span class="_organizer">DesiCharms</span>
+                                        <span class="_organizer_email">@objClassifieds.Email</span>
+                                        <span class="_facebook_event"></span>
+                                        <span class="_all_day_event">false</span>
+                                        <span class="_date_format">MM/DD/YYYY</span>
+                                    </a>
+                                </span>
+                            }
+                            @if (PostedOn == "display")
+                            {
+                                <h6 class="font13 green-t t-p0 mobile-r-p0 pull-right t-m0 mobilevs-hide">Posted on: @objClassifieds.InsertedDate.ToString("MMM dd, yyyy") </h6>
+                            }
+                                </article>
+                            <h4 class="black-t font20 l-h24 mobilev-font16 mobile-t-m0">
+                                <span class="dis-in t-p6 mobile-l-p0 pull-right">
+                                    @if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null && Session["username"] != null)
+                                    {
+                                        if (objClassifieds.UserWishListCount == 0)
+                                        {
+                                        <a id="A1" onclick="AddFavorite('A');" title="Add to your favorite">
+                                            <img src="Content/images/favorite-heart.png" alt="Add to your favorite" width="21" height="19" border="0" /></a>
+                                        <a id="A0" onclick="AddFavorite('D');" class="hide" title="Add to your favorite">
+                                            <img src="Content/images/favorite-heart.png" alt="Add to your favorite" width="21" height="19" border="0" /></a>
+                                        }
+                                        else
+                                        {
+                                        <a id="A1" onclick="AddFavorite('A');" title="Add to your favorite">
+                                            <img src="Content/images/favorite-heart.png" alt="Add to your favorite" width="21" height="19" border="0" /></a>
+                                        <a id="A0" onclick="AddFavorite('D');" class="hide" title="Add to your favorite">
+                                            <img src="Content/images/favorite-heart.png" alt="Add to your favorite" width="21" height="19" border="0" /></a>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <a onclick="PostAdd();" title="Add to your favorite">
+                                            <img src="Content/images/favorite-heart.png" alt="Add to your favorite" width="21" height="19" border="0" /></a>
+                                    }
+                                </span>
+                                @objClassifieds.Heading
+                            </h4>
+                            <h6 class="regular font12 l-h14">@Description</h6>                            
+                        </article>
+                        <article class="clearfix overflow-h t-c white-bg border shadow">
+                            @*<span id="imagediv">
+                                <span id="spanPhoto">*@
+                            <article class="clearfix position-r detailsimagescrolling" data-navigation="navbtns1">
+                                <article id="navbtns1" class="clearfix">
+                                    <a class="previous"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a>
+                                    <a class="next"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a>
+                                </article>
+                                <ul class="clearfix m0 list-pn crsl-wrap">
+                                    @if (lstPhotos != null && lstPhotos.Count != 0)
+                                    {
+                                        foreach (var item in lstPhotos)
+                                        {
+                                        <li class="crsl-item">
+                                            <a href="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgloc + item.ImageUrl), imgloc + "no-image.png")" class="a-largeimg fancybox" data-fancybox-group="gallery">
+                                                <img src="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgloc + item.ImageUrl), imgloc + "no-image.png")" alt="Placeholder" class="i-largeimg width100"  />
+                                            </a>
+                                        </li>
+                                        }
+                                    }
+                                </ul>
+                            </article>
+                            @*</span>*@
+                            <span id="spanVideo" class="hide">
+                                @*@if (objClassifieds.VideoUrl != null)
+                                    {
+                                        <iframe id="player" height="320" src="http://www.youtube.com/embed/@(objClassifieds.VideoUrl)" class="width100 largeimg"></iframe>
+                                    }*@
+                                @if (lstVideos != null && lstVideos.Count != 0)
+                                {
+                                    int i = 1;
+                                    foreach (var item in lstVideos)
+                                    {<iframe id="player@(i)" height="320" src="http://www.youtube.com/embed/@(item.VideoUrl)" class="width100 largeimg hide"></iframe> 
+                                        i++;
+                                    }
+                                }
+                            </span>
+                            @*</span>*@
+                            @*<span id="loadimage" class="hide">Loading ...<br />
+                                <img alt="load" class="" width="100" src="Content/images/gif-load.gif" />
+                            </span>*@
+                        </article>
+                        @*<article id="gallery_01" class="clearfix t-p10">
+                            <article class="clearfix l-m8n">
+                                <article class="clearfix" style="margin-right: -8px;">
+                                    <ul class="clerfix list-pn thumbs list-f m0 carouselmy">
+                                        @if (lstPhotos != null && lstPhotos.Count != 0)
+                                        {
+                                            foreach (var item in lstPhotos)
+                                            {
+                                            <li>
+                                                <article>
+                                                    <a onclick="ViewPhoto()" href="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgloc + item.ImageUrl), imgloc + "no-image.png")" class="thumbnail" data-update="" data-image="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgloc + item.ImageUrl), imgloc + "no-image.png")" data-zoom-image="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgloc + item.ImageUrl), imgloc + "no-image.png")">
+                                                        <img src="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgloc + item.ImageUrl), timgloc + "no-image.png")" alt="Thumbnails" class="width100" style="width:101px; height:80px;" /></a>
+                                                </article>
+                                                <img style="display:none;" src="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgloc + item.ImageUrl), imgloc + "no-image.png")" />
+                                            </li>
+                                            }
+                                        }
+                                        @if (lstVideos != null && lstVideos.Count != 0)
+                                        {
+                                            int j = 1;
+                                            foreach (var item in lstVideos)
+                                            { 
+                                            <li>
+
+                                                <article class="clearfix position-r flip">
+                                                    <a href="http://i1.ytimg.com/vi/" onclick="ViewVideo(@(j),'@item.VideoUrl');" class="dis-b b-m0 thumbnail">
+                                                        <i class="video-icon-hover"></i>
+                                                        <img class="width100" style="height: 69px;" alt="Thumbnails" title="@objClassifieds.Heading" src="http://i1.ytimg.com/vi/@(item.VideoUrl)/hqdefault.jpg">
+                                                    </a>
+                                                </article>
+
+                                            </li>
+                                                j++;
+                                            }
+                                        }
+                                    </ul>
+                                </article>
+                            </article>
+                        </article>*@
+
+                    </article>
+                </article>
+                <article class="clearfix right-block3 t-p15 tablet-t-p0">
+                    <article class="clearfix tablet-l-r-p10 tabhorizontal-l-r-p15">
+                        <article class="clearfix r-p15 tablet-r-p0">
+                            <article class="clearfix tablet-hide">
+                                <h4 class="black-t font20 l-h24 mobilev-font16 mobile-t-m0">
+                                    <span class="dis-in t-p6 mobile-l-p0 pull-right">
+                                        @if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null && Session["username"] != null)
+                                        {
+                                            if (objClassifieds.UserWishListCount == 0)
+                                            {
+                                            <a id="A1" onclick="AddFavorite('A');" title="Add to your favorite">
+                                                <img src="Content/images/favorite-heart.png" alt="Add to your favorite" width="21" height="19" border="0" /></a>
+                                            <a id="A0" onclick="AddFavorite('D');" class="hide" title="Add to your favorite">
+                                                <img src="Content/images/favorite-heart.png" alt="Add to your favorite" width="21" height="19" border="0" /></a>
+                                            }
+                                            else
+                                            {
+                                            <a id="A1" onclick="AddFavorite('A');" title="Add to your favorite">
+                                                <img src="Content/images/favorite-heart.png" alt="Add to your favorite" width="21" height="19" border="0" /></a>
+                                            <a id="A0" onclick="AddFavorite('D');" class="hide" title="Add to your favorite">
+                                                <img src="Content/images/favorite-heart.png" alt="Add to your favorite" width="21" height="19" border="0" /></a>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <a onclick="PostAdd();" title="Add to your favorite">
+                                                <img src="Content/images/favorite-heart.png" alt="Add to your favorite" width="21" height="19" border="0" /></a>
+                                        }
+                                    </span>
+                                    @objClassifieds.Heading
+                                </h4>
+                                <h6 class="regular font12 l-h14">@Description</h6>
+                                @if (PostedOn == "display")
+                                {
+                                    <h6 class="font13 green-t t-p0 mobile-r-p0 pull-right t-m0">Posted on: @objClassifieds.InsertedDate.ToString("MMM dd, yyyy") </h6>
+                                }
+                            </article>
+
+                            <article class="clearfix part-row border-t t-p15 mobile-t-p5">
+                                @if (lstReviews != null && lstReviews.Count != 0)
+                                {
+                                    <article class="clearfix t-r part-12 mobile-t-c">
+                                        <article class="clearfix dis-in">
+                                            <input type="radio" disabled="disabled"  @(objClassifieds.Rating == 1 ? "checked='checked'" : "")  class="star required" value="" />
+                                            <input type="radio" disabled="disabled"  @(objClassifieds.Rating == 2 ? "checked='checked'" : "") value=""  class="star" />
+                                            <input type="radio" disabled="disabled"  @(objClassifieds.Rating == 3 ? "checked='checked'" : "") value=""  class="star" />
+                                            <input type="radio" disabled="disabled"  @(objClassifieds.Rating == 4 ? "checked='checked'" : "") value=""  class="star" />
+                                            <input type="radio" disabled="disabled" @(objClassifieds.Rating == 5 ? "checked='checked'" : "") value=""  class="star" />
+                                        </article>
+                                    </article>
+                                }
+                                @if ((objClassifieds.Prices != null) || (objClassifieds.Amount != null && objClassifieds.Amount != "0"))
+                                {
+                                    <article class="clearfix part-7 mobile-t-c">
+                                        <h4 class="clearfix red-t font13 montserratregular t-m0 b-m5">
+                                            @if (objClassifieds.Prices != null)
+                                            {
+                                                <span class="dis-in border yellow-border p5 border-radius8">Amount : 
+                                                       @{string[] values = objClassifieds.Prices.Split(',');
+                                                       }
+                                                    @for (int i = 0; i < values.Length; i++)
+                                                    {
+                                                        if (i == 0)
+                                                        {
+                                                        <span>$@values[i].Trim()</span>
+                                                        }
+                                                        if (i > 0 && values[i] != "")
+                                                        {
+                                                        <span>, $@values[i].Trim()</span>
+                                                        }
+                                                    }
+                                                </span> 
+                                            }
+                                            else if (objClassifieds.Amount != null && objClassifieds.Amount != "0")
+                                            {
+                                                if (objClassifieds.Amount == "Please contact ")
+                                                {
+                                                    <span class="dis-in border yellow-border p5 border-radius8">Please Contact for Amount</span>
+                                                }
+                                                else
+                                                {
+                                                <span class="dis-in border yellow-border p5 border-radius8">Amount : $ @objClassifieds.Amount</span>
+                                            }
+                                            }
+                                        </h4>
+                                    </article>
+                                }
+                                <article class="clearfix part-5">
+                                    <article class="clearfix t-l mobile-t-c">
+                                        @if (lstReviews != null && lstReviews.Count != 0)
+                                        {
+                                            <a href="@Request.Url.AbsoluteUri#Reviews" class="dis-in v-align-t graylight-t smoothScroll l-p5 t-u">Reviews</a> @objClassifieds.ReviewsCount
+                                        }
+                                        @if (objClassifieds.ViewCount != 0)
+                                        {
+                                            <span class="dis-in v-align-t black-t smoothScroll border yellow-border border-radius8 p5 l-p5 @(lstReviews != null && lstReviews.Count != 0 ? "pull-right b-p10" : "")  star-rating-readonly">Visitors @objClassifieds.ViewCount</span>
+                                        }
+                                    </article>
+                                </article>
+                            </article>
+                        </article>
+                        <article class="clearfix border-t t-m10 tablet-t-m5"></article>
+                        <article class="clearfix t-p25 r-p25 tablet-t-p5 tablet-r-p5">
+                            @if (objClassifieds.StartDate != DateTime.MinValue)
+                            {
+                                <article class="clearfix box-row t-b-p3">
+                                    <article class="box-4"><span class="light-blue-t font14">Event Date</span> </article>
+                                    <article class="box-8 dark-t">
+                                        :
+                                        @*@objClassifieds.StartDate.ToString("MMM dd, yyyy hh:mm tt")*@
+                                        @if (objClassifieds.StartDate != DateTime.MinValue && objClassifieds.EndDate != DateTime.MinValue && (objClassifieds.EndDate.Date - objClassifieds.StartDate.Date).Days > 0)
+                                        {
+                                            if (objClassifieds.StartDate.ToString("hh.mm tt") != "12.00 AM" && objClassifieds.EndDate.ToString("hh.mm tt") != "12.00 AM")
+                                            {
+                                            @Html.Raw(@objClassifieds.StartDate.ToString("MMM-dd yyyy hh.mm tt") + " to <br/><span class=\"l-p8\">" + @objClassifieds.EndDate.ToString("MMM-dd yyyy hh.mm tt") + "</span>")
+                                            }
+                                            else
+                                            {
+                                            @Html.Raw(@objClassifieds.StartDate.ToString("MMM-dd yyyy") + " to <br/><span class=\"l-p8\">" + @objClassifieds.EndDate.ToString("MMM-dd yyyy") + "</span>")
+                                            }
+                                        }
+                                        else if (objClassifieds.StartDate != DateTime.MinValue && objClassifieds.EndDate != DateTime.MinValue)
+                                        {
+                                            @Html.Raw(@objClassifieds.StartDate.ToString("dddd") + " , " + objClassifieds.StartDate.ToString("MM/dd/yyyy"))
+                                            if (objClassifieds.StartDate.ToString("hh.mm tt") != "12.00 AM")
+                                            {
+                                            @Html.Raw(" " + @objClassifieds.StartDate.ToString("hh.mm tt") + " - ")
+                                            @Html.Raw(@objClassifieds.EndDate.ToString("hh.mm tt"))
+                                            }
+                                        }
+                                        else
+                                        {
+                                            @Html.Raw(@objClassifieds.StartDate.ToString("dddd") + " , " + objClassifieds.StartDate.ToString("MM/dd/yyyy"))
+                                            if (objClassifieds.StartDate.ToString("hh.mm tt") != "12.00 AM")
+                                            {
+                                            @Html.Raw(" " + @objClassifieds.StartDate.ToString("hh.mm tt"))
+                                           
+                                            }
+                                        }
+                                    </article>
+                                </article>
+                            }
+                            @if (objClassifieds.Email != null)
+                            {
+                                <article class="clearfix box-row t-b-p3 w-break-all">
+                                    <article class="box-4"><span class="light-blue-t font14 mobile-font13"><span class="mobilevs-hide">Contact</span> Email </span></article>
+                                    <article class="box-8 dark-t">: <a class="w-break-all" href="mailto:@objClassifieds.Email">@objClassifieds.Email</a></article>
+                                </article>
+                            }
+                            @if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Session["username"] != null && lstClassifiedsAccess.Count != 0 && (Status != 0 || HostCount != 0))
+                            {
+                                <article class="clearfix t-p7 border-t gray-border2 t-m10 tablet-t-p5 tablet-r-p5">
+                                    <article class="clearfix box-row t-b-p3 w-break-all">
+                                        <article class="box-2">Host</article>
+                                        <article class="box-7 dark-t">: <a class="w-break-all" href="mailto:@objClassifieds.HostEmail">@objClassifieds.HostEmail</a></article>
+                                        <article class="box-3 dark-t">
+                                            <article class="clearfix b-p3 w-break-all">
+                                                <a class="gray-t" onclick="$(&quot;#participants&quot;).dialog(&quot;open&quot;);">Participants <span class="l-p5 tabhorizontal-hide">
+                                                    <img border="0" width="6" height="11" src="Content/images/grean-arrow.png" alt="" title=""></span></a>
+                                            </article>
+                                            <article class="clearfix border-b l-h0 yellow-border" style="max-width: 97px;">&nbsp;</article>
+                                        </article>
+                                    </article>
+                                </article>
+                            }
+                            @if (objClassifieds.ShortDescription != null)
+                            {
+                                <article class="clearfix t-p10">
+                                    @Html.Raw(objClassifieds.ShortDescription)
+
+                                </article>
+                            }
+
+                        </article>
+                        <article class="clearfix t-p10 b-p3 r-p10 border-t t-m10 tablet-t-p5">
+                            <article class="clearfix box-row">
+                                <article class="box-4 t-l">
+                                    <a onclick="OpenEnquiry(@objClassifieds.ClassifiedId,'@objClassifieds.CategoryName','@objClassifieds.IsPaid')" style="background:#bd362f;" class="btn btn-danger latoheavy font13 btn-large l-r-p17 border-radius0 tabhorizontal-p5 mobilev-font12">Send Enquiry</a>
+                                </article>
+                                @if (objClassifieds.WebSiteUrl != null)
+                                {
+                                    <article class="box-4 t-c">
+                                        <a target="_blank" href="@objClassifieds.WebSiteUrl" class="btn btn-success latoheavy font13 btn-large l-r-p17 border-radius0 tabhorizontal-p5 mobilev-font12">Website link</a>
+                                    </article>
+                                }
+                                @if (objClassifieds.EventUrl != null)
+                                {
+                                    <article class="box-4 t-r">
+                                        <a target="_blank" href="@objClassifieds.EventUrl" class="btn btn-warning latoheavy font13 btn-large l-r-p17 border-radius0 tabhorizontal-p5 mobilev-font12">Get Direction</a>
+                                    </article>
+                                }
+                            </article>
+
+                        </article>
+
+                    </article>
+                    <article class="clearfix sm-row t-p10 t-m10 border-t gray-border2 tablet-t-m5 tablet-t-p0 mobile-t-c">
+                        @if (objClassifieds.PhoneNo != null)
+                        {
+                            <article class="sm-6">
+                                <article class="clearfix l-p10 t-l">
+                                    <label class="r-m10 v-align-m dis-in">
+                                        <img src="Content/images/phone-icon.png" alt="Phone Icon" title="Phone Icon" width="24" height="33" border="0">
+                                        <label class="font13 latoregular t-m2 dk-red-t v-align-m dis-in">
+                                            Contact Us<br>
+                                            <a href="callto:@(objClassifieds.Required1 == null || objClassifieds.Required1 == "" ? "" : objClassifieds.Required1)@objClassifieds.PhoneNo"><strong class="skyblue-bg font15">@(objClassifieds.Required1 == null || objClassifieds.Required1 == "" ? "" : objClassifieds.Required1) @objClassifieds.PhoneNo</strong></a>
+                                        </label>
+                                    </label>
+                                </article>
+                            </article>
+                        }
+                        @if (objClassifieds.HomeNo != null)
+                        {
+                            <article class="sm-6">
+                                <article class="clearfix l-p10 t-l">
+                                    <label class="r-m10 v-align-m dis-in">
+                                        <img src="Content/images/phone-icon.png" alt="Phone Icon" title="Phone Icon" width="24" height="33" border="0">
+                                        <label class="font13 latoregular t-m2 dk-red-t v-align-m dis-in">
+                                            Contact Home<br>
+                                            <a href="callto:@(objClassifieds.HomeNoCode == null || objClassifieds.HomeNoCode == "" ? "" : objClassifieds.HomeNoCode)@(objClassifieds.HomeNo == null || objClassifieds.HomeNo == "" ? "" : objClassifieds.HomeNo)"><strong class="skyblue-bg font15">@(objClassifieds.HomeNoCode == null || objClassifieds.HomeNoCode == "" ? "" : objClassifieds.HomeNoCode) @objClassifieds.HomeNo</strong></a>
+                                        </label>
+                                    </label>
+                                </article>
+                            </article>
+                        }
+                        @if (objClassifieds.WorkNo != null)
+                        {
+                            <article class="sm-6">
+                                <article class="clearfix l-p10 t-l">
+                                    <label class="r-m10 v-align-m dis-in">
+                                        <img src="Content/images/phone-icon.png" alt="Phone Icon" title="Phone Icon" width="24" height="33" border="0">
+                                        <label class="font13 latoregular t-m2 dk-red-t v-align-m dis-in">
+                                            Contact Work<br>
+                                            <a href="callto:@(objClassifieds.WorkNoCode == null || objClassifieds.WorkNoCode == "" ? "" : objClassifieds.WorkNoCode)@(objClassifieds.WorkNo == null || objClassifieds.WorkNo == "" ? "" : objClassifieds.WorkNo)"><strong class="skyblue-bg font15">@(objClassifieds.WorkNoCode == null || objClassifieds.WorkNoCode == "" ? "" : objClassifieds.WorkNoCode) @(objClassifieds.WorkNo == null || objClassifieds.WorkNo == "" ? "" : objClassifieds.WorkNo)</strong></a>
+                                        </label>
+                                    </label>
+                                </article>
+                            </article>
+                        }
+                        @if (objClassifieds.FaxNo != null)
+                        {
+                            <article class="sm-6">
+                                <article class="clearfix l-p10 t-l">
+                                    <label class="r-m10 v-align-m dis-in">
+                                        <img src="Content/images/fax.png" alt="Fax Icon" title="Phone Icon" width="21" height="31" border="0">
+                                        <label class="font13 latoregular t-m2 dk-red-t v-align-m dis-in">
+                                            Fax No.<br>
+                                            <a href="callto:@(objClassifieds.FaxNo == null || objClassifieds.FaxNo == "" ? "" : objClassifieds.FaxNo)"><strong class="skyblue-bg font15">@(objClassifieds.FaxNo == null || objClassifieds.FaxNo == "" ? "" : objClassifieds.FaxNo)</strong></a>
+                                        </label>
+                                    </label>
+                                </article>
+                            </article>
+                        }
+                    </article>
+                    @if (objClassifieds.Required2 == "Yes" && objClassifieds.ClassifiedRegistrationTypesCount != 0)
+                    {
+                        <article class="clearfix sm-row t-m10 border-t gray-border2 tablet-t-m5 tablet-t-p0 mobile-t-c">
+                            <article class="sm-5">
+                                <article class="clearfix t-b-p10">
+                                    @if (objClassifieds.Required3 != null && objClassifieds.ClassifiedOrdersCount >= Convert.ToInt32(objClassifieds.Required3))
+                                    { 
+                                        <span style="background: #bd362f;" class="btn btn-danger latoheavy font16 btn-large l-r-p17 btn-large border-radius0 b-p10 tablet-l-m10">Tickets sold out</span>
+                                    }
+                                    else
+                                    {
+                                        if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null && Session["username"] != null)
+                                        {
+                                            if (objClassifieds.RegistrationUrl == null)
+                                            {
+                                        <a href="@Url.Action("EventRegistration", "Classifieds", new { Title = DesiCharmsMD2017.BLL.Common.EncodeURL(objClassifieds.Heading), cid = objClassifieds.ClassifiedId })" style="background:#bd362f;" class="btn btn-danger latoheavy font16 btn-large l-r-p17 btn-large border-radius0 b-p10 tablet-l-m10">Buy Tickets Now</a>
+                                            }
+                                            else
+                                            { 
+                                        <a href="@objClassifieds.RegistrationUrl" target="_blank" style="background:#bd362f;" class="btn btn-danger latoheavy font16 btn-large l-r-p17 btn-large border-radius0 b-p10 tablet-l-m10">Buy Tickets Now</a>
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                        <a onclick="PostAdd();" style="background: #bd362f;" class="btn btn-danger latoheavy font16 btn-large l-r-p17 btn-large border-radius0 b-p10 tablet-l-m10">Buy Tickets Now</a>
+                                        }
+                                    }
+                                </article>
+                            </article>
+                        </article>
+                    }
+                    else if (objClassifieds.IsPaid == true)
+                    {
+                        if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null && Session["username"] != null)
+                        {
+                            if (objClassifieds.RegistrationUrl == null)
+                            {
+                        <a href="@Url.Action("EventRegistration", "Classifieds", new { Title = DesiCharmsMD2017.BLL.Common.EncodeURL(objClassifieds.Heading), cid = objClassifieds.ClassifiedId })" class="btn btn-danger latoheavy font16 btn-large l-r-p17 btn-large border-radius0 b-p10 mobile-l-m10" >Register Now</a>
+                            }
+                            else
+                            { <a target="_blank" href="@objClassifieds.RegistrationUrl" class="btn btn-danger latoheavy font16 btn-large l-r-p17 btn-large border-radius0 b-p10 mobile-l-m10" >Register Now</a>}
+                        }
+                        else
+                        {
+                        <a onclick="PostAdd();" class="btn btn-danger latoheavy font16 btn-large l-r-p17 btn-large border-radius0 b-p10 mobile-l-m10">Register Now</a>
+                        }
+                    }
+                    <article class="clearfix t-m10 border-t gray-border2 tablet-t-m5 tablet-t-p0 mobile-t-l">
+                        @if (objClassifieds.CouponUsersCount != 0)
+                        {
+                            if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null && Session["username"] != null)
+                            {
+                            <span class="t-p10">
+                                <img title="" alt="" src="Content/images/couponl-flash.gif" />
+                                @*<span class="muliregularitalic font-w6 font15 grean-t3 ">Your Coupon code here : </span>[<span class="red-t">@objClassifieds.CouponCode</span>] </span>*@
+                                <span class="muliregularitalic font-w6 font15 grean-t3 ">Get<span class="red-t font15"> @objClassifieds.CouponDiscount % </span>discount using this coupon code : </span>[ <span class="red-t font15 muliregularitalic font-w6">@objClassifieds.CouponCode</span> ] </span>
+                            }
+                            else
+                            {<a onclick="PostAdd();" class="btn btn-warning latoheavy font16 btn-large l-r-p17 btn-small border0">Click here</a> }
+
+                        }
+                        else if ((objClassifieds.CouponPrice != 0 || objClassifieds.CouponDiscount != 0) && objClassifieds.CouponStatus == true && objClassifieds.CouponExpiryDate != DateTime.MinValue)
+                        {
+                            int Day = objClassifieds.CouponExpiryDate.Date.Subtract(DateTime.UtcNow.Date).Days;
+                            if (Day < 0)
+                            { <span class="muliregularitalic font-w6 font15 grean-t3 ">Coupon</span> }
+                            else
+                            {
+                                    
+                            <article class="clearfix t-p10">
+                                <img title="" alt="" src="Content/images/couponl-flash.gif" />
+                                @if (objClassifieds.CouponPrice != 0 && objClassifieds.CouponDiscount == 0)
+                                {
+                                    <span class="muliregularitalic font-w6 font15 grean-t3 ">Get your $@(objClassifieds.CouponPrice) Coupon</span> 
+                                }
+                                else if (objClassifieds.CouponDiscount != 0 && objClassifieds.CouponPrice == 0 && objClassifieds.CouponVisible != false)
+                                {<span class="muliregularitalic font-w6 font15 grean-t3 ">Get your @(objClassifieds.CouponDiscount)% Coupon discount</span> }
+                                else if (objClassifieds.CouponPrice != 0 && objClassifieds.CouponDiscount != 0)
+                                {<span class="muliregularitalic font-w6 font15 grean-t3 ">Get your $@(objClassifieds.CouponPrice) Coupon, @(objClassifieds.CouponDiscount)% discount</span> }
+
+
+                            </article>
+                            }
+
+                            if (Day >= 0)
+                            {
+                            <article class="clearfix">
+                                @if (Day == 0)
+                                {<span class="red-t">Valid till: @(objClassifieds.CouponExpiryDate.ToString("MMM dd, yyyy")). Hurry up! Today is last date.</span>}
+                                else
+                                {<span class="red-t">Valid till: @(objClassifieds.CouponExpiryDate.ToString("dd MMM, yyyy")). Hurry up! @(Day) days left.</span>}
+                            </article>  
+                            <article class="clearfix p3 l-p0 mobile-l-p10">
+                                @if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null && Session["username"] != null)
+                                {
+                                            
+                                    <span id="load" class="t-c hide">Loading ...<br />
+                                        <img alt="load" class="" src="Content/images/add-loader.gif" />
+                                    </span>
+                                    <article id="divsubmit">
+                                        <a id="btnCoupon" onclick="CouponSubmit();" class="btn btn-warning latoheavy font16 btn-large l-r-p17 btn-small border0 border-radius0">Click here</a>
+                                    </article>
+                                    <span id="spanCoupon" class="hide"><span class="muliregularitalic font-w6 font15 grean-t3 ">Your Coupon code : </span>[<span class="red-t">@objClassifieds.CouponCode</span>] </span>
+                                           
+
+                                }
+                                else
+                                {<a onclick="PostAdd();" class="btn btn-warning latoheavy font16 btn-large l-r-p17 btn-small border0 border-radius0">Click here</a>
+                                }
+                            </article>
+                            }
+                            else
+                            {<span class="red-t">Expired on @objClassifieds.CouponExpiryDate.ToString("MMM dd, yyyy")</span>}
+                        }
+
+
+                    </article>
+
+
+                </article>
+            </article>
+
+            <article class="clearfix white-bg p10 border-b liborder tablet-t-p0">
+                <ul class="clearfix list-f m0 list-pn tablist dis-in tabs artists">
+                    <li rel="description" class="active"><a>Description</a></li>
+                    @if (lstClassifiedBeneifits != null && lstClassifiedBeneifits.Count != 0)
+                    {
+                        <li rel="benefits"><a>Benefits</a></li>
+                    }
+                    @if (lstPhotos != null && lstPhotos.Count != 0)
+                    {
+                        <li rel="photos"><a>Photos</a></li>
+                    }
+                    @if (lstVideos != null && lstVideos.Count != 0)
+                    {
+                        <li rel="videos"><a>Videos</a></li>
+                    }
+                </ul>
+            </article>
+            <article class="clearfix tab_container white-bg p20">
+                @if (objClassifieds.Description != null)
+                {
+                    <article class="clearfix tab_content2 active" id="description" style="display:block;">
+                        <article class="clearfix t-p10">
+                            @Html.Raw(objClassifieds.Description)
+                        </article>
+                    </article>
+                }
+                @if (lstClassifiedBeneifits != null && lstClassifiedBeneifits.Count != 0)
+                {               
+                    <article class="clearfix tab_content2" id="benefits">
+                        <article class="clearfix t-p10">
+                            <ul class="clearfix m0 list list-pn font15 muliregular benifits-list b-p10">
+                                @foreach (var item in lstClassifiedBeneifits)
+                                {
+                                    <li>@item.BenefitTitle</li>
+                                }
+                            </ul>
+                        </article>
+                    </article>
+                }
+                @if (lstPhotos != null && lstPhotos.Count != 0)
+                {               
+                    <article class="clearfix tab_content2" id="photos">
+                        <article class="clearfix t-p10">
+                            <ul class="clearfix list-pn m0 list-f part-row">
+                                @foreach (var item in lstPhotos)
+                                {
+                                    <li class="part-2">
+                                        <article class="clearfix p5">
+                                            <a href="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgloc + item.ImageUrl), imgloc + "no-image.png")" data-fancybox-group="gallery" class="fancybox">
+                                                <img src="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgloc + item.ImageUrl), timgloc + "no-image.png")" width="207" height="151" class="width100 img-bp2" style="width:140px; height:100px;" /></a>
+                                        </article>
+                                    </li> 
+                                }
+                            </ul>
+                        </article>
+                    </article>
+                }
+                @if (lstVideos != null && lstVideos.Count != 0)
+                {               
+                    <article class="clearfix tab_content2" id="videos">
+                        <article class="clearfix t-p10">
+                            <ul class="clearfix list-pn m0 list-f part-row">
+                                @foreach (var item in lstVideos)
+                                {
+                                    <li class="part-2">
+                                        <article class="clearfix p5">
+                                            <a href="http://www.youtube.com/embed/@(item.VideoUrl)?autoplay=1" data-fancybox-group="gallery" class="various fancybox.iframe">
+                                                <img src="http://i1.ytimg.com/vi/@item.VideoUrl/mqdefault.jpg" width="207" height="151" class="width100 img-bp2" /></a>
+                                        </article>
+                                    </li> 
+                                }
+                            </ul>
+                        </article>
+                    </article>
+                }
+            </article>
+        </article>
+
+    </article>
+</article>
+@if (lstAdvertiseWithUs != null && lstAdvertiseWithUs.Count != 0)
+{
+    <section class="clearfix wrapper t-b-p10">
+        <article class="clearfix inner-wrapper">
+            <article class="clearfix t-b-p20 t-c tablet-p10 mobile-p5 gray-bg2">
+                <article class="clearfix l-r-m-auto" style="max-width: 800px;">
+                    <article class="nivoSlider slider2">
+                        @foreach (var item in lstAdvertiseWithUs)
+                        {
+                            if (item.RedirectUrl != "")
+                            {
+                            <a href="@item.RedirectUrl" target="@(item.Target == null || item.Target == "" ? "_parent" : item.Target)">
+                                <img src="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgAdversise + item.ImageUrl), imgAdversise + "no-image-l.jpg")" alt="" title="Ads" width="728" height="90" border="0"/></a>
+                            }
+                            else
+                            {<img src="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgAdversise + item.ImageUrl), imgAdversise + "no-image-l.jpg")" alt="" title="Ads" width="728" height="90" border="0"/>}
+                        }
+                    </article>
+                </article>
+            </article>
+        </article>
+    </section> 
+}
+<article class="clearfix  wrapper t-b-p20 mobile-t-b-p10">
+    <article class="clearfix inner-wrapper">
+        <!--Review Section (Start)-->
+        <article class="clearfix border dkgray-border white-bg p15 tablet-p10 tabhorizontal-p15">
+            <span class="pull-right">
+                @if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null && Session["username"] != null)
+                {
+                    <a onclick="OpenReview();" class="btn btn-small font14">Write your Review</a>
+                }
+                else
+                {
+                    <a onclick="PostAdd();" class="btn btn-small font14">Write your Review</a>
+                }
+            </span>
+            @if (lstReviews != null && lstReviews.Count != 0)
+            {
+                <h6 class="clearfix dk-gray-t font18 latoregular border-b b-p5 dis-in t-m0">Top Reviews</h6>
+                <article id="divReviewsList">
+
+                    <ul class="clearfix list-fn list-pn m0 reviews-list">
+                        @foreach (var item in lstReviews)
+                        {
+                            <li>
+                                <article class="clearfix part-row">
+                                    <article class="clearfix part-2">
+                                        <article style="max-width: 150px;" class="clearfix border gray-border2 p5 shadow l-r-m-auto">
+                                            <article style="max-width: 100px;" class="clearfix l-r-m-auto">
+                                                <img width="300" height="300" border="0" alt="@item.UserName" title="@item.UserName" src="@DesiCharmsMD2017.BLL.Common.ValidateImage((location + item.ProfileImage), location + "profile_img.png")">
+                                            </article>
+                                            <h4 class="clearfix light-blue-t font13 b-m0 t-m5 mobilev-t-c mobilev-b-m0 mobilev-t-m5 t-c border-t gray-border2 t-t-c">@item.UserName</h4>
+                                        </article>
+                                    </article>
+                                    <article class="clearfix part-10">
+                                        <article class="clearfix l-p10 mobile-l-p0">
+                                            <span class="clearfix font13 pull-right grean-t t-p0 mobile-r-p0 mobilev-pull-n mobilev-t-c  mobile-dis-b">Posted on: @item.UpdatedDate.ToString("MMM, dd yyyy")  </span>
+                                            <h4 class="clearfix black-t font16 t-m0 mobilev-t-c mobilev-b-m0 mobilev-t-m5">@item.FirstName</h4>
+                                            <article class="@(item.Comments.Length > 325 ? "more-less" : "")">
+                                                <article class="more-block">
+                                                    @item.Comments
+                                                </article>
+                                            </article>
+                                        </article>
+                                    </article>
+                                </article>
+                            </li>
+                        }
+                    </ul>
+
+                </article>
+            }
+        </article>
+    </article>
+    <!--Review Section (End)-->
+</article>
+<!--
+@if (lstRecClassifieds != null && lstRecClassifieds.Count != 0)
+{
+    <section class="clearfix wrapper gray-bg t-b-p20 tablet-t-b-p20 mobile-t-b-p10">
+        <article class="clearfix inner-wrapper">
+            <article class="clearfix border dkgray-border white-bg p30 mobile-p20">
+                <h4 class="dk-gray-t font21 montserratregular b-p15 t-m0 mobile-b-p5 mobilev-font16">Recently <span class="border-b2 yellow-border">Added</span>:
+                </h4>
+                <article class="clearfix position-r mostlyviewedlistwrapper" data-navigation="navbtns1">
+                    <article id="navbtns1" class="clearfix">
+                        <a class="previous"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a>
+                        <a class="next"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a>
+                    </article>
+                    <ul class="clearfix m0 list-pn crsl-wrap">
+                        @foreach (var item in lstRecClassifieds)
+                        {
+                            <li class="crsl-item effectpart3">
+                                <article class="clearfix p10 border gray-bg grayborder shadow">
+                                    <article class="clearfix position-r caption-bg">
+                                        <article class="clearfix overflow-h position-r" style="max-height: 121px;">
+                                            <article class="clearfix recentlyaddewidth">
+                                                <a href="@Url.Action("ClassifiedDetails", "Classifieds", new { Title = DesiCharmsMD2017.BLL.Common.EncodeURL(item.Heading), cid = item.ClassifiedId, cname = DesiCharmsMD2017.BLL.Common.EncodeURL(item.CategoryName), sname = DesiCharmsMD2017.BLL.Common.EncodeURL(item.SubCategoryName) })" class="dis-b">
+                                                    <i class="caption-bg-hover"></i>
+
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0" height="125">
+                                                        <tr>
+                                                            <td height="125" align="center" valign="middle">
+                                                                <img src="@DesiCharmsMD2017.BLL.Common.ValidateImage((imgloc + item.ImageUrl), imgloc + "no-image.png")"  alt="@item.Heading" title="@item.Heading" width="441" height="407" border="0" class="width100" /></td>
+                                                        </tr>
+                                                    </table>
+                                                </a>
+                                            </article>
+                                            <article class="clearfix add-text">
+                                                <h4 class="clearfix font16 white-t t-m5 l-h18">@item.Heading</h4>
+                                            </article>
+                                        </article>
+                                    </article>
+
+                                    <article class="clearfix font13 muliregular dkgray-t t-p6 dis-in l-h18">
+                                        @{string Description1 = "";
+                                          Description1 = (item.Address == null ? "" : item.Address);
+                                          Description1 = Description1 + (item.City == null ? "" : (item.Address == null ? "" : ", ") + item.City);
+                                          Description1 = Description1 + (item.State == null ? "" : (item.City == null ? "" : ", ") + item.State);
+                                          Description1 = Description1 + (item.Country == null ? "" : (item.State == null ? "" : ", ") + item.Country);
+                                          Description1 = Description1 + (item.ZipCode == null ? "" : (item.Country == null ? "" : ", ") + item.ZipCode);
+                                        }
+                                        @if (Description1.Length >= 75)
+                                        { @Html.Raw(Description1.Substring(0, 75))  @("...")}
+                                        else
+                                        {@Html.Raw(Description1)}
+                                        @if (PostedOn == "display")
+                                        {
+                                            <span class="font13 muliregular green-t t-b-p7 dis-b @(item.Country != null || item.State != null || item.City != null ? "" : "t-p6")">Posted on : @item.InsertedDate.ToString("dd, MMM yyyy")</span>
+                                        }
+                                        @if (item.Prices != null)
+                                        {
+                                            <h4 class="clearfix red-t font18 montserratregular t-m0 b-m5">
+                                                @*@item.Prices.Remove(item.Prices.Length - 1)*@
+                                                @{string[] values = item.Prices.Split(',');
+                                                }
+                                                @for (int i = 0; i < values.Length; i++)
+                                                {
+                                                    if (i == 0)
+                                                    {
+                                                    <span>$@values[i].Trim()</span>
+                                                    }
+                                                    if (i > 0 && values[i] != "")
+                                                    {
+                                                    <span>, $@values[i].Trim() </span>
+                                                    }
+                                                }
+                                            </h4>
+                                        }
+                                        else if (item.Amount != null)
+                                        {
+                                            <h4 class="clearfix red-t font18 montserratregular t-m0 b-m5">$ @item.Amount</h4>
+                                        }
+                                        else
+                                        {
+                                            <article class="t-p25"></article>
+                                        }
+
+                                    </article>
+                                    <a href="@Url.Action("ClassifiedDetails", "Classifieds", new { Title = DesiCharmsMD2017.BLL.Common.EncodeURL(item.Heading), cid = item.ClassifiedId, cname = DesiCharmsMD2017.BLL.Common.EncodeURL(item.CategoryName), sname = DesiCharmsMD2017.BLL.Common.EncodeURL(item.SubCategoryName) })" class="clearfix btn btn-danger btn-block montserratregular white-t font14 border-radius0">View Details</a>
+                                </article>
+                            </li>
+                        }
+                    </ul>
+                </article>
+            </article>
+        </article>
+    </section>
+}
+    -->
+
+
+<!--- DIALOG BOX Write Review [Start]---->
+<article id="WriteaReview" style="display: none; overflow: visible;">
+    <article class="clearfix dialog-content gray-bg2 sm-row position-r p10">
+        <article class="white-bg">
+            <article class="clearfix p30 tablet-p10">
+                <h4 class="t-m0 Poppins-Regular dkblack-t b-m5 l-h24 font16">Write a Review</h4>
+                <article class="clearfix validation">
+                    <article class="clearfix">
+                        <input type="radio" class="star " name="Rating" value="1">
+                        <input type="radio" value="2" name="Rating" class="star">
+                        <input type="radio" value="3" name="Rating" class="star">
+                        <input type="radio" value="4" name="Rating" class="star">
+                        <input type="radio" value="5" name="Rating" class="star">
+                    </article>
+                    <span class="field-validation-error t-p10 b-p20" id="spanRating"></span>
+                    <article class="clearfix b-p5">
+                        <input type="text" class="form-control" id="FirstName" name="FirstName" placeholder="Subject" />
+                    </article>
+                    <article class="clearfix b-p5">
+                        <textarea id="Comments" name="Comments" class="form-control" placeholder="Comments" rows="4"></textarea>
+                    </article>
+                    <article class="clearfix t-p10">
+                        <input type="submit" class="btn btn-lg border-radius0 btn-success font18 t-t-u pull-left t-b-p7 l-r-p10" onclick="javascript: ReviewsSubmit();" value="Submit" />
+                    </article>
+                </article>
+            </article>
+        </article>
+        <span class="popupclosebtn"><a class="cursor-p poppins-medium font12 gray-t3" onclick=" $('#WriteaReview').dialog('close')">Close <span class="dis-in v-align-m l-p8">Close 
+            <img src="Content/images/close.png" alt="Close" /></span></a></span>
+    </article>
+</article>
+
+<script type="text/javascript" src="Scripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        // The height of the content block when it's not expanded
+        var adjustheight = 65;
+        // The "more" link text
+        var moreText = "More...";
+        // The "less" link text
+        var lessText = "Less...";
+
+        // Sets the .more-block div to the specified height and hides any content that overflows
+        $(".more-less .more-block").css('height', adjustheight).css('overflow', 'hidden');
+
+        // The section added to the bottom of the "more-less" div
+        $(".more-less").append('<a href="#" class="adjust pull-right"></a>');
+
+        $("a.adjust").html(moreText);
+
+        $(".adjust").toggle(function () {
+            $(this).parents("div:first").find(".more-block").css('height', 'auto').css('overflow', 'visible');
+            // Hide the [...] when expanded
+            $(this).parents("div:first").find("p.continued").css('display', 'none');
+            $(this).html(lessText);
+        }, function () {
+            $(this).parents("div:first").find(".more-block").css('height', adjustheight).css('overflow', 'hidden');
+            $(this).parents("div:first").find("p.continued").css('display', 'block');
+            $(this).html(moreText);
+        });
+    });
+
+</script>
+<script src="Scripts/jquery.rating.js"></script>
+<link href="Content/jquery.rating.css" rel="stylesheet" />
+<script type="text/javascript" src="Scripts/rrssb.min.js"></script>
+
+<script type="text/javascript" src="Scripts/slick.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.mostpopular').slick({
+            dots: true,
+            arrows: false,
+            fade: false,
+            slidesToShow: 4,
+            slidesToScroll: 2,
+            speed: 1500,
+            autoplaySpeed: 4500,
+            autoplay: true,
+            draggable: false,
+            infinite: true,
+            cssEase: 'linear',
+            responsive: [
+            {
+                breakpoint: 981,
+                settings: {
+                    arrows: false,
+                    dots: true,
+                    slidesToShow: 3,
+                    slidesToScroll: 2,
+                    infinite: true
+                }
+            },
+            {
+                breakpoint: 801,
+                settings: {
+                    slidesToShow: 2,
+                    arrows: false,
+                    dots: true,
+                    slidesToScroll: 2
+                }
+            },
+            {
+                breakpoint: 380,
+                settings: {
+                    slidesToShow: 1,
+                    arrows: false,
+                    dots: true,
+                    slidesToScroll: 1
+                }
+            }
+            ]
+        });
+
+
+    });
+</script>
+
+
+<!--- DILOG BOX Enquary Form [start] --->
+<div id="participants" style="display: none; overflow: visible; min-height: 100px!important;">
+    <div class="dialog-content">
+        <div class="clearfix t-b-p20 l-r-p30 mobile-p10">
+            <div class="popupclosebtn">
+                <a class="cursor-p latomedium white-t" onclick=" $('#participants').dialog('close')">
+                    <img title="" alt="" src="Content/images/close.png" /></a>
+            </div>
+            <h4 class="black-t montserratregular font22 t-m0 border-b b-p10 t-p10">Participants</h4>
+            <div class="clearfix">
+                @if (lstClassifiedsAccess != null && lstClassifiedsAccess.Count != 0)
+                {
+                    <ul class="clearfix m0 list list-pn gray-t t-p10">
+                        @foreach (var item in lstClassifiedsAccess)
+                        {
+                            if (item.Email != this.User.Identity.Name)
+                            {
+                            <li><a href="mailto:@item.Email" class="gray-t">@item.Email</a></li>
+                            }
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!--- DILOG BOX Enquary Form   [end] --->
+
+<script>
+    // tabbed content
+    // http://www.entheosweb.com/tutorials/css/tabs.asp
+    $(".tab_content2").hide();
+    $(".tab_content2:first").show();
+
+    /* if in tab mode */
+    $("ul.tabs li").click(function () {
+
+        $(".tab_content2").hide();
+        var activeTab = $(this).attr("rel");
+        $("#" + activeTab).fadeIn();
+
+        $("ul.tabs li").removeClass("active");
+        $(this).addClass("active");
+
+        $(".tab_drawer_heading2").removeClass("d_active");
+        $(".tab_drawer_heading2[rel^='" + activeTab + "']").addClass("d_active");
+
+    });
+    /* if in drawer mode */
+    $(".tab_drawer_heading2").click(function () {
+
+        $(".tab_content2").hide();
+        var d_activeTab = $(this).attr("rel");
+        $("#" + d_activeTab).fadeIn();
+
+        $(".tab_drawer_heading2").removeClass("d_active");
+        $(this).addClass("d_active");
+
+        $("ul.tabs li").removeClass("active");
+        $("ul.tabs li[rel^='" + d_activeTab + "']").addClass("active");
+    });
+
+
+    /* Extra class "tab_last" 
+       to add border to right side
+       of last tab */
+    $('ul.tabs li').last().addClass("tab_last");
+    </script>

@@ -1,0 +1,123 @@
+﻿@{ Layout = null;
+    var userRole = "";
+}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+    List<WATS.Entities.Photos> lstPhotos = ViewBag.lstPhotosLst;
+    var location = System.Configuration.ConfigurationManager.AppSettings["usersiteurl"] + "Content/photogallery/thumb/";
+    var imglocNormal = System.Configuration.ConfigurationManager.AppSettings["usersiteurl"] + "Content/photogallery/normalphoto/";
+
+}
+@{ HttpContext ctx = HttpContext.Current;
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+
+    if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null)
+    {
+        authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+        userRole = authTicket.UserData;
+    }
+
+}
+<link rel="stylesheet" type="text/css" href="Content/lib/lightview/css/lightview/lightview.css" />
+<script type="text/javascript" src="Content/lib/lightview/js/spinners/spinners.js"></script>
+<script type="text/javascript" src="Content/lib/lightview/js/lightview/lightview.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+
+    });
+    function DeleteAll() {
+        Id = Common.GetCheckBoxValue('checkbox')
+        if (validate(Id)) {
+            var val1 = confirm("Do you want to delete for selected items?");
+            if (val1) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("PhotoDeleteAll", "PhotoGallery")', // the URL of the controller action method
+                    data: { PhotoIds: Id }, // optional data
+                    success: function (result) {
+                        $("#divmessage").html(result.data);
+                        $('#divmessage').show();
+                        PhotosBind($('#hdnPageNo').val());
+                    },
+                    error: function (req, status, error) {
+                        $("#divmessage").html(result.data);
+                        $('#divmessage').show();
+                    }
+                });
+            }
+        }
+    }
+
+    function validate(Id) {
+        if (Id == "") {
+            alert("Please select atleast one Item.");
+            return false;
+        }
+        return true;
+    }
+
+</script>
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div>
+        }
+        else
+        {
+            var i = 1;
+            <div>
+                <input type="button" class="btn" onclick="DeleteAll()" value="Delete Selected Items" name="delete" id="delete">
+            </div>
+            <div class="clearfix t-b-p20">
+                <div class="part-row">
+                    @if (lstPhotos.Count != 0)
+                    {
+                        foreach (var item in lstPhotos)
+                        {
+                            <div class="part-2 b-m5">
+                                <a href='@(imglocNormal + item.ImageUrl)' class='lightview' data-lightview-group='example'>
+                                    <img alt="@item.ImageDescription" title="@item.ImageDescription" src="@WATS.BLL.Common.ValidateImage((location + item.ImageUrl), location + "no-image.png")">
+                                </a>
+                                <p>
+                                    <input type="checkbox" class="m-t8" name="checkbox" id="checkbox-@i" value="@{@item.PhotoId}" />
+
+                                    <a title="Edit" href="@Url.Action("PhotoEdit", "PhotoGallery", new { PhotoId = item.PhotoId })"><i class="icon-pencil coursesMenu"></i></a>
+                                    @if (userRole.Contains("WebMaster"))
+                                    {
+
+                                    }
+                                    else
+                                    {
+                                    <a id="12" class="picturedelete" onclick="javascript:Delete(@item.PhotoId,'@item.ImageUrl');"><i class="icon-trash coursesMenu"></i></a>
+                                    }
+                                    @*<a title="Delete" class="sepV_a disable-alpha"><i class="icon-trash coursesMenu"></i></a>*@
+                                </p>
+                            </div>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <div class="norecords">No Photos Found.</div>
+                    }
+                </div>
+            </div>
+
+        }
+    </div>
+</div>
+
+@Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

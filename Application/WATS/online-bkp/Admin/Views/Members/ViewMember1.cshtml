@@ -1,0 +1,296 @@
+﻿@{
+    ViewBag.Title = "ViewEnquiry";
+    Layout = null;
+
+    var objMemberDetails = (WATS.Entities.Members)ViewBag.objMemberDetails;
+}
+@{var baseurl = System.Configuration.ConfigurationManager.AppSettings["baseurl"];}
+<base href="@(baseurl)" />
+<link href="Content/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" type="text/css" href="Content/jquery-ui.css" />
+<link href="Content/admin-style.css" rel="stylesheet" media="screen">
+<link href="Content/admin-comman-styles.css" rel="stylesheet" media="screen">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700' rel='stylesheet' type='text/css'>
+<script src="Scripts/jquery-1.8.3.js" type="text/javascript"></script>
+<script src="Scripts/jquery-ui-1.9.2.custom.min.js" type="text/javascript"></script>
+<script src="Scripts/jquery.ui.widget.js"></script>
+<script src="Scripts/jquery.ui.accordion.js"></script>
+<script src="Scripts/delete_item.js" type="text/javascript"></script>
+<script type="text/javascript" src="Scripts/jquery-ui-timepicker-addon.js"></script>
+<script type="text/javascript" src="Scripts/jquery-ui-sliderAccess.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $(".ui-accordion").accordion({
+            collapsible: true,
+            heightStyle: "content"
+        });
+
+        // date picker
+        $(function () {
+            $(function () {
+                $(".datepicker").datepicker({
+                    altField: "#alternate",
+                    altFormat: "DD, d MM, yy"
+                });
+            });
+        });
+    });
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+        Common.mfadeout();
+
+    });
+</script>
+<table width="750" cellspacing="0" cellpadding="0" border="0" align="center" class="main-text">
+    <tbody>
+        <tr>
+            <td>
+                <div id="messages"></div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Personal Details</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                            <div class="filedsetInner clearfix">
+
+                                <table width="100%" cellspacing="0" cellpadding="6" border="0" class="mgrey2">
+                                    <tbody>
+                                        <tr>
+                                            <td width="270"><strong>Title: </strong></td>
+                                            <td width="724">@objMemberDetails.UserName</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>First Name : </strong></td>
+                                            <td>@objMemberDetails.FirstName</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Last Name : </strong></td>
+                                            <td>@objMemberDetails.LastName</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Member above 18 years? : </strong></td>
+                                            <td>@(objMemberDetails.MemberAge)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Profession : </strong></td>
+                                            <td>@(objMemberDetails.Occupation == "" ? "N/A" : objMemberDetails.Occupation)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Skills/Interests : </strong></td>
+                                            <td>@(objMemberDetails.MemberSkils == "" ? "N/A" : objMemberDetails.MemberSkils)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Email : </strong></td>
+                                            <td>@objMemberDetails.Email</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Spouse Name : </strong></td>
+                                            <td>@(objMemberDetails.SpouseFirstName == null ? "N/A" : objMemberDetails.SpouseFirstName)</td>
+                                        </tr>
+                                      @*  <tr>
+                                            <td><strong>Spouse Last Name : </strong></td>
+                                            <td>@(objMemberDetails.SpouseLastName == null ? "N/A" : objMemberDetails.SpouseLastName)</td>
+                                        </tr>*@
+                                        <tr>
+                                            <td><strong>Spouse Occupation : </strong></td>
+                                            <td>@(objMemberDetails.SpouseOccupation == null ? "N/A" : objMemberDetails.SpouseOccupation)</td>
+                                        </tr>
+                                       @* <tr>
+                                            <td><strong>Spouse Skills/Interests : </strong></td>
+                                            <td>@(objMemberDetails.SpouseSkils == "" ? "N/A" : objMemberDetails.SpouseSkils)</td>
+                                        </tr>*@
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end personal info form -->
+                </div>
+                <hr class="mN" />
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Children Details</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                            <div class="filedsetInner clearfix">
+                                <table cellspacing="0" cellpadding="0" border="0" class="tbl membership" width="100%">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <table id="childinfo" name="childinfo" width="650" cellspacing="0" cellpadding="0" border="0" class="table table-hover omb table_vam table-black tvm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th width="180">Name</th>
+                                                            @*<th width="360">Date of Birth</th>*@
+                                                            <th width="280" align="center">Age</th>
+                                                            @*<th width="180" align="center">Skills/Interests</th>*@
+
+                                                        </tr>
+                                                        @if (objMemberDetails.lstChildrenInfo != null && objMemberDetails.lstChildrenInfo.Count != 0)
+                                                        {
+                                                            Int64 i = 0;
+                                                            foreach (var Item in objMemberDetails.lstChildrenInfo)
+                                                            {
+                                                            <tr>
+                                                                <td width="180">
+                                                                    <label class="t-p5 black-t t-t-c">@Item.FirstName</label></td>
+                                                                @*<td width="110" align="center">
+                                                                    <label class="t-p5 black-t">@Item.LastName</label></td>*@
+                                                                <td width="180" align="center">
+                                                                    <label class="t-p5 black-t">@Item.Age</label></td>
+                                                               @* <td width="180" align="center">
+                                                                    <label class="t-p5 black-t">@Item.Relationship</label></td>*@
+
+                                                            </tr>
+                                                                i++;
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td width="180" colspan="4" class="t-c">
+                                                                    <label class="t-p5 black-t t-c">No Children's Found</label></td>
+                                                            </tr>
+                                                        }
+                                                    </thead>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end personal info form -->
+                </div>
+                <hr class="mN" />
+                <div class="clearfix sepH_b b-m0"></div>
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Contact Details</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                            <div class="filedsetInner clearfix">
+
+                                <table width="100%" cellspacing="0" cellpadding="6" border="0" class="mgrey2">
+                                    <tbody>
+                                        <tr>
+                                            <td width="270"><strong>Address : </strong></td>
+                                            <td width="724">@objMemberDetails.UserName</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>State : </strong></td>
+                                            <td>@(objMemberDetails.State == null ? "N/A" : objMemberDetails.State)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>City : </strong></td>
+                                            <td>@(objMemberDetails.City == null ? "N/A" : objMemberDetails.City)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Zip Code : </strong></td>
+                                            <td>@(objMemberDetails.ZipCode == null ? "N/A" : objMemberDetails.ZipCode)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Home Phone : </strong></td>
+                                            <td>@(objMemberDetails.HomePhone == null ? "N/A" : objMemberDetails.HomePhone)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Comments : </strong></td>
+                                            <td>@(objMemberDetails.Comments == null ? "N/A" : objMemberDetails.Comments)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Mobile Phone : </strong></td>
+                                            <td>@(objMemberDetails.MobilePhone == null ? "N/A" : objMemberDetails.MobilePhone)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Is Volunteer : </strong></td>
+                                            <td>@objMemberDetails.IsVolunteer</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Referred By : </strong></td>
+                                            <td>@(objMemberDetails.ReferredBy == null ? "N/A" : objMemberDetails.ReferredBy)</td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- end contact details form -->
+                <hr class="mN" />
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Latest Order Details</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                            <div class="filedsetInner clearfix">
+                                <table width="100%" cellspacing="0" cellpadding="6" border="0" class="mgrey2">
+
+
+                                    <tbody>
+                                        <tr>
+                                            <td width="270"><strong>Membership Type : </strong></td>
+                                            <td width="724">@objMemberDetails.objMembershipOrder.MembershipType</td>
+                                        </tr>
+                                        <tr>
+                                            <td width="175"><strong>Amount ($): </strong></td>
+                                            <td width="724">@objMemberDetails.objMembershipOrder.Amount</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Transaction Id : </strong></td>
+                                            <td>@objMemberDetails.objMembershipOrder.TransactionId</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Payment Method : </strong></td>
+                                            <td>@objMemberDetails.objMembershipOrder.PaymentMethod</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Payment By : </strong></td>
+                                            <td>@objMemberDetails.objMembershipOrder.PaymentBy</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Bank Name : </strong></td>
+                                            <td>@objMemberDetails.objMembershipOrder.BankName</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Cheque No : </strong></td>
+                                            <td>@objMemberDetails.objMembershipOrder.ChequeNo</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Cheque Date : </strong></td>
+                                            <td>@(objMemberDetails.objMembershipOrder.ChequeDate == DateTime.MinValue ? "" : objMemberDetails.objMembershipOrder.ChequeDate.ToString("MM/dd/yyyy"))</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Expiry Date : </strong></td>
+                                            <td>@(objMemberDetails.objMembershipOrder.ExpiryDate == DateTime.MinValue ? "" : objMemberDetails.objMembershipOrder.ExpiryDate.ToString("MM/dd/yyyy"))</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>User Comment : </strong></td>
+                                            <td>@objMemberDetails.objMembershipOrder.UserComment</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Admin Comment : </strong></td>
+                                            <td>@objMemberDetails.objMembershipOrder.AdminComment</td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix sepH_b b-m0"></div>
+
+
+                <!-- end other details form -->
+            </td>
+        </tr>
+    </tbody>
+</table>

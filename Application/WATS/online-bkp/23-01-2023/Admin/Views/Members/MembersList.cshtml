@@ -1,0 +1,183 @@
+﻿  @{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+
+    List<WATS.Entities.Members> lstMembers = ViewBag.lstMembers; 
+    var userRole = "";   
+}
+@{  HttpContext ctx = HttpContext.Current;
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+
+    if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null)
+    {
+        authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+        userRole = authTicket.UserData;
+    }
+        
+}
+<link type="text/css" media="screen" rel="stylesheet" href="colorbox/colorbox.css" />
+<script type="text/javascript" src="colorbox/jquery.colorbox.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("a[rel]").colorbox({ transition: "fade" });
+        $(".viewdetails").colorbox({ iframe: true, innerWidth: 800, innerHeight: 600 });
+    });
+   
+</script>
+
+
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div> 
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+                <thead>
+                    <tr>
+ @if (userRole.Contains("SuperAdmin"))
+                 {
+                         <th class="table_checkbox"> <input type="checkbox" name="mainchk" onclick="javascript: Select('mainchk');" /></th>
+}
+                        <th width="5%" align="center">S.No.</th>
+                        <th><a onclick="javascript:sortresult('SpouseCell');" class="white-t-u">Member ID @if (sortcolumn == "SpouseCell")
+                                                                                                        {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+                        
+                        <th width="12%"><a onclick="javascript:sortresult('UserName');" class="white-t-u">First Name @if (sortcolumn == "FirstName")
+                                                                                                               {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+                         <th width="12%"><a onclick="javascript:sortresult('UserName');" class="white-t-u">Last Name @if (sortcolumn == "LastName")
+                                                                                                               {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+ <th width="12%"><a onclick="javascript:sortresult('MobilePhone');" class="white-t-u">Phone @if (sortcolumn == "MobilePhone")
+                                                                                                               {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+
+                        <th width="12%">Membership</th>
+                        <th width="12%"><a onclick="javascript:sortresult('ExpiryDate');" class="white-t-u">Expire Date @if (sortcolumn == "ExpiryDate")
+                                                                                                                        {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> } </th>
+                        <th width="12%">P Method</th>
+                        <th width="9%"><a onclick="javascript:sortresult('PaymentStatus');" class="white-t-u">P Status @if (sortcolumn == "PaymentStatus")
+                                                                                                                       {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+                        <th width="12%"><a onclick="javascript:sortresult('IsApproved');" class="white-t-u">Status @if (sortcolumn == "IsApproved")
+                                                                                                                   {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+<th width="10%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (lstMembers.Count != 0)
+                    {
+                        Int64 i = 1;
+                        foreach (var item in lstMembers)
+                        { 
+                        <tr>
+ @if (userRole.Contains("SuperAdmin"))
+                 {
+                             <td><input type="checkbox" name="checkbox" id="checkbox-@i" value= "@{@item.MemberId}" /></td>
+}
+                            <td>@item.RId</td>
+                            <td style="text-align: left">@item.SpouseCell</td>
+                            <td>@item.FirstName
+                            </td>
+<td>@item.LastName
+                            </td>
+<td>@item.MobilePhone
+                            </td>
+                            
+                            <td>@item.MembershipType
+                            </td>
+                            <td>@(item.objMembershipOrder.ExpiryDate == DateTime.MinValue ? "N/A" : item.objMembershipOrder.ExpiryDate.ToString("MM-dd-yyyy"))
+                            </td>
+                            <td>@(item.objMembershipOrder.PaymentMethod==null||item.objMembershipOrder.PaymentMethod==""?"N/A":item.objMembershipOrder.PaymentMethod)
+                            </td>
+                            <td>
+                              @(item.objMembershipOrder.PaymentStatus==null|| item.objMembershipOrder.PaymentStatus==""?"N/A":item.objMembershipOrder.PaymentStatus)
+                            </td>
+<td>
+ @if (userRole.Contains("SuperAdmin"))
+                 {
+                                <div id="divStatus@(item.MemberId)">
+                    @{
+                            var isactive = "";
+                            var active = "";
+                            var disable = "";
+                            if (item.IsApproved == true)
+                            {
+                                isactive = "Active";
+                                disable = "style=\"cursor: pointer;\" onclick=\"javascript:MemberStatus(" + item.MemberId + ");\"";
+                            }
+                            else
+                            {
+                                isactive = "Disabled";
+                                active = "style=\"cursor: pointer;\" onclick=\"javascript:MemberStatus(" + item.MemberId + ");\"";
+                            }
+                        <div class="admin-active">@isactive
+                            <ul>
+                                <li><a @Html.Raw(active) >Active</a></li>
+                                <li><a @Html.Raw(disable) >Disabled</a></li>
+                            </ul>
+                        </div>      
+                    }
+                                    </div>
+                                <div id="load@(item.MemberId)" class="hide">
+                                                    <img alt="load" class="" src="Content/images/loader.gif" />
+                                                </div>
+}
+else
+{var isactive = "";
+	 if (item.IsApproved == true)
+                            {
+                                isactive = "Active";
+                                
+                            }
+                            else
+                            {
+                                isactive = "Disabled";
+                                
+                            }
+@isactive
+}
+                </td>
+<td>
+    @* <a title="Send Mail" href="@Url.Action("SendMail", "Home", new { MemberId = item.MemberId })"><i class="icon-envelope"></i></a>*@
+    <a title="View" href="@Url.Action("ViewMember", "Members", new { MemberId = item.MemberId })" class='lightview rightmost' data-lightview-group='example' data-lightview-type='iframe' data-lightview-options="width: 800" data-lightview-caption="@item.UserName">
+        <i class="icon-eye-open"></i>
+    </a>
+
+    @if (userRole.Contains("SuperAdmin"))
+    {
+
+        <a href="@Url.Action("EditMember", "Members", new { MemberId = item.MemberId })" title="Edit"><i class="icon-pencil"></i></a>
+        <a class="pagedelete" onclick="javascript:Delete(@item.MemberId);" id="1" title="Delete"><i class="icon-trash"></i></a>
+        @*<a title="Delete" class="sepV_a disable-alpha"><i class="icon-trash"></i></a>*@
+    }
+    else if (userRole.Contains("WebMaster"))
+    {
+        <a href="@Url.Action("EditMember", "Members", new { MemberId = item.MemberId })" title="Edit"><i class="icon-pencil"></i></a>
+    }
+
+</td>
+                        </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="10">No Members Found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    </div>
+</div>
+ @Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

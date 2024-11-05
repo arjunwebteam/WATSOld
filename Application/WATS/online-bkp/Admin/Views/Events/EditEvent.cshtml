@@ -1,0 +1,863 @@
+﻿@{
+    ViewBag.Title = "EditEvent";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    WATS.Entities.Events objEvent = ViewBag.objEvent;
+
+    List<WATS.Entities.EventCategories> lstEventCategories = ViewBag.lstEventCategories;
+    List<WATS.Entities.EventRegistrationTypes> lstEventRegistrationTypes = ViewBag.lstEventRegistrationTypes;
+
+    List<WATS.Entities.RegistrationCategories> lstRegistrationCategories = ViewBag.lstRegistrationCategories;
+
+    List<WATS.Entities.RegistrationCategories> lstEventRegistrationCategories = ViewBag.lstEventRegistrationCategories;
+}
+
+<script src="Scripts/countries.js" type="text/javascript"></script>
+<script type="text/javascript" src="ckeditor/ckeditor.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#MEvents').addClass('active');
+        $("#StartDate").datetimepicker({ timeFormat: "hh:mm tt" });
+        $("#EndDate").datetimepicker({ timeFormat: "hh:mm tt" });
+        $("#RegistrationStartDate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-10:+10", altFormat: 'mm/dd/yy' });
+        $("#RegistrationEndDate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-10:+10", altFormat: 'mm/dd/yy' });
+        $("#TopLine").datepicker({ changeMonth: true, changeYear: true, yearRange: "-10:+10", altFormat: 'mm/dd/yy' });
+    });
+
+    function Validate() {
+        if ($('#EventName').val() == '') { $('#spanEventName').html('Required.'); $('#EventName').focus().addClass("red-border"); return false; } else { $('#spanEventName').html(''); $('#EventName').focus().removeClass("red-border"); }
+        if ($('#EventCategoryId').val() == '') { $('#spanEventCategoryId').html('Required.'); $('#EventCategoryId').focus(); return false; } else { $('#spanEventCategoryId').html(''); $('#EventCategoryId').focus(); }
+
+        var checkbox = document.getElementsByName('IsRegistration');
+        if (checkbox[0].checked) {
+            if ($('#RegistrationStartDate').val() == '') { $('#spanRegistrationStartDate').html('Required.'); $('#RegistrationStartDate').focus().addClass("red-border"); return false; } else { $('#spanRegistrationStartDate').html(''); $('#EventName').focus().removeClass("red-border"); }
+            if ($('#RegistrationEndDate').val() == '') { $('#spanRegistrationEndDate').html('Required.'); $('#RegistrationEndDate').focus().addClass("red-border"); return false; } else { $('#spanRegistrationEndDate').html(''); $('#RegistrationEndDate').focus().removeClass("red-border"); }
+
+            if ($('#RegistrationStartDate').val() != "" && $('#RegistrationEndDate').val() != "") {
+                var startdate = new Date($('#RegistrationStartDate').val());
+                var enddate = new Date($('#RegistrationEndDate').val());
+                if (startdate > enddate) { $('#spanRegistrationStartDate').html('Registration start date should be less than registration end date.'); $('#spanRegistrationStartDate'); return false; } else { $('#spanRegistrationStartDate').html(''); }
+            }
+        }
+
+        $('#spanRegistrationStartDate').html('');
+
+        if ($('#StartDate').val() != "" && $('#EndDate').val() != "") {
+            var startdate = new Date($('#StartDate').val());
+            var enddate = new Date($('#EndDate').val());
+            if (startdate > enddate) { $('#spanStartDate').html('Start date should be less than end date.'); $('#spanStartDate'); return false; } else { $('#spanStartDate').html(''); }
+        }
+        $('#spanStartDate').html('');
+
+        if ($('#file').val() != "") {
+            if (!Common.isImage($('#file').val())) { $('#spanfile').html('Sorry image is invalid. Only allowed extensions are:<b>jpg, png, PNG, gif, jpeg, JPEG</b>.'); $('#file').focus(); return false; } else { $('#spanfile').html(''); }
+            //if ($('#hdnimgvalidate').val() == '0') { $('#spanfile').html('Please select image with diemensions equal to 690 * 500.'); $('#file').focus(); return false; } else { $('#spanfile').html(''); }
+        }
+
+        return true;
+    }
+
+    function addRow1() {
+        var table = document.getElementById("tableRegistrationType");
+        var rowCount = table.rows.length;
+        var row = table.insertRow(rowCount);
+        row.id = rowCount;
+
+        var cell2 = row.insertCell(0);
+        var element2 = document.createElement("input");
+        element2.type = "text";
+        element2.placeholder = "Title";
+        element2.name = "[" + (rowCount - 1) + "].RegistrationTitle";
+        element2.style = "height:40px!important;min-height:40px!important;"
+        element2.id = "RegistrationTitle-" + (rowCount - 1);
+        element2.className = "input-block-level b-m0";
+        cell2.appendChild(element2);
+
+        var cell3 = row.insertCell(1);
+        var element3 = document.createElement("input");
+        element3.type = "text";
+        element3.placeholder = "Member Amount";
+        element3.name = "[" + (rowCount - 1) + "].TypeMemberAmount";
+        element3.style = "height:40px!important;min-height:40px!important;"
+        element3.id = "TypeMemberAmount-" + (rowCount - 1);
+        element3.className = "input-block-level b-m0";
+        element3.onkeypress = "return Common.isNumberKey(event)";
+        cell3.appendChild(element3);
+
+
+        var cell4 = row.insertCell(2);
+        var element4 = document.createElement("input");
+        element4.type = "text";
+        element4.placeholder = "Non-Member Amount";
+        element4.name = "[" + (rowCount - 1) + "].NonMemberAmount";
+        element4.style = "height:40px!important;min-height:40px!important;"
+        element4.id = "NonMemberAmount-" + (rowCount - 1);
+        element4.className = "input-block-level b-m0";
+        element4.onkeypress = "return Common.isNumberKey(event)";
+        cell4.appendChild(element4);
+
+
+        var cell5 = row.insertCell(3);
+        var element5 = document.createElement("input");
+        element5.type = "text";
+        element5.placeholder = "Reg.Count";
+        element5.name = "[" + (rowCount - 1) + "].RegCount";
+        element5.style = "height:40px!important;min-height:40px!important;"
+        element5.id = "RegCount-" + (rowCount - 1);
+        element5.className = "input-block-level b-m0";
+        element5.onkeypress = "return Common.isNumberKey(event)";
+        cell5.appendChild(element5);
+
+        var cell6 = row.insertCell(4);
+        var element5 = document.createElement("input");
+        element5.type = "text";
+        element5.placeholder = "OrderNo";
+        element5.name = "[" + (rowCount - 1) + "].OrderNo";
+        element5.style = "height:40px!important;min-height:40px!important;"
+        element5.id = "OrderNo-" + (rowCount - 1);
+        element5.className = "input-block-level b-m0";
+        element5.onkeypress = "return Common.isNumberKey(event)";
+        cell6.appendChild(element5);
+
+
+        var cell7 = row.insertCell(5);
+        cell7.innerHTML = '<a onclick="javascript:deleteRow1(' + rowCount + ')" class="dis-b t-p15"><i class="fa fa-trash-o"></i></a>';
+        $('#hdnRowCount1').val(rowCount);
+    }
+
+    function deleteRow1(i) {
+        try {
+            var row = document.getElementById(i);
+            row.parentNode.removeChild(row);
+            $('#hdnRowCount1').val(i - 1);
+        } catch (e) {
+            alert(e);
+        }
+    }
+
+    function EventssRegistrationTypesBind() {
+        $.ajax({
+            url: '@Url.Action("EventRegistrationTypesList", "Events")',
+            type: 'GET',
+            cache: false,
+            data: { EventId: '@objEvent.EventId' },
+            success: function (result) {
+                $('#divClassifiedRegistrationTypes').html(result);
+            }
+        });
+    }
+
+    function EventBeneifitsRegistrationTypesStatus(EventRegistrationTypeId) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("EventRegistrationTypesStatus", "Events")', // the URL of the controller action method
+            data: { EventRegistrationTypeId: EventRegistrationTypeId }, // optional data
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    EventssRegistrationTypesBind();
+                   $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+
+
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                    $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                }
+            }
+        });
+    }
+    function DeleteEventRegistrationType(EventRegistrationTypeId) {
+        var val2 = confirm("Do you want to delete this?");
+        if (val2) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("DeleteRegistrationType", "Events")',  // the URL of the controller action method
+                data: { EventRegistrationTypeId: EventRegistrationTypeId }, // optional data
+                success: function (result) {
+                    $("#divmessage").html(result.data);
+                    EventssRegistrationTypesBind();
+                    $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                },
+                error: function (req, status, error) {
+                    $("#divmessage").html(result.data);
+                    $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                }
+            });
+        }
+    }
+
+    function UpdateDisplayOrder(i, EventRegistrationTypeId) {
+        var OrderNo = parseInt($('#OrderNo' + i).val());
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("UpdateEventRegistrationTypesDisplayOrder", "Events")',
+            data: { OrderNo: OrderNo, EventRegistrationTypeId: EventRegistrationTypeId },
+            success: function (result) {
+                var div = '';
+                if (result.ok) {
+                    $("#divmessage").html(result.data);
+                    EventssRegistrationTypesBind();
+                    $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                }
+                else {
+                    $("#divmessage").html(result.data);
+                    $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                }
+            }
+        });
+    }
+
+
+    function EventRegistrationTypesEdit(EventRegistrationTypeId) {
+        $('#view-' + EventRegistrationTypeId).hide();
+        $('#edit-' + EventRegistrationTypeId).show();
+    }
+
+    function EventRegistrationTypesView(EventRegistrationTypeId) {
+        $('#view-' + EventRegistrationTypeId).show();
+        $('#edit-' + EventRegistrationTypeId).hide();
+    }
+
+    function TypesUpdate(EventRegistrationTypeId) {
+        if (Validate()) {
+            var objRegistrationTypes = {};
+            objRegistrationTypes.EventRegistrationTypeId = EventRegistrationTypeId;
+            objRegistrationTypes.EventId = @objEvent.EventId;
+            objRegistrationTypes.RegistrationTitle = $('#RegistrationTitle-' + EventRegistrationTypeId).val();
+            objRegistrationTypes.MemberAmount = $('#TypeMemberAmount-' + EventRegistrationTypeId).val();
+            objRegistrationTypes.NonMemberAmount = $('#NonMemberAmount-' + EventRegistrationTypeId).val();
+            objRegistrationTypes.RegCount = $('#RegCount-' + EventRegistrationTypeId).val();
+
+
+            $.ajax({
+                url: '@Url.Action("AddEventRegistrationTypes", "Events")',
+                type: 'POST',
+                data: JSON.stringify(objRegistrationTypes),
+                datatype: "JSON",
+                contentType: 'application/json',
+                success: function (result) {
+                    if (result.ok) {
+                        $("#divmessage").html(result.data);
+                        window.location.href = '@Request.Url.AbsoluteUri';
+                        $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                    }
+                    else {
+                        $("#spanRegistrationTitle").html(result.data);
+                        $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                    }
+                }
+            });
+        }
+    }
+</script>
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+
+        <li><a href="@Url.Action("Index", "Events", new { EventType = "upcoming" })">Events</a> <span class="divider">/</span></li>
+        <li class="active">Edit Event</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<input type="hidden" id="hdnimgvalidate" value="0" />
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock">
+            <div class="grayBackground">
+                <div class="fR t-r p_b"><a href="@Url.Action("Index", "Events", new { EventType = "upcoming" })" class="clearfix">← back to events list</a> </div>
+                <h3 class="title t-t-c">'@objEvent.EventName' - Edit Details </h3>
+                @{Html.RenderAction("EventMenu", "Events", new { EventId = objEvent.EventId, EventName = objEvent.EventName, tab = "edit" });}
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            { @Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            { @Html.Raw(ViewBag.message.ToString())}
+        </div>
+        @using (Html.BeginForm("AddEvent", "Events", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        { 
+            <input id="EventId" name="EventId" type="hidden" value="@(objEvent.EventId)" />
+             
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Event Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Event Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" id="EventName" value="@objEvent.EventName" name="EventName" class="input-block-level">
+                                                <span id="spanEventName" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Start Date :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" id="StartDate" value="@(objEvent.StartDate != DateTime.MinValue ? objEvent.StartDate.ToString("MM/dd/yyyy") : "")" name="StartDate" class="input-block-level">
+                                                <span id="spanStartDate" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">End Date :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" name="EndDate" value="@(objEvent.EndDate != DateTime.MinValue ? objEvent.EndDate.ToString("MM/dd/yyyy") : "")" id="EndDate" class="input-block-level">
+                                                <span id="spanEndDate" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+
+                                        @* <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Member Count :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" value="@objEvent.MemberCount" onkeypress="return Common.isNumberKey(event)" name="MemberCount" id="MemberCount" class="input-block-level">
+                                            </div>
+                                        </div>*@
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5 font12">City :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" id="City" name="City" value="@objEvent.City" class="input-block-level">
+                                                <span id="spanCity" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row-fluid b-p15">
+                                            <div class="span5">
+                                                <label class="t-p5">Image :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="file" id="file" name="file" class="input-block-level">
+                                                <span id="spanfile" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="clearfix">
+                                            <b style="color: #f00; font-size: 11px">Note :</b> Image size should be maintained width * height (690 * 500)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix">
+
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Event Category :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span7">
+                                                <select name="EventCategoryId" id="EventCategoryId" class="input-block-level">
+                                                    <option value="">-- Select Category --</option>
+                                                    @if (lstEventCategories.Count > 0)
+                                                    {
+                                                        foreach (var item in lstEventCategories)
+                                                        {
+                                                        <option @(item.EventCategoryId == objEvent.EventCategoryId ? "selected = selected" : "") value="@(item.EventCategoryId)">@(item.EventCategory)</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <span id="spanEventCategoryId" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5 font12">Contact Email :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" id="ContactEmail" value="@objEvent.ContactEmail" name="ContactEmail" class="input-block-level">
+                                                <span id="spanContactEmail" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Location :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" name="Location" value="@objEvent.Location" id="Location" class="input-block-level">
+                                                <span id="spanLocation" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">State Name :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" name="StateName" id="StateName" value="@objEvent.StateName" class="input-block-level">
+                                                <span id="spanStateName" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5 font12">Zip Code :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" id="ZipCode" name="ZipCode" value="@objEvent.ZipCode" class="input-block-level">
+                                                <span id="spanZipCode" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Registration Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid b-p10">
+                                            <div class="span5">
+                                                <label class="t-p5">Is Registration :</label>
+                                            </div>
+                                            <div class="span7">
+                                                @Html.CheckBox("IsRegistration", objEvent.IsRegistration == true ? true : false)
+                                            </div>
+                                        </div>
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5 font12">Reg. End Date :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" value="@(objEvent.RegistrationEndDate != DateTime.MinValue ? objEvent.RegistrationEndDate.ToString("MM/dd/yyyy") : "")" id="RegistrationEndDate" name="RegistrationEndDate" class="input-block-level">
+                                                <span id="spanRegistrationEndDate" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+
+                                    <div class="clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Reg. Start Date :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" value="@(objEvent.RegistrationStartDate != DateTime.MinValue ? objEvent.RegistrationStartDate.ToString("MM/dd/yyyy") : "")" name="RegistrationStartDate" id="RegistrationStartDate" class="input-block-level">
+                                                <span id="spanRegistrationStartDate" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-1" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Cultural Registration Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-1" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid b-p10">
+                                            <div class="span5">
+                                                <label class="t-p5">Is Cultural Registration :</label>
+                                            </div>
+                                            <div class="span7">
+                                                @Html.CheckBox("IsVIP", objEvent.IsVIP == true ? true : false)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="span6">
+                                    <div class="span5">
+                                        <label class="t-p5 font12">Cut Of Date:</label>
+                                    </div>
+                                    <div class="span7">
+                                        <input type="text" id="TopLine" name="TopLine" value="@objEvent.TopLine" class="input-block-level">
+                                        <span id="spanTopLine" class="field-validation-error"></span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Event Registration Forms</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                            <div class="filedsetInner clearfix">
+                                <div class="clearfix part-row">
+                                    @if (lstRegistrationCategories != null && lstRegistrationCategories.Count != 0)
+                                    {
+
+                                        int j = 1;
+                                        foreach (var item in lstRegistrationCategories)
+                                        {
+
+                                            int x = 0;
+                                            decimal amt = 0;
+                                            decimal namt = 0;
+                                            if (lstEventRegistrationCategories != null && lstEventRegistrationCategories.Count != 0)
+                                            {
+                                                foreach (var item2 in lstEventRegistrationCategories)
+                                                {
+                                                    if (item2.RegistrationCategoryId == item.RegistrationCategoryId)
+                                                    {
+                                                        x = 1;
+                                                        amt = item2.MemberAmount;
+                                                        namt = item2.NAmount;
+                                                    }
+                                                }
+                                            }
+                                            <div class="part-3">
+                                                <div class="clearfix rp10">
+                                                    <div class="row-fluid">
+                                                        <div class="span1">
+                                                            <label>
+                                                                <label>
+                                                                    <input type="checkbox" @(x == 1 ? "checked=checked" : "") name="[@(j - 1)].RegistrationCategoryId" id="RegistrationCategoryId-@j" class="flat-red" value="@{@item.RegistrationCategoryId}">
+                                                                </label>
+                                                                <label>
+                                                                    <input type="text" name="[@(j - 1)].MemberAmount" id="MemberAmount-@j" class="form-control" value="@amt" placeholder="Member Amount">
+                                                                </label>
+                                                                @if (item.CategoryName == "Spell Master" || item.CategoryName == "Math Bowl" || item.CategoryName == "Art Competition" || item.CategoryName == "Mahila Sambaralu" || item.CategoryName == "Cultural Registration" || item.CategoryName == "Seminar" || item.CategoryName == "Meet & Greet" || item.CategoryName == "Muggula Potilu" || item.CategoryName == "Mehandi" || item.CategoryName == "LEGO Competition" || item.CategoryName == "Volleyball" || item.CategoryName == "Cricket" || item.CategoryName == "Public Speaking Contest" || item.CategoryName == "Essay Writing Competition" || item.CategoryName == "Chess" || item.CategoryName == "Badminton" || item.CategoryName == "Tennis" || item.CategoryName == "Table Tennis" || item.CategoryName == "Stalls" || item.CategoryName == "5kRegistrations")
+                                                                {
+                                                                <label>
+                                                                    <input type="text" name="[@(j - 1)].NAmount" id="NAmount-@j" class="form-control" value="@namt" placeholder="Non Member Amount">
+                                                                </label>
+                                                                }
+                                                            </label>
+                                                        </div>
+                                                        <div class="span11">
+                                                            @item.CategoryName
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+            j++;
+        }
+    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Registration Types</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                            <div class="filedsetInner clearfix">
+                                <div id="divClassifiedRegistrationTypes">
+                                    @if (lstEventRegistrationTypes != null && lstEventRegistrationTypes.Count != 0)
+                                    {
+                                        int i = 0;
+                                        <table width="100%" class="table table-bordered table-hover">
+                                            <tbody>
+                                                <tr>
+                                                    <th width="20%">Title</th>
+                                                    <th width="15%">Member Amount</th>
+                                                    <th width="15%">Non-Member Amount</th>
+                                                    <th width="15%">Status</th>
+                                                    <th width="10%">Reg.Count</th>
+                                                    <th width="15%">Order No</th>
+                                                    <th width="13%">Action</th>
+                                                </tr>
+                                                @foreach (var item in lstEventRegistrationTypes)
+                                                {
+                                                    <tr id="view-@item.EventRegistrationTypeId">
+                                                        <td width="20%">
+                                                            <label>@item.RegistrationTitle</label>
+                                                        </td>
+                                                        <td width="15%">
+                                                            <label>@item.MemberAmount</label>
+                                                        </td>
+                                                        <td width="15%">
+                                                            <label>@item.NonMemberAmount</label>
+                                                        </td>
+                                                        <td width="15%">
+
+                                                            @{
+                                                                var isactive = "";
+                                                                var active = "";
+                                                                var disable = "";
+                                                                if (item.IsActive == true)
+                                                                {
+                                                                    isactive = "Active";
+                                                                    disable = "style=\"cursor: pointer;\" onclick=\"javascript:EventBeneifitsRegistrationTypesStatus(" + item.EventRegistrationTypeId + ");\"";
+                                                                }
+                                                                else
+                                                                {
+                                                                    isactive = "Disabled";
+                                                                    active = "style=\"cursor: pointer;\" onclick=\"javascript:EventBeneifitsRegistrationTypesStatus(" + item.EventRegistrationTypeId + ");\"";
+                                                                }
+                                                                <div class="admin-active">
+                                                                    @isactive
+                                                                    <ul>
+                                                                        <li><a @Html.Raw(active)>Active</a></li>
+                                                                        <li><a @Html.Raw(disable)>Disabled</a></li>
+                                                                    </ul>
+                                                                </div>
+                                                            }
+
+
+                                                        </td>
+                                                        <td width="10%">@item.RegCount</td>
+                                                        <td width="15%">
+                                                            <input type="text" style="width:30px;margin-bottom:0px;" maxlength="3" id="OrderNo@(i)" value="@item.OrderNo" onkeypress="return Common.isNumberKey(event)" />
+                                                            <a onclick="UpdateDisplayOrder(@i,@item.EventRegistrationTypeId);" title="Update"><i class="fa fa-fw fa-refresh"></i></a>
+
+                                                        </td>
+                                                        <td width="13%">
+                                                            <a onclick="EventRegistrationTypesEdit(@item.EventRegistrationTypeId);" title="Edit"><i class="icon-pencil"></i></a>
+                                                            <a title="Delete" onclick="DeleteEventRegistrationType(@item.EventRegistrationTypeId)" class="pagedelete"><i class="icon-trash"></i></a>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr id="edit-@item.EventRegistrationTypeId" style="display:none;">
+                                                        <td width="20%">
+                                                            <input type="text" class="form-control" id="RegistrationTitle-@item.EventRegistrationTypeId" name="RegistrationTitle-@item.EventRegistrationTypeId" value="@item.RegistrationTitle" />
+                                                        </td>
+                                                        <td width="15%">
+                                                            <input type="text" class="form-control" id="TypeMemberAmount-@item.EventRegistrationTypeId" name="TypeMemberAmount-@item.EventRegistrationTypeId" value="@item.MemberAmount" />
+                                                        </td>
+                                                        <td width="15%">
+                                                            <input type="text" class="form-control" id="NonMemberAmount-@item.EventRegistrationTypeId" name="NonMemberAmount-@item.EventRegistrationTypeId" value="@item.NonMemberAmount" />
+                                                        </td>
+                                                        <td width="15%"></td>
+                                                        <td width="10%">
+
+                                                            <input type="text" class="form-control" id="RegCount-@item.EventRegistrationTypeId" name="RegCount-@item.EventRegistrationTypeId" value="@item.RegCount" />
+                                                        </td>
+
+                                                        <td width="15%">
+                                                            @*<input type="text" style="width:30px;margin-bottom:0px;" maxlength="3" id="OrderNo@(i)" value="@item.OrderNo" onkeypress ="return Common.isNumberKey(event)"/>
+                                                    <a onclick="UpdateDisplayOrder(@i,@item.EventRegistrationTypeId);" title="Update"><i class="fa fa-fw fa-refresh"></i></a>*@
+
+                                                        </td>
+                                                        <td width="13%">
+                                                            <a onclick="TypesUpdate(@item.EventRegistrationTypeId);" title="Update">Update</a>
+                                                        </td>
+                                                    </tr>
+
+                                                    i++;
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                </div>
+                                <table width="100%" class="table table-bordered table-hover" id="tableRegistrationType">
+                                    <tbody>
+                                        <tr>
+                                            <th width="35%">Title</th>
+                                            <th width="15%">Member Amount</th>
+                                            <th width="15%">Non-Member Amount</th>
+                                            <th width="10%">Reg. Count</th>
+                                            <th width="10%">OrderNo</th>
+                                            <th width="15%"><a class="btn btn-danger btn-small" onclick="addRow1();" style="color: #ffffff; padding-left: 15px;">Add</a></th>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input type="text" class="input-block-level b-m0" name="[0].RegistrationTitle" style="height: 40px!important; min-height: 40px!important;" placeholder="Registration Title" id="RegistrationTitle-0">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="input-block-level b-m0" name="[0].TypeMemberAmount" onkeypress="return Common.isNumberKey(event)" style="height: 40px!important; min-height: 40px!important;" placeholder="Member Amount" id="TypeMemberAmount-0">
+                                            </td>
+
+                                            <td>
+                                                <input type="text" class="input-block-level b-m0" name="[0].NonMemberAmount" onkeypress="return Common.isNumberKey(event)" style="height: 40px!important; min-height: 40px!important;" placeholder="Non-Member Amount" id="NonMemberAmount-0">
+                                            </td>
+
+                                            <td>
+                                                <input type="text" class="input-block-level b-m0" name="[0].RegCount" onkeypress="return Common.isNumberKey(event)" style="height: 40px!important; min-height: 40px!important;" placeholder="Reg Count" id="RegCount-0">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="input-block-level b-m0" name="[0].OrderNo" onkeypress="return Common.isNumberKey(event)" style="height: 40px!important; min-height: 40px!important;" placeholder="OrderNo" id="OrderNo-0">
+                                            </td>
+
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Event Description</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                            <div class="filedsetInner clearfix">
+                                <textarea rows="10" name="EventDetails" id="description" cols="80" style="visibility: hidden; display: none;">@objEvent.EventDetails</textarea>
+                                <span id="spandescription" class="field-validation-error"></span>
+                                <script type="text/javascript">
+                                    CKEDITOR.replace('description', { contentsCss: '../css/editor.css' });
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Cultural Guidelines</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                            <div class="filedsetInner clearfix">
+                                <div class="row-fluid">
+                                    <textarea rows="10" name="Guidlines" id="guidlines" cols="80" style="visibility: hidden; display: none;">@objEvent.Guidlines</textarea>
+                                    <span id="spandescription" class="field-validation-error"></span>
+                                    <script type="text/javascript">
+                                        CKEDITOR.replace('guidlines', { contentsCss: '../css/editor.css' });
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Registration Notes</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                            <div class="filedsetInner clearfix">
+                                <div class="row-fluid">
+                                    <textarea rows="10" name="RegistrationNotes" id="notes" cols="80" style="visibility: hidden; display: none;">@objEvent.RegistrationNotes</textarea>
+                                    <span id="spandescription" class="field-validation-error"></span>
+                                    <script type="text/javascript">
+                                        CKEDITOR.replace('notes', { contentsCss: '../css/editor.css' });
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>SEO Details</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                            <div class="filedsetInner clearfix">
+                                <div class="row-fluid">
+                                    <div class="span6">
+                                        <div class="clearfix rp10">
+                                            <div class="row-fluid">
+                                                <div class="span5">
+                                                    <label class="t-p5">Page Title :</label>
+                                                </div>
+                                                <div class="span7">
+                                                    <textarea type="text" id="PageTitle" name="PageTitle" class="input-block-level">@objEvent.PageTitle</textarea>
+                                                    <span id="spanPageTitle" class="field-validation-error"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="clearfix rp10">
+                                            <div class="row-fluid">
+                                                <div class="span5">
+                                                    <label class="t-p5">Meta Keywords :</label>
+                                                </div>
+                                                <div class="span7">
+                                                    <textarea type="text" id="MetaKeywords" name="MetaKeywords" class="input-block-level">@objEvent.MetaKeywords</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span6">
+
+                                        <div class="clearfix rp10">
+                                            <div class="row-fluid">
+                                                <div class="span5">
+                                                    <label class="t-p5">Meta Description :</label>
+                                                </div>
+                                                <div class="span7">
+                                                    <textarea type="text" id="MetaDescription" name="MetaDescription" class="input-block-level">@objEvent.MetaDescription</textarea>
+                                                    <span id="spanMetaDescription" class="field-validation-error"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @*<div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Top Line :</label>
+                                        </div>
+                                        <div class="span7">
+                                            <textarea type="text" id="TopLine" name="TopLine" class="input-block-level">@objEvent.TopLine</textarea>
+                                        </div>
+                                    </div>
+                                </div>*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <div class="actionButtons">
+                        <input type="submit" value=" Submit " onclick="return Validate();" name="send" class="button2 btn btn-primary">
+                        <a class="btn btn-inverse" href="@Url.Action("Index", "Events", new { EventType = "upcoming" })">Cancel</a>
+                    </div>
+                </div>
+
+            </div>
+            
+        }
+</div>
+
+<script>
+    var _URL = window.URL || window.webkitURL;
+    $("#file").change(function (e) {
+        var file, img;
+        if ((file = this.files[0])) {
+            img = new Image();
+            img.onload = function () {
+                if (this.width == 690 && this.height == 500) {
+                    $('#hdnimgvalidate').val('1');
+                }
+                else {
+                    $('#hdnimgvalidate').val('0');
+                }
+            };
+            img.src = _URL.createObjectURL(file);
+        }
+    });
+
+</script>
+

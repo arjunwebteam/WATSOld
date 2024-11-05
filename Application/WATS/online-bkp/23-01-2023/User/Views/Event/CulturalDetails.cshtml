@@ -1,0 +1,259 @@
+﻿@{
+    ViewBag.Title = "EventDetails";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var objEvents = (WATS.Entities.Events)ViewBag.objEvents;
+
+    ViewBag.Heading = "Cultural";
+
+    var imglocNormal = System.Configuration.ConfigurationManager.AppSettings["adminimgurl"] + "events/banners/";
+
+    var imglocEvent = System.Configuration.ConfigurationManager.AppSettings["adminimgurl"] + "events/banners/";
+
+    var ChoreographerId = Session["choreographerId"];
+
+    WATS.BLL.InnerPages _InnerPages = new WATS.BLL.InnerPages();
+    WATS.Entities.InnerPages objCulturalInfo = new WATS.Entities.InnerPages();
+
+    int Status = 0;
+    objCulturalInfo = _InnerPages.GetInnerPagesListById(0, "Cultural", ref Status);
+}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        if ('@ViewBag.str' == 'clogin-failed') {
+          /*  CuturalLoginShow();*/
+           /*  $('#ErrorMessage').show();*/
+        }
+    
+        $('#ErrorMessage1').show();
+        $('#cutural').dialog
+            ({
+                autoOpen: false,
+                width: 750,
+                modal: true
+            });
+        $('#cuturallogin').dialog
+            ({
+                autoOpen: false,
+                width: 450,
+                modal: true
+            });
+        CulturalShow();
+    });
+
+    function CulturalShow() {
+        $('#cutural').dialog('open');
+        $('#cuturallogin').dialog('close');
+    }
+
+    function CuturalLoginShow() {
+
+        $('#cuturallogin').dialog('open');
+
+        $('#cutural').dialog('close');
+    }
+
+    function CuturalLoginValidate() {
+
+        if ($('#CEmail1').val() == "") { $('#CEmail1').focus().addClass("validate"); return false; } else { $('#CEmail1').removeClass("validate"); }
+        if (!Common.CheckEmail($('#CEmail1').val())) { $('#CEmail1').val(''); document.getElementsByName('CEmail1')[0].placeholder = 'Invalid email address'; $('#CEmail1').focus().addClass("validate"); return false; } else { $('#CEmail1').removeClass("validate"); }
+        if ($('#CPassword1').val() == '') { $('#CPassword1').focus().addClass("validate"); return false; } else { $('#CPassword1').focus().removeClass("validate"); }
+
+
+        return true;
+    }
+    function ResetValidateClass() {
+        $('#Email1').removeClass("validate");
+        $('#Password1').removeClass("validate");
+
+    }
+
+    function cforgotpasswordshow() {
+        $('#cuturallogin').dialog('close');
+        $('#CEmail').val('').removeClass('validate');
+        $('#cforgot-password').dialog('open');
+    }
+
+    function CValidateFPword1() {
+        if ($('#CEmail').val() == "") { alert("Please Enter Email."); return false; }
+        if ($('#CEmail').val() != "") {
+            if ($.trim($('#CEmail').val()) == '') { $('#CEmail').focus().addClass("validate"); return false; } else { $('#CEmail').focus().removeClass("validate"); }
+            if (!Common.CheckEmail($('#CEmail').val())) { $('#CEmail').val(''); document.getElementsByName('Email')[0].placeholder = 'Invalid email address'; $('#CEmail').focus().addClass("validate"); return false; } else { $('#CEmail').removeClass("validate"); }
+        }
+        return true;
+    }
+</script>
+
+<!--- DILOG BOX Login [start] --->
+<section id="cutural" style="display: none; overflow: visible;">
+    <article class="clearfix dialog-title t-c white-bg border-b b-p5">
+        <span class="pull-right r-p10 t-p10"><a class="cursor-p latomedium red-t" onclick=" $('#cutural').dialog('close')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></span>
+        <h3 class="black-t font20 poppins-medium">Cultural Registration</h3>
+    </article>
+
+    <article id="ErrorMessage1" class="clearfix border dkredborder red-t font13 p5 hide t-b-m10 l-r-m10">@(TempData["message1"] != null ? TempData["message1"].ToString() : "")</article>
+    <article class="clearfix dialog-content">
+        <article class="clearfix p30 mobile-p10 border-radius4 dk-cream-bg">
+            @*<article class="clearfix t-l Poppins-Regular t-m0 b-p10 merunred-t">Please fill the below credentials to login. </article>*@
+
+            <article class="clearfix t-c" style="margin-left:auto; margin-right:auto;">
+
+                <a href="@Url.Action("CulturalRegistration", "Event", new { EventName = WATS.BLL.Common.EncodeURL(@objEvents.EventName), eid = objEvents.EventId })" class="btn btn-danger border-radius0 t-t-u t-b-p10 l-r-p30 poppinssemibold border0 font14 mobile-font14 l-h18 mobile-t-b-p10 mobile-l-r-p10">New Choreographer? Sign In</a>
+
+                <a onclick="CuturalLoginShow();" class="btn btn-success border-radius0 t-t-u t-b-p10 l-r-p30 poppinssemibold border0 font14 mobile-font14 l-h18 mobile-t-b-p10 mobile-l-r-p10">Already Registered Choreographer</a>
+            </article>
+
+        </article>
+    </article>
+</section>
+<!--- DILOG BOX Login [end] --->
+<!--- DILOG BOX Login [start] --->
+<section id="cuturallogin" style="display: none; overflow: visible;">
+    <article class="clearfix dialog-title t-c white-bg border-b b-p5">
+        <span class="pull-right r-p10 t-p10"><a class="cursor-p latomedium red-t" onclick=" $('#cuturallogin').dialog('close')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></span>
+        <h3 class="black-t font20 poppins-medium">Choreographer Login</h3>
+    </article>
+
+    <article id="ErrorMessage" class="clearfix border dkredborder red-t font13 p5 hide t-b-m10 l-r-m10">@(TempData["message1"] != null ? TempData["message1"].ToString() : "")</article>
+    <article class="clearfix dialog-content">
+        <article class="clearfix p30 mobile-p10 border-radius4 dk-cream-bg">
+            <article class="clearfix t-l Poppins-Regular t-m0 b-p10 merunred-t">Please fill the below credentials to login. </article>
+            @using (Html.BeginForm("LogOn", "Choreographer", FormMethod.Post, new { enctype = "multipart/form-data", @class = "validation" }))
+            {
+                @*<input type="hidden" value="@Request.Url.AbsoluteUri" id="ReturnUrl" name="ReturnUrl" />*@
+                <input type="hidden" value="@objEvents.EventName" id="EventName" name="EventName" />
+                <input type="hidden" value="@objEvents.EventId" id="EventId" name="EventId" />
+
+                <input type="text" value="" placeholder="Email ID" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" name="Email" id="CEmail1" class="form-control" />
+                <input type="password" placeholder="Password" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" name="Password" id="CPassword1" class="form-control" />
+                <article class="clearfix t-p10 t-c">
+                    <input type="submit" value="LOGIN" class="btn btn-danger btn-block poppinssemibold font18 border-radius0" onclick="return CuturalLoginValidate();" />
+                    <span class="dis-b t-p5">
+                        <a onclick="cforgotpasswordshow();" class="dk-t font14"><u>Forgot Password ?</u></a>
+                    </span>
+                </article>
+            }
+        </article>
+    </article>
+</section>
+<!--- DILOG BOX Login [end] --->
+<!--- DILOG BOX forgot password [start] --->
+<section id="cforgot-password" style="display: none; overflow: visible;">
+    <article class="clearfix dialog-title t-c white-bg border-b b-p5">
+        <span class="pull-right r-p10 t-p10"><a class="cursor-p latomedium red-t" onclick=" $('#forgot-password').dialog('close')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></span>
+        <h3 class="black-t font20 poppins-medium">Forgot Password</h3>
+    </article>
+    <article class="clearfix dialog-content">
+        <article class="clearfix p30 mobile-p10 border-radius4 dk-cream-bg">
+
+            <article class="clearfix b-p15 font13 dk-t l-h18">
+                <span class="red-t font14 poppins-medium">Note :-</span> “ If you have forgotten your password and would like to change it, enter your email address and we'll send you a new password reset request.
+            </article>
+            @using (Html.BeginForm("ForgotPassword", "Choreographer", FormMethod.Post, new { enctype = "multipart/form-data", @class = "validation" }))
+            {
+                <input type="hidden" value="" id="" name="" />
+
+                <input type="text" value="" placeholder="Email ID" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" name="Email" id="CEmail" class="form-control" />
+                <article class="clearfix t-p10 t-c">
+                    <input type="submit" value="SUBMIT" class="btn btn-danger btn-block poppinssemibold font18 border-radius0" onclick="return CValidateFPword1();" />
+                    <span class="dis-b t-p5">
+                        <a onclick="CuturalLoginShow();" class="dk-t font14"><u>Back to Login</u></a>
+                    </span>
+                </article>
+            }
+        </article>
+    </article>
+</section>
+<!--- DILOG BOX forgot password [end] --->
+
+<article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height:1150px;">
+    <article class="clearfix curve position-r t-m4n b-p15">
+
+        <h2 class="Impact font22 black-t l-h16 t-c mobile-font16 b-p15">@objEvents.EventName <span class="kaushan_scriptregular font22 red-t l-h14 mobile-font16"> Details</span></h2>
+    </article>
+    @if (objEvents.IsRegistration == true && objEvents.RegistrationStartDate.Date <= DateTime.UtcNow.Date && objEvents.RegistrationEndDate.Date >= DateTime.UtcNow.Date)
+    {
+        if (objEvents.IsVIPSingleAdult == true)
+        {
+            if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null && Session["username"] != null)
+            {
+                <article class="clearfix part-row">
+                    <article class="clearfix part-4">
+                        &nbsp;
+                    </article>
+                    <article class="clearfix part-4">
+                        <article class="clearfix l-r-p30">
+                            <span class="t-m30n">
+                                <a href="@Url.Action("CulturalRegistration", "Event", new { EventName = WATS.BLL.Common.EncodeURL(@objEvents.EventName), eid = objEvents.EventId })" class="btn btn-danger btn-sm white-t font14 poppinssemibold t-t-u border-radius">
+                                    Cultural Registration
+                                </a>
+                            </span>
+                        </article>
+                    </article>
+                    <article class="clearfix part-4">
+                        &nbsp;
+                    </article>
+                </article>
+            }
+            else
+            {
+                <article class="clearfix l-r-p30">
+                    <span class="pull-right t-m30n">
+                        <a onclick="LoginShow();" class="btn btn-danger btn-sm white-t font14 poppinssemibold t-t-u border-radius">
+                            Register Now
+                        </a>
+                    </span>
+                </article>
+            }
+        }
+    }
+    <article class="clearfix part-row">
+        <article class="clearfix part-4">
+            &nbsp;
+        </article>
+        <article class="clearfix part-4">
+            @if (objEvents.IsVIP == true && objEvents.RegistrationStartDate.Date <= DateTime.UtcNow.Date && objEvents.RegistrationEndDate.Date >= DateTime.UtcNow.Date)
+            {
+
+                <article class="clearfix l-r-p30 t-p50">
+                    <span class="t-m30n">
+                        @*<a href="@Url.Action("CulturalRegistration", "Event", new { EventName = WATS.BLL.Common.EncodeURL(@objEvents.EventName), eid = objEvents.EventId })" class="btn btn-danger btn-sm white-t font14 poppinssemibold t-t-u border-radius">
+                                Cultural Registration
+                            </a>*@
+                        @if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null && Session["username"] != null)
+                        {
+                            <a href="@Url.Action("CulturalRegistration", "Event", new { EventName = WATS.BLL.Common.EncodeURL(@objEvents.EventName), eid = objEvents.EventId})" class="btn btn-danger btn-sm white-t font14 poppinssemibold t-t-u border-radius">
+                                Cultural Registration
+                            </a>
+                        }
+                        else if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null && Session["choreographername"] != null)
+                        {
+                            <a href="@Url.Action("CulturalRegistration", "Event", new { EventName = WATS.BLL.Common.EncodeURL(@objEvents.EventName), eid = objEvents.EventId, ChoreographerId = ChoreographerId })" class="btn btn-danger btn-sm white-t font14 poppinssemibold t-t-u border-radius">
+                                Cultural Registration
+                            </a>
+                        }
+                        else
+                        {
+                            <a onclick="CulturalShow();" class="btn btn-danger btn-sm white-t font14 poppinssemibold t-t-u border-radius">
+                                Cultural Registration
+                            </a>
+                        }
+                    </span>
+                </article>
+            }
+        </article>
+        <article class="clearfix part-4">
+            &nbsp;
+        </article>
+    </article>
+    <article class="clearfix tablet-p10 p30">
+        <h4 class="font20 Poppins-Regular merunred-t l-h18 b-m10"> Guidelines</h4>
+
+        @if (objCulturalInfo != null && objCulturalInfo.Description != "")
+        {
+            @Html.Raw(objCulturalInfo.Description)
+        }
+    </article>
+    </article>

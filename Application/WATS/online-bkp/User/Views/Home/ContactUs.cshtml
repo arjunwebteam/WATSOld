@@ -1,0 +1,154 @@
+﻿@{
+    ViewBag.Title = "ContactUs";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    WATS.BLL.AppInfo _AppInfo = new WATS.BLL.AppInfo();
+    WATS.Entities.AppInfo objAppInfo = new WATS.Entities.AppInfo();
+
+    int Status = 0;
+    objAppInfo = _AppInfo.GetAppInfoDetails(ref Status);
+    ViewBag.heading = "Contact Us"; 
+    }
+    
+  <script>
+      function EValidate() {
+          if ($('#EName').val() == "") { $('#EName').focus().addClass("validate"); return false; } else { $('#EName').removeClass("validate"); }
+          if ($.trim($('#EEmail').val()) == "") { $('#EEmail').focus().addClass("validate"); return false; } else { $('#EEmail').focus().removeClass("validate"); }
+          if (!Common.CheckEmail($('#EEmail').val())) { $('#EEmail').val(''); document.getElementsByName('Email')[0].placeholder = 'Invalid email address'; $('#EEmail').focus().addClass("validate"); return false; } else { $('#spanEmail').html(''); $('#EEmail').focus().removeClass("validate"); }
+          if ($('#EPhone').val() == "") { $('#EPhone').focus().addClass("validate"); return false; } else { $('#EPhone').focus().removeClass("validate"); }
+          if ($.trim($('#EDescription').val()) == "") { $('#EDescription').focus().addClass("validate"); return false; } else { $('#EDescription').focus().removeClass("validate"); }
+          if ($('#txtCaptcha').val() == '') { $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+          var str = Common.GetCaptcha();
+
+          if ($('#txtCaptcha').val() != str) { $('#txtCaptcha').val(''); document.getElementsByName('ECaptcha')[0].placeholder = 'wrong captcha.'; $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+
+    
+          return true;
+      }
+
+      var specialKeys = new Array();
+      specialKeys.push(8); //Backspace
+      specialKeys.push(9); //Tab
+      specialKeys.push(32); //Space
+      specialKeys.push(46); //Delete
+      specialKeys.push(36); //Home
+      specialKeys.push(35); //End
+      specialKeys.push(37); //Left
+      specialKeys.push(39); //Right    
+
+
+      function onlyAlphabets(e, t) {
+          try {
+              if (window.event) {
+                  var charCode = window.event.keyCode;
+              }
+              else if (e) {
+                  var charCode = e.which;
+              }
+              else { return true; }
+              if ((charCode == 32) || (charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || (specialKeys.indexOf(e.keyCode) != -1 && e.charCode != e.keyCode))
+                  return true;
+              else
+                  return false;
+          }
+          catch (err) {
+              alert(err.Description);
+          }
+      }
+
+      function CreloadCaptcha() {
+          document.getElementById('CUcaptcha').src = document.getElementById('CUcaptcha').src + '/';
+      }
+     
+
+</script>  
+<script>
+    function phonenochange(event) {
+        if (event.keyCode == 8 || event.keyCode == 46) {
+        }
+        else {
+            var ph = $('#EPhone').val();
+            if (ph.length == 3) { $('#EPhone').val(ph + '-'); }
+            if (ph.length == 7) { $('#EPhone').val(ph + '-'); }
+        }
+    }
+</script>
+    
+   
+
+         <article class="clearfix border t-m1 Poppins-Regular font14 l-h24 black-t" style="min-height:1150px;">
+                    <article class="clearfix curve position-r t-m4n b-p15">
+     <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">Contact<span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16"> Us</span></h2></article>
+     <article class="clearfix p30 t-p15 tabhorizontal-p10">
+<article class="clearfix part-row">
+<article class="part-5">
+<article class="clearfix r-m15 mobile-r-m0">
+<h4 class="font20 Poppins-Regular merunred-t l-h18 t-m0 border-b dashborder-b b-p5">Address</h4>
+<article class="clearfix t-p3 mobile-b-p5">
+<article class="clearfix b-p5 l-h20 tabhorizontal-b-p0 tablet-b-p0"><strong class="black-t">Washington Telugu Samithi (WATS)</strong><br>
+@objAppInfo.CompanyAddress <br />
+@objAppInfo.CustomerCareNumber<br/< />
+    @objAppInfo.TollFreeNumber<br />
+ 1171 Bellevue Way NE,<br />
+Bellevue, WA 98004.
+   
+
+</article>
+<label class="clearfix Poppins-Regular font14 l-h12 tabhorizontal-b-m0"> <img class="r-m5" alt="Cal" src="Content/images/phone-icon1.png" width="21" height="15" border="0"> <a class="black-t" >@objAppInfo.CompanyPhone</a></label>
+<label class="clearfix Poppins-Regular font14 l-h12 tabhorizontal-b-m0"> <img class="r-m5" alt="Email" src="Content/images/email1.png" width="21" height="15" border="0"> <a class="black-t" href="mailto:@objAppInfo.CompanyEmail">@objAppInfo.CompanyEmail</a></label>
+</article>
+</article>
+</article>
+<article class="part-7 mobile-t-p10">
+<h4 class="font20 Poppins-Regular merunred-t l-h18 t-m0 border-b dashborder-b b-p5">Enquiry Form</h4>
+<article class="clearfix t-p5 b-p10">
+     @using (Html.BeginForm("ContactUs", "Home", FormMethod.Post, new { enctype = "multipart/form-data", @class = "validation" }))
+                        {
+<article class="clearfix part-row b-p1">
+<article class="part-12">
+<article class="clearfix mobile-r-p0">
+<input id="EName" name="Name" placeholder="Name*"  class="form-control b-m10" onkeypress="return onlyAlphabets(event,this);" type="text">
+</article>
+</article>
+
+</article>
+<article class="clearfix part-row b-p1">
+<article class="part-6">
+<article class="clearfix r-p5 mobile-r-p0">
+<input id="EEmail" name="Email" placeholder="Email*" class="form-control b-m10" type="text">
+</article>
+</article>
+<article class="part-6">
+<article class="clearfix l-p5 mobile-l-p0">
+<input id="EPhone" name="PhoneNo" placeholder="Phone No*" onkeypress="phonenochange(event); return Common.isNumberKey(event);" maxlength="12" class="form-control b-m10" type="text">
+</article>
+</article>
+</article>
+<textarea cols="4" rows="3" placeholder="Comments" id="EDescription" name="Description" onkeypress="return onlyAlphabets(event,this);" class="form-control b-m10" style="border-radius:2px;"></textarea>
+      <article class="clearfix t-p10 sm-row mobile-t-b-p10">
+                    <article class="sm-4">
+                        <article class="clearfix r-p10 tabhorizontal-r-p5 mobilev-r-p0">
+                            <input placeholder="Security Code" class="form-control" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" id="txtCaptcha" name="ECaptcha" type="text" />
+                            <span class="field-validation-error" id="spanCaptcha"></span>
+                        </article>
+                    </article>
+                    <article class="sm-8">
+                        <article class="clearfix l-p10 tabhorizontal-l-p5 mobilev-l-p0">
+                            <img alt="Captcha" width="91" border="0" height="33" id="CUcaptcha" src="Members/ShowCaptchaImage" style="min-height: 38px!important;" />
+                            <a href="javascript:CreloadCaptcha();">
+                                <img src="Content/images/refresh.png" alt="Refresh" width="33" border="0" height="33" /></a>
+                        </article>
+                    </article>
+                </article>
+
+<article class="clearfix b-p10 f-r tablet-t-b-p5 mobile-t-b-p0">
+<input value="Submit" class="btn btn-danger btn-large font18 poppinssemibold t-t-u border-radius0" type="submit" onclick="return EValidate();">
+</article>
+                        }
+</article>
+</article>
+</article>
+<article class="clearfix thumbnail white-bg t-m10 b-m0">
+<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2689.8371844631533!2d-122.20319038476369!3d47.60985547918489!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x54906c7dc1eab23b%3A0xb43ecafef216f40b!2sJack+in+the+Box!5e0!3m2!1sen!2sin!4v1489584032591" width="100%" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>
+</article>
+</article>
+             </article>

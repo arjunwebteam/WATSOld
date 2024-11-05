@@ -1,0 +1,233 @@
+﻿@{
+    ViewBag.Title = "Category";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    
+    <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+    <li class="active">Sponsors Categories</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+</ul></div>
+<!-- end breadcumb -->
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#wSponsors').addClass('active');
+        $('#AddSponsorCategory').dialog
+           ({
+               autoOpen: false,
+               width: 450,
+               modal: true
+           });
+    });
+
+    function sortresult(sortcolumn) {
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        PagerClickBind();
+    }
+
+    function Onload(Pageno) {
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+        var Search = $('#txtsearch').val();
+
+        $.ajax({
+            url: '@Url.Action("SponsorCategoriesList", "Sponsors")',
+            type: 'GET',
+            cache: false,
+            data: { Search: Search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items },
+            success: function (result) {
+                $('#divSponsorCatrgory').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+
+    function EditSponsorCategory(SponsorCategoryId) {
+        $.ajax({
+            url: '@Url.Action("EditSponsorCategory", "Sponsors")',
+            type: 'POST',
+            data: { SponsorCategoryId: SponsorCategoryId },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objSponsor = result.data;
+                    $('#CategoryName').val(objSponsor.CategoryName);
+                    $('#SponsorCategoryId').val(objSponsor.SponsorCategoryId);
+                    $('#AddSponsorCategory').dialog("open");
+                    $('#lbltitle').html('Edit Sponsor');
+
+                    $('#spanCategoryName').html('');
+                    $('#CategoryName').focus().removeClass("red-border");
+                }
+                else {
+                    $('#divmessage').val(result.data);
+                }
+            }
+        });
+    }
+
+    function SponsorSave() {
+        if (Validate()) {
+            var objSponsor = {};
+            objSponsor.SponsorCategoryId = $('#SponsorCategoryId').val();
+            objSponsor.CategoryName = $('#CategoryName').val();
+
+            $.ajax({
+                url: '@Url.Action("AddSponsorCategory", "Sponsors")',
+                type: 'POST',
+                data: JSON.stringify(objSponsor),
+                datatype: "JSON",
+                contentType: 'application/json',
+                success: function (result) {
+                    if (result.ok) {
+                        $("#divmessage").html(result.data);
+                        Onload($('#hdnPageNo').val());
+
+                        $("#AddSponsorCategory").dialog("close");
+                    }
+                    else {
+                        $("#spanCategoryName").html(result.data);
+                    }
+                }
+            });
+        }
+    }
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            Onload($(this).text());
+        });
+    }
+
+    function Add() {
+        clearSponsor();
+        $("#AddSponsorCategory").dialog("open");
+        $('#lbltitle').html('Add Category');
+    }
+
+    function clearSponsor() {        
+        $('#CategoryName').val('');
+        $('#SponsorCategoryId').val('');
+        $('#spanCategoryName').html('');
+        $('#CategoryName').focus().removeClass("red-border");
+
+    }
+    function Validate() {
+        if ($('#CategoryName').val() == "") { $('#spanCategoryName').html('Required.'); $('#CategoryName').focus().addClass("red-border"); return false; } else { $('#spanCategoryName').html(''); $('#CategoryName').focus().removeClass("red-border"); }
+        return true;
+    }
+
+    function ClearSearch() {
+        $('#txtsearch').val('');
+        Onload(1);
+    }
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+        PagerClickBind();
+    });
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="SponsorCategoryId" />
+<input id="hdnsortorder" type="hidden" value="ASC" />
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r spcT_b">
+                    <a href="@Url.Action("Index", "Sponsors")">← back to Sponsors</a><br>
+                    <a class="btn btn-primary coursesMenu" onclick="Add();">Add Category</a>
+                </div>
+                <h3 class="title">Sponsors Categories</h3>
+                                 @Html.Partial("WebsiteMenu")
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div class="grayBackground nobL nobR">
+                            <div id="filterReg" class="ui-accordion">
+                                <h4><b>Search</b></h4>
+                                <div>
+                                    <div class="filedsetInner clearfix">
+                                        <div class="row-fluid">                                            
+                                            <div class="span4">
+                                                <label>Search </label>
+                                                <input type="text" name="txtsearch" id="txtsearch" style="width: 100%;" value="" placeholder="Category Name" />
+                                            </div>
+                                            <div class="span3">
+                                                <button class="btn btn-primary filterAction" onclick="Onload(1);">Search</button>
+                                                <a class="btn btn-inverse filterAction wC" onclick="ClearSearch();">Clear</a>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="divmessage">
+                            @if (TempData["message"] != null)
+                            { @Html.Raw(TempData["message"].ToString())}
+
+                            @if (ViewBag.message != null)
+                            { @Html.Raw(ViewBag.message.ToString())}
+                        </div>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="divSponsorCatrgory">
+                            @{Html.RenderAction("SponsorCategoriesList", "Sponsors");}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="AddSponsorCategory" style="display: none;">
+    <input type="hidden" id="SponsorCategoryId" name="SponsorCategoryId" value="0" />
+    <div class="dialog-title"><span id="lbltitle"></span></div>
+    <div class="dialog-content">
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span5">Category Name :<span class="red-t">*</span></div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="CategoryName" name="CategoryName">
+                    <span class="field-validation-error" id="spanCategoryName"></span>
+                </div>
+            </div>
+            <div class="clearfix t-r t-p5">
+                <input type="submit" class="btn btn-primary font-w7" value="Submit" onclick="javascript: SponsorSave();" />
+                <a class="btn font-w7" onclick=" $('#AddSponsorCategory').dialog('close')">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>

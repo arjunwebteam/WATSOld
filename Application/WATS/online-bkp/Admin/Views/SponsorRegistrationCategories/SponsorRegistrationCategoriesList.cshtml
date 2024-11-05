@@ -1,0 +1,128 @@
+﻿@{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+    List<WATS.Entities.SponsorRegistrationCategories> lstSponsorRegistrationCategory = ViewBag.lstSponsorRegistrationCategory;    
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+
+    function SponsorRegistrationCategoryStatus(SponsorRegistrationCategoryId) {
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SponsorRegistrationCategoryStatus", "SponsorRegistrationCategories")', // the URL of the controller action method
+            data: { SponsorRegistrationCategoryId: SponsorRegistrationCategoryId }, // optional data
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    SponsorRegistrationCategoryBind($('#hdnPageNo').val());
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                }
+            }
+        });
+    }
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div> 
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+                <thead>
+                    <tr>
+                        <th width="44" align="center">S.No.</th>
+                        <th><a onclick="javascript:sortresult('CategoryName');" class="white-t-u">Category Name @if (sortcolumn == "CategoryName")
+                                                                                                                    {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</a></th>
+
+                      @*  <th><a onclick="javascript:sortresult('BannerDisplay');" class="white-t-u">Display Banner @if (sortcolumn == "BannerDisplay")
+                                                                                                                    {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</a></th>
+
+                        <th><a onclick="javascript:sortresult('DinnerTickets');" class="white-t-u">Dinner Tickets @if (sortcolumn == "DinnerTickets")
+                                                                                                                    {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</a></th>*@
+                        <th><a onclick="javascript:sortresult('EventName');" class="white-t-u">EventName @if (sortcolumn == "EventName")
+                                                                                                                    {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</a></th>
+
+                       <th><a onclick="javascript:sortresult('Amount');" class="white-t-u">Amount @if (sortcolumn == "Amount")
+                                                                                                                    {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</a></th>
+                        
+                        
+                        <th width="10%">Status</th>
+                        <th width="7%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                     @if (lstSponsorRegistrationCategory.Count != 0)
+                     {
+                         foreach (var item in lstSponsorRegistrationCategory)
+                         { 
+                    <tr>
+                        <td valign="top">@item.RId</td>
+                        <td style="text-align: left">@item.CategoryName</td>
+                        @*<td style="text-align: left">@(item.BannerDisplay == null || item.BannerDisplay == "" ? "N/A" : item.BannerDisplay)</td>
+                        <td style="text-align: left">@(item.DinnerTickets == null || item.DinnerTickets == "" ? "N/A" : item.DinnerTickets)</td>*@
+                        <td style="text-align: left">@(item.EventName == null || item.EventName == "" ? "N/A" : item.EventName)</td>
+                        <td style="text-align: left">@item.Amount</td>
+                        
+                        
+                        <td>
+                                 @{
+                            var isactive = "";
+                            var active = "";
+                            var disable = "";
+                            if (item.IsActive == true)
+                            {
+                                isactive = "Active";
+                                disable = "style=\"cursor: pointer;\" onclick=\"javascript:SponsorRegistrationCategoryStatus(" + item.SponsorRegistrationCategoryId + ");\"";
+                            }
+                            else
+                            {
+                                isactive = "Disabled";
+                                active = "style=\"cursor: pointer;\" onclick=\"javascript:SponsorRegistrationCategoryStatus(" + item.SponsorRegistrationCategoryId + ");\"";
+                            }
+                        <div class="admin-active">@isactive
+                            <ul>
+                                <li><a @Html.Raw(active) >Active</a></li>
+                                <li><a @Html.Raw(disable) >Disabled</a></li>
+                            </ul>
+                        </div>      
+                    }
+                            </td>
+                        <td>
+                            <a title="Edit"onclick="SponsorRegistrationCategoryEdit(@item.SponsorRegistrationCategoryId);" ><i class="icon-pencil"></i></a> 
+                            <a title="Delete" id="10" onclick="javascript:Delete(@item.SponsorRegistrationCategoryId);" class="scdelete"><i class="icon-trash"></i></a> 
+                        </td>
+                    </tr>
+                         }
+                     
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="9">No Records Found.</td>
+                        </tr>
+                    }
+            </table>
+        }
+    </div>
+</div>
+
+@Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

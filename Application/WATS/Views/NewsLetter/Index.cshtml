@@ -1,0 +1,137 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+        PagerClickBind();
+    });
+
+    function sortresult(sortcolumn) {
+
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        Onload($('#hdnPageNo').val());
+    }
+
+    function Onload(Pageno) {
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var pageno = Common.Pageno(Pageno);
+        var search = $('#keyword').val();
+        $.ajax({
+            url: '@Url.Action("NewsLetterList", "NewsLetter")',
+            type: 'GET',
+            cache: false,
+            data: { search: search, PageNo: $('#hdnPageNo').val(), PageItems: $('#pgitems').val(), SortColumn: sortcolumn, SortOrder: sortorder },
+            success: function (result) {
+                $('#divNewsLetterList').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            Onload($(this).text());
+        });
+    }
+    function SearchClear() {
+        $('#txtsearch').val(' ');
+        Onload(1);
+    }
+    function ClearSearch() {
+        $('#keyword').val('');
+        $('#hdnPageNo').val(1);
+        Onload(1);
+    }
+
+    function ExporttoExcel() {
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var Search = $('#keyword').val();
+
+        window.location.href = "NewsLetter/NewsLetterExporttoExcel?Search=" + Search + "&SortColumn=" + sortcolumn + "&SortOrder=" + sortorder ;
+
+    }
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="RegisteredDate" />
+<input id="hdnsortorder" type="hidden" value="DESC" />
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+<ul class="breadcrumb">
+        <li><a href="@Url.Action("Index", "Home")">Home</a> <span class="divider">/</span></li>
+        <li class="active t-t-c">News Letter Subscribers</li>
+    </ul>
+    </div>
+<!--end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r">
+                    <div align="right" style="padding-bottom: 5px;"><a onclick="ExporttoExcel();">Export Details to Excel</a></div>
+                </div>
+                <h3 class="title">News Letter Subscribers</h3>
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="divmessage">
+                            @if (TempData["message"] != null)
+                            { @Html.Raw(TempData["message"].ToString())}
+
+                            @if (ViewBag.message != null)
+                            { @Html.Raw(ViewBag.message.ToString())}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+            <td height="50">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>
+                            <strong>Keyword :</strong>
+                            <input type="text" name="keyword" id="keyword" class="input coursesMenu" style="width: 200px" value="" />
+                            &nbsp;
+                  <input type="button" onclick="javascript: Onload(1);" name="register" value="Search" id="Button1" class="btn btn-primary" />
+                            <a class="btn btn-inverse" onclick="javascript: ClearSearch();">Clear</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+                <tr>
+                    <td>
+                        <div id="divNewsLetterList">
+                            @{Html.RenderAction("NewsLetterList", "NewsLetter");}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+

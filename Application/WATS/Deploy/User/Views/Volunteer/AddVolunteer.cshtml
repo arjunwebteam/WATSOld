@@ -1,0 +1,403 @@
+﻿@{
+    ViewBag.Title = "AddVolunteer";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    ViewBag.heading = "Volunteer";
+    List<WATS.Entities.Events> lstEvents = ViewBag.lstEvents;
+    List<WATS.Entities.VolunteerCategories> lstVolunteerCategory = ViewBag.lstVolunteerCategory;
+    Int64 EventId = ViewBag.EventId;
+    Int64 VolunteerCategoryId = ViewBag.VolunteerCategoryId;
+}
+
+<script src="Scripts/countries.js" type="text/javascript"></script>
+<script>
+    $(document).ready(function () {
+        print_country("Country"); 
+        $("#Country").change(function () {
+            print_state('State', $('#Country').val());
+        });
+    });
+
+</script>
+<script type="text/javascript">
+
+    function CheckEmailAvailability(email) {
+
+        var returnval = null;
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CheckEmailAvailability", "Volunteer")', // the URL of the controller action method
+            data: { Email: email }, // optional data
+            datatype: "JSON",
+            async: false,
+            success: function (result) {
+                if (result.ok) {
+                    returnval = result.data;
+                }
+            }
+        });
+        return returnval;
+    }
+
+    function Validate() {
+
+        if (@EventId != 0) {
+            if ($('#EventId').val() == "") { $('#EventId').focus().addClass("validate"); $('#spanEventId').show().html('Select Event.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanEventId').hide().html(''); $('#EventId').focus().removeClass("validate"); }
+        }
+        if ($.trim($('#FirstName').val()) == '') { $('#FirstName').focus().addClass("validate"); return false; } else { $('#FirstName').focus().removeClass("validate"); }
+        if ($.trim($('#LastName').val()) == '') { $('#LastName').focus().addClass("validate"); return false; } else { $('#LastName').focus().removeClass("validate"); }
+        if ($('#Email').val() == "") { $('#Email').focus().addClass("validate"); return false; } else { $('#Email').removeClass("validate"); }
+        if (!Common.CheckEmail($('#Email').val())) { $('#Email').val(''); document.getElementsByName('Email')[0].placeholder = 'Invalid email address'; $('#Email').focus().addClass("validate"); return false; } else { $('#Email').removeClass("validate"); }
+        if (!CheckEmailAvailability($.trim($('#Email').val()))) { $('#Email').val(''); document.getElementsByName('Email')[0].placeholder = 'Email already exist.'; $('#Email').focus().addClass("validate"); return false; } else { $('#Email').removeClass("validate"); }
+        if ($('#EPhone').val() == "") { $('#EPhone').focus().addClass("validate"); return false; } else { $('#EPhone').focus().removeClass("validate"); }
+       @* if ($('#SchoolName').val() == '') { $('#SchoolName').focus().addClass("validate"); return false; } else { $('#SchoolName').focus().removeClass("validate"); }
+        if ($('#GradeinSchool').val() == "") { $('#GradeinSchool').focus().addClass("validate"); $('#lblGradeinSchool').show().html('Select GradeinSchool.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#lblGradeinSchool').hide().html(''); $('#GradeinSchool').focus().removeClass("validate"); }
+
+        if ($('#GradeinSchool').val() == '') { $('#GradeinSchool').focus().addClass("validate"); return false; } else { $('#GradeinSchool').focus().removeClass("validate"); }
+        if ($('#Age').val() == '') { $('#Age').focus().addClass("validate"); return false; } else { $('#Age').focus().removeClass("validate"); }
+        if ($('#Notes').val() == '') { $('#Notes').focus().addClass("validate"); return false; } else { $('#Notes').focus().removeClass("validate"); }
+        if ($('#Profile').val() == '') { $('#Profile').focus().addClass("validate"); return false; } else { $('#Profile').focus().removeClass("validate"); }
+        if ($('#CompanyName').val() == '') { $('#CompanyName').focus().addClass("validate"); return false; } else { $('#CompanyName').focus().removeClass("validate"); }
+        if ($('#Designation').val() == '') { $('#Designation').focus().addClass("validate"); return false; } else { $('#Designation').focus().removeClass("validate"); }
+        if ($('#HoursSpent').val() == '') { $('#HoursSpent').focus().addClass("validate"); return false; } else { $('#HoursSpent').focus().removeClass("validate"); }*@
+    
+        if ($('#txtCaptcha').val() == '') { $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+        var str = Common.GetCaptcha();
+
+        if ($('#txtCaptcha').val() != str) { $('#txtCaptcha').val(''); document.getElementsByName('VCaptcha')[0].placeholder = 'wrong captcha.'; $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+
+        $('#Loading').show();
+        $('#submitbtn').hide();
+        return true;
+    }
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    specialKeys.push(9); //Tab
+    specialKeys.push(32); //Space
+    specialKeys.push(46); //Delete
+    specialKeys.push(36); //Home
+    specialKeys.push(35); //End
+    specialKeys.push(37); //Left
+    specialKeys.push(39); //Right
+
+    function CreloadCaptcha() {
+        document.getElementById('CUcaptcha').src = document.getElementById('CUcaptcha').src + '/';
+    }
+    function ResetValidateClass() {
+        $('#Name').removeClass("validate");
+
+        $('#Email').removeClass("validate");
+
+
+        $('#txtCaptcha').removeClass("validate");
+
+    }
+
+    function onlyAlphabets(e, t) {
+        try {
+            if (window.event) {
+                var charCode = window.event.keyCode;
+            }
+            else if (e) {
+                var charCode = e.which;
+            }
+            else { return true; }
+            if ((charCode == 32) || (charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || (specialKeys.indexOf(e.keyCode) != -1 && e.charCode != e.keyCode)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        catch (err) {
+            alert(err.Description);
+        }
+    }
+    function phonenochange(event) {
+        if (event.keyCode == 8 || event.keyCode == 46) {
+        }
+        else {
+            var ph = $('#EPhone').val();
+            if (ph.length == 3) { $('#EPhone').val(ph + '-'); }
+            if (ph.length == 7) { $('#EPhone').val(ph + '-'); }
+        }
+    }
+
+  
+
+    function checkhide() {
+     
+        $('#PaymentBy').show();
+        $('#check').hide();
+        $('#PaymentMethod').val('PayPal');
+        $('#Youthdiv').show();
+    }
+    function checkshow() {
+      
+        $('#PaymentBy').show();
+        $('#check').show();
+        $('#PaymentMethod').val('Cash/Cheque');
+        $('#Youthdiv').hide();
+    }
+
+    function CompanyChange() {
+        var Employer = $('#CompanyName').val();
+        if (Employer == 'Other') {
+            $('#Othershow').show();
+        }
+        else {
+            $('#Othershow').hide();
+        }
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#Mcontact-us').addClass('active');
+    });
+    </script>
+
+
+
+
+<input type="hidden" value="1" id="hdnRowCount" />
+<article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height:1150px;">
+    <article class="clearfix curve position-r t-m4n b-p15">
+        <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">Volunteer <span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16">Registration</span></h2>
+    </article>
+    @using (Html.BeginForm("AddVolunteerRegistration", "Volunteer", FormMethod.Post, new { enctype = "multipart/form-data", @class = "validation" }))
+    {
+
+<article class="clearfix p30 t-p15 tabhorizontal-p10 l-r-m-auto" style="max-width: 670px;">
+    <article class="clearfix part-row b-p10 mobile-b-p0">
+        <article class="clearfix part-6">
+            <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 t-p20 black-t1 b-m2">First Name <span class="red-t">*</span> </label>
+            <article class="mobile-r-p0 r-p10">
+                <input type="text" class="form-control" name="FirstName" placeholder="First Name *" id="FirstName" onkeypress="return onlyAlphabets(event,this);">
+            </article>
+        </article>
+        <article class="clearfix part-6">
+            <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 t-p20 black-t1 b-m2">Last Name <span class="red-t">*</span> </label>
+            <article class="mobile-l-p0">
+                <input type="text" class="form-control" name="LastName" placeholder="Last Name *" id="LastName" onkeypress="return onlyAlphabets(event,this);">
+            </article>
+        </article>
+
+    </article>
+
+    <article class="clearfix part-row b-p10 mobile-b-p0">
+
+        <article class="clearfix part-6">
+            <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26  black-t1 b-m2">Email <span class="red-t">*</span> </label>
+            <article class="mobile-r-p0 r-p10">
+                <input type="text" class="form-control" name="Email" placeholder="Email *" id="Email">
+            </article>
+        </article>
+        <article class="clearfix part-6">
+            <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26  black-t1 b-m2">Phone No <span class="red-t">*</span> </label>
+            <article class="mobile-l-p0">
+                <input type="text" class="form-control" name="PhoneNo" placeholder="PhoneNo *" id="EPhone" onkeypress="phonenochange(event); return Common.isNumberKey(event);" maxlength="12">
+            </article>
+        </article>
+
+    </article>
+
+
+
+
+
+    <article class="clearfix part-row b-p10 mobile-b-p0">
+        @if (EventId != 0)
+        {
+            <article class="clearfix part-6 position-r">
+                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26  black-t1 b-m2">Select an event you would like to Volunteer <span class="red-t">*</span> </label>
+                <article class="mobile-r-p0 r-p10">
+                    <article class="clearfix dropdown" style="background-color: #fefefe;border-color: #e2e2e2;border-radius: 2px">
+                        @if (lstEvents.Count != 0)
+                        {
+                            <select class="dropdown-select" name="EventId" id="EventId" style="min-height: 44px; font-family:'Poppins-Regular'; font-size: 13px!important; color: #4a4a4a;">
+                                <option value="">Choose</option>
+                                @foreach (var item in lstEvents)
+                                {
+                                    <option @(EventId == item.EventId ? "selected='selected" : "") value="@item.EventId">@item.EventName</option>
+                                }
+                            </select>
+                        }
+                    </article>
+                    <span class="error3" id="spanEventId"></span>
+                </article>
+            </article>
+        }
+        else
+        {
+            <article class="clearfix part-6 position-r">
+                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26  black-t1 b-m2">Volunteer Category <span class="red-t">*</span> </label>
+
+                <article class="clearfix r-m5 mobile-r-m0">
+                    <article class="clearfix dropdown" style="background-color: #fefefe;border-color: #e2e2e2;border-radius: 3px">
+                        @if (lstVolunteerCategory.Count != 0)
+                        {
+                            <select class="dropdown-select" name="VolunteerCategoryId" id="VolunteerCategoryId" style="min-height: 44px; font-family:'Poppins-Regular'; font-size: 13px!important; color: #4a4a4a;">
+                                <option value="">Choose</option>
+                                @foreach (var item in lstVolunteerCategory)
+                                {
+                                    <option @(VolunteerCategoryId == item.VolunteerCategoryId ? "selected='selected" : "") value="@item.VolunteerCategoryId">@item.CategoryName</option>
+                                }
+                            </select>
+                        }
+                    </article>
+                    <span class="error3" id="spanVolunteerCategoryId"></span>
+                </article>
+            </article>
+        }
+    </article>
+
+
+
+    <article class="clearfix part-row b-p10 mobile-b-p0">
+        <article class="clearfix part-6">
+            <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26  black-t1 b-m2">Address <span class="red-t">*</span> </label>
+            <article class="mobile-r-p0 r-p10">
+                <textarea class="form-control" name="address" placeholder="Address" id="address"></textarea>
+            </article>
+        </article>
+        <article class="clearfix part-6">
+            <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26  black-t1 b-m2">Comment <span class="red-t">*</span> </label>
+            <article class="mobile-l-p0 l-p0">
+                <textarea class="form-control" name="Comment" placeholder="Comment" id="Comment"></textarea>
+            </article>
+        </article>
+
+    </article>
+
+
+
+    <article class="clearfix row-fluid">
+        <article class="clearfix span10">
+            <article class="clearfix part-row">
+                <article class="clearfix part-6">
+                    <label class="font16 dkdark-t radiostyle b-m0">
+                        <input value="1" name="pmethod" checked="checked" onclick="checkhide();" type="radio">
+                        <span class="dis-in" for="radio1">Youth </span>
+                    </label>
+                </article>
+                <article class="clearfix part-6">
+                    <label class="font16 dkdark-t radiostyle b-m0">
+                        <input value="0" name="pmethod" onclick="checkshow();" type="radio">
+                        <span class="dis-in" for="radio1">Adult</span>
+                    </label>
+                </article>
+            </article>
+        </article>
+    </article>
+
+
+
+    <article style="display: none;" class="Poppins-Regular font14 dk-t l-h22" id="check">
+        <article class="clearfix border2 border-radius4 t-b-m10 p10 l-m5 shadow" style="border-color:#17275d;">
+            <article class="clearfix part-row b-p10  mobile-b-p0">
+
+                <article class="clearfix part-6">
+                    <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26  black-t1 b-m2">Company Name  </label>
+                    <article class="mobile-r-p0 r-p10">
+                        <select lass="dropdown-select ui-select" name="CompanyName" id="CompanyName" onchange="CompanyChange();" class="form-control">
+                            <option value="">--Select Company--</option>
+                            <option value="Microsoft Corporation">Microsoft Corporation</option>
+                            <option value="Boeing">Boeing</option>
+                            <option value="Salesforce">Salesforce</option>
+                            <option value="T-Mobile">T-Mobile</option>
+                            <option value="Expedia">Expedia</option>
+                            <option value="Alakska Airlines">Alakska Airlines</option>
+                            <option value="Service Now">Service Now</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </article>
+                </article>
+                <article class="clearfix part-6">
+                    <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26  black-t1 b-m2">Notes </label>
+                    <article class="mobile-l-p0">
+                        <input type="text" id="Notes" name="Notes" placeholder="Notes" class="form-control">
+                    </article>
+                </article>
+            </article>
+
+
+            <article class="clearfix part-row t-p5">
+                <article class="part-6 t-b-p5 position-r">
+                    <article class="clearfix r-p10 tabhorizontal-r-p5 mobile-l-p0" id="Othershow" style="display:none;">
+                        <label>Other<span class="red-t">*</span></label>
+                        <input type="text" id="CName" name="CName" class="form-control" />
+                    </article>
+                </article>
+
+            </article>
+
+        </article>
+    </article>
+
+
+  
+        <article class="clearfix border2 border-radius4 t-b-m10 p10 l-m5 shadow" id="Youthdiv" style="border-color:#17275d;">
+            <article class="clearfix part-row b-p10 mobile-b-p0">
+
+                <article class="clearfix part-6">
+                    <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26  black-t1 b-m2">School Name  </label>
+                    <article class="mobile-r-p0 r-p10">
+                        <input type="text" class="form-control" name="SchoolName" placeholder="SchoolName " id="SchoolName">
+                    </article>
+                </article>
+                <article class="clearfix part-6">
+                    <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26  black-t1 b-m2">Grade in School <span class="red-t">*</span> </label>
+                    <article class="mobile-r-p0 r-p10">
+                        <div class="span7">
+                            <select name="GradeinSchool" id="GradeinSchool" class="form-control">
+                                <option class="clearfix dropdown" value="">--Select Grade--</option>
+                                <option value="Grade 1">Grade 1</option>
+                                <option value="Grade 2">Grade 2</option>
+                                <option value="Grade 3">Grade 3</option>
+                                <option value="Grade 4">Grade 4</option>
+                                <option value="Grade 5">Grade 5</option>
+                                <option value="Grade 6">Grade 6</option>
+                                <option value="Grade 7">Grade 7</option>
+                            </select>
+                            <span class="field-validation-error" id="lblGradeinSchool"></span>
+                        </div>
+                    </article>
+                </article>
+
+            </article>
+
+        </article>
+   
+
+
+        <article class="clearfix part-row b-p5 t-p15 mobile-b-p0">
+
+            <article class="part-8">
+                <article class="clearfix sm-row b-m5">
+                    <article class="sm-5">
+                        <article class="clearfix">
+                            <input type="text" placeholder="Security Code" class="form-control" id="txtCaptcha" name="VCaptcha">
+                        </article>
+                    </article>
+                    <article class="sm-7 mobilev-t-p0">
+                        <article class="clearfix l-m10 mobilev-l-m0 mobilev-t-p10">
+                            <img alt="Captcha" id="CUcaptcha" src="Members/ShowCaptchaImage" width="91" height="33" border="0" style="min-height:38px;">
+                            <a class="l-m10" href="javascript:CreloadCaptcha();">
+                                <img width="33" border="0" height="33" title="Refresh" src="Content/images/refresh.png" alt="Refresh">
+                            </a>
+
+                        </article>
+                    </article>
+                </article>
+            </article>
+            <article class="part-4 t-r t-p5">
+                <input type="submit" value="Submit" id="submitbtn" style="height: 48px; line-height: 12px; border-radius: 2px; width: 135px;" onclick="return Validate();" class="btn btn-danger btn-large font18 poppinssemibold t-t-u border-radius">
+            </article>
+        </article>
+
+
+    </article>
+    }
+</article>

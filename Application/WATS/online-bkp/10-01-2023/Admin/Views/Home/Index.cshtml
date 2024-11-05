@@ -1,0 +1,22 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+<script>
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+    });
+</script>
+    <div id="maincontainer">
+        <div class="mainContent">
+                @Html.Partial("MainMenu", "SuperAdmin")
+@Html.Partial("LeftMenu", "SuperAdmin")
+            <div class="pageHeadingBlock ">
+                <div class="grayBackground">
+                    
+                    <h3 class="title">Page will update soon</h3>
+                    
+                </div>
+            </div>
+            </div></div>
+

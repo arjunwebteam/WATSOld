@@ -1,0 +1,173 @@
+﻿@using System.Configuration
+@{
+    ViewBag.Title = "SendMail";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    List<WATS.Entities.MailTemplates> lstMailTemplate = ViewBag.lstMailTemplate;
+}
+
+<script type="text/javascript" src="ckeditor/ckeditor.js"></script>
+<script type="text/javascript" src="ckfinder/ckfinder.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#MSendmail').addClass('active');
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+    });
+
+    function Validate() {
+        if ($('#EmailFrom').val() == '') { $('#spanEmailFrom').html('Required.'); $('#EmailFrom').focus(); return false; } else { $('#spanEmailFrom').html(''); }
+        if ($('#EmailTo').val() == '') { $('#spanEmailTo').html('Required.'); $('#EmailTo').focus(); return false; } else { $('#spanEmailTo').html(''); }
+        if ($('#MailTemplateId').val() == "") { $('#MailTemplateId').focus(); $('#spanMailTemplateId').html('Required.'); return false; } else { $('#spanMailTemplateId').html(''); }
+        if ($('#Subject').val() == "") { $('#Subject').focus(); $('#spanSubject').html('Required.'); return false; } else { $('#spanSubject').html(''); }
+
+        if (CKEDITOR.instances.description.getData() == "") { $('#description').focus(); $('#spandescription').html('Required.'); return false; } else { $('#description').val(CKEDITOR.instances.description.getData()); $('#spandescription').html(''); }
+        return true;
+    }
+
+    function MailTemplate() {
+        $.ajax({
+            url: '@Url.Action("MailTemplate", "Home")',
+            type: 'POST',
+            data: { MailTemplateName: $('#MailTemplateName').val() },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objMailTemplate = result.data;
+                    $('#description').val(objMailTemplate.Description);
+                    CKEDITOR.instances.description.setData(objMailTemplate.Description)
+                }
+                else {
+                    alert(result.data);
+                }
+            }
+        });
+    }
+</script>
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+
+        <li class="active">Send Mail</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                
+                <h3 class="title">Send Mail</h3>
+            </div>
+        </div>
+        <div class="clearfix sepH_c"></div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            { @Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            { @Html.Raw(ViewBag.message.ToString())}
+        </div>
+
+
+
+        @using (Html.BeginForm("Send", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+                                                
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Send Mail Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            
+                            <div class="row-fluid">
+                                <div class="span8">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Email From :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <span class="b-p5"><b>@ConfigurationManager.AppSettings["adminemailid"].ToString()</b></span>
+                                                <span class="field-validation-error" id="spanEmail"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Email To :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                 <input type="text" value="@ViewBag.Email" style="width: 400px"  class="inputstyle" name="EmailTo" id="EmailTo">                                                
+                                                <span id="spanEmailTo" class="field-validation-error"></span>
+                                                <br>
+                                               <p style="width:400px;">[ If multiple mails, separate by (,) comma ]</p> 
+                                            </div>
+                                        </div>
+                                         <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Subject :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" style="width: 400px"  class="inputstyle" name="Subject" id="Subject">                                                
+                                                <span id="spanSubject" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Choose Notification :</label>
+                                                </div>
+                                            <div class="span6">
+                                                <select onchange="MailTemplate();" class="inputstyle" name="MailTemplateName" id="MailTemplateName">
+                                                    <option value="">Select</option>
+                                                    @if (lstMailTemplate != null)
+                                                    {
+                                                        foreach (var item in lstMailTemplate)
+                                                        { 
+                                                        <option @(ViewBag.TemplateName == item.Heading ? "selected=selected" : null) value="@item.Heading">@item.Heading</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <span id="spanMailTemplateId" class="field-validation-error"></span>
+                                            </div>
+                                        </div>                                       
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Description</b><span style="font-size: 12px;" class="red-t">*</span></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <textarea rows="10" name="Description" id="description" cols="80" style="visibility: hidden; display: none;"></textarea>
+                            <span id="spandescription" class="field-validation-error"></span>
+                            <script type="text/javascript">
+                                CKEDITOR.replace('description', { contentsCss: '../css/editor.css' });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <div class="actionButtons">
+                    <input type="submit" onclick="return Validate();" class="btn btn-primary" value="Submit">
+                    @*<input type="submit" disabled="disabled" class="btn btn-primary" value="Submit">*@
+                    <a class="btn btn-inverse" href="javascript:history.back()">Cancel</a>
+                </div>
+            </div>
+                                                
+        }
+    </div>
+</div>

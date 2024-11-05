@@ -1,0 +1,371 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    List<WATS.Entities.DonationCategories> lstDonationCategories = ViewBag.lstDonationCategories;
+}
+<script>
+    function Validate() {
+        if ($.trim($('#FirstName').val()) == '') { $('#FirstName').focus().addClass("validate"); return false; } else { $('#FirstName').focus().removeClass("validate"); }
+        if ($.trim($('#LastName').val()) == '') { $('#LastName').focus().addClass("validate"); return false; } else { $('#LastName').focus().removeClass("validate"); }
+        if ($('#Email').val() == "") { $('#Email').focus().addClass("validate"); return false; } else { $('#Email').removeClass("validate"); }
+        if (!Common.CheckEmail($('#Email').val())) { $('#Email').val(''); document.getElementsByName('Email')[0].placeholder = 'Invalid email address'; $('#Email').focus().addClass("validate"); return false; } else { $('#Email').removeClass("validate"); }
+        if ($.trim($('#PhoneNo').val()) == '') { $('#PhoneNo').focus().addClass("validate"); return false; } else { $('#PhoneNo').focus().removeClass("validate"); }
+        if ($.trim($('#DonationProgram').val()) == '') { $('#DonationProgram').focus().addClass("validate"); return false; } else { $('#DonationProgram').focus().removeClass("validate"); }
+        if ($.trim($('#DonationCause').val()) == '') { $('#DonationCause').focus().addClass("validate"); return false; } else { $('#DonationCause').focus().removeClass("validate"); }
+        var pmethod = $('#PaymentMethod').val();
+        if (pmethod == 'PayPal') {
+            if ($.trim($('#AmountPayPal').val()) == '') { $('#AmountPayPal').focus().addClass("validate"); return false; } else { $('#AmountPayPal').focus().removeClass("validate"); }
+
+            if (!IsNumeric($("#AmountPayPal").val())) { $('#AmountPayPal').val(''); document.getElementsByName('AmountPayPal')[0].placeholder = 'Please enter valid amount.'; $('#AmountPayPal').focus().addClass("validate"); return false; } else { $('#AmountPayPal').focus().removeClass("validate"); }
+            if ($('#AmountPayPal').val() <= 0) { $('#AmountPayPal').val(''); document.getElementsByName('AmountPayPal')[0].placeholder = 'Please enter valid amount.'; $('#AmountPayPal').focus().addClass("validate"); return false; } else { $('#AmountPayPal').focus().removeClass("validate"); }
+
+            $('#Amount').val($('#AmountPayPal').val());
+        }
+        else if (pmethod == 'Zelle') {
+            if ($.trim($('#AmountZelle').val()) == '') { $('#AmountZelle').focus().addClass("validate"); return false; } else { $('#AmountZelle').focus().removeClass("validate"); }
+
+            if (!IsNumeric($("#AmountZelle").val())) { $('#AmountZelle').val(''); document.getElementsByName('AmountZelle')[0].placeholder = 'Please enter valid amount.'; $('#AmountZelle').focus().addClass("validate"); return false; } else { $('#AmountZelle').focus().removeClass("validate"); }
+            if ($('#AmountZelle').val() <= 0) { $('#AmountZelle').val(''); document.getElementsByName('AmountZelle')[0].placeholder = 'Please enter valid amount.'; $('#AmountZelle').focus().addClass("validate"); return false; } else { $('#AmountZelle').focus().removeClass("validate"); }
+
+            $('#Amount').val($('#AmountZelle').val());
+        }
+
+        //if ($('#CardNumber').val() == "") { $('#CardNumber').focus().addClass("validate"); return false; } else { $('#CardNumber').focus().removeClass("validate"); }
+        //if ($('#CSVMonth').val() == "") { $('#CSVMonth').focus().addClass("validate"); return false; } else { $('#CSVMonth').focus().removeClass("validate"); }
+        //if ($('#CSVYear').val() == "") { $('#CSVYear').focus().addClass("validate"); return false; } else { $('#CSVYear').focus().removeClass("validate"); }
+        //if ($('#Cvv').val() == "") { $('#Cvv').focus().addClass("validate"); return false; } else { $('#Cvv').focus().removeClass("validate"); }
+        if ($('#txtCaptcha').val() == '') { $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+        var str = Common.GetCaptcha();
+        if ($('#txtCaptcha').val() != str) { $('#txtCaptcha').val(''); document.getElementsByName('DCaptcha')[0].placeholder = 'wrong captcha.'; $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+        
+        if (Common.GetCheckBoxValue('Terms') == '')
+        { $('#spanTerms').html('Required.'); returnval = false; } else { $('#spanTerms').html(''); }
+        
+
+        return true;
+    }
+
+    function CreloadCaptcha() {
+        document.getElementById('CUcaptcha').src = document.getElementById('CUcaptcha').src + '/';
+    }
+    function checkhide() {
+        document.getElementById("mailed").checked = false;
+        document.getElementById("rpaymentby").checked = false;
+        $('#PaymentBy').show();
+        $('#check').hide();
+        $('#zellepay').hide();
+        $('#PaymentMethod').val('PayPal');
+        $('#paypaldiv').show();
+    }
+    function checkshow() {
+        document.getElementById("mailed").checked = false;
+        document.getElementById("rpaymentby").checked = true;
+        $('#PaymentBy').show();
+        $('#check').show();
+        $('#zellepay').hide();
+        $('#PaymentMethod').val('Cash/Cheque');
+        $('#paypaldiv').hide();
+    }
+    function zellashow() {
+        document.getElementById("mailed").checked = false;
+        document.getElementById("rpaymentby").checked = true;
+        $('#PaymentBy').show();
+        $('#check').hide();
+        $('#zellepay').show();
+        $('#PaymentMethod').val('Zelle');
+        $('#paypaldiv').hide();
+    }
+    function paymentbyhide() {
+        $('#PaymentBy').val('');
+        $('#PaymentBy').hide();
+    }
+    function paymentbyshow() {
+        $('#PaymentBy').val('');
+        $('#PaymentBy').show();
+    }
+</script>
+<script>
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    specialKeys.push(9); //Tab
+    specialKeys.push(32); //Space
+    specialKeys.push(46); //Delete
+    specialKeys.push(36); //Home
+    specialKeys.push(35); //End
+    specialKeys.push(37); //Left
+    specialKeys.push(39); //Right    
+
+
+    function onlyAlphabets(e, t) {
+        try {
+            if (window.event) {
+                var charCode = window.event.keyCode;
+            }
+            else if (e) {
+                var charCode = e.which;
+            }
+            else { return true; }
+            if ((charCode == 32) || (charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || (specialKeys.indexOf(e.keyCode) != -1 && e.charCode != e.keyCode))
+                return true;
+            else
+                return false;
+        }
+        catch (err) {
+            alert(err.Description);
+        }
+    }
+    
+</script>
+<script>
+    function phonenochange(event) {
+    if (event.keyCode == 8 || event.keyCode == 46) {
+    }
+    else {
+        var ph = $('#PhoneNo').val();
+        if (ph.length == 3) { $('#PhoneNo').val(ph + '-'); }
+        if (ph.length == 7) { $('#PhoneNo').val(ph + '-'); }
+    }
+    }
+
+</script>
+
+
+                 <article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height:1150px;">
+                    <article class="clearfix curve position-r t-m4n b-p15">
+     <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">Donate <span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16">Now</span></h2>
+                    </article>
+                      @using (Html.BeginForm("AddDonor", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                      {
+                       <input type="hidden" name="PaymentMethod" id="PaymentMethod" value="PayPal" />
+                       <input type="hidden" name="Amount" id="Amount" value="" />
+                    <article class="clearfix p30 t-p15 tabhorizontal-p10 l-r-m-auto validation" style="max-width:670px;" >
+                      <article class="clearfix part-row b-p10 mobile-b-p0" >
+                        <article class="part-6" >
+                          <article class="clearfix r-p10 tabhorizontal-r-p5 mobile-r-p0">
+                            <input type="text" class="form-control" placeholder="First Name *"  onclick="ResetValidateClass();" onkeypress="return onlyAlphabets(event, this);" name="FirstName" id="FirstName"/>
+                          </article>
+                        </article>
+                        <article class="part-6" >
+                          <article class="clearfix l-p10 tabhorizontal-l-p5 mobile-l-p0">
+                            <input type="text" class="form-control" placeholder="Last Name *" onkeypress="return onlyAlphabets(event, this);" onclick="ResetValidateClass();" name="LastName" id="LastName" />
+                          </article>
+                        </article>
+                      </article>
+                      <article class="clearfix part-row b-p10 mobile-b-p0">                        
+                        <article class="part-6" >
+                          <article class="clearfix r-p10 tabhorizontal-r-p5 mobile-r-p0">
+                            <input type="text" class="form-control border-radius0" placeholder="Email Id *" name="Email" id="Email" />
+                          </article>
+                        </article>
+                          <article class="part-6">
+                        <article class="clearfix l-p10 tablet-l-p5 mobile-l-p0">                            
+                            <input class="form-control border-radius0" placeholder="Phone No *" name="PhoneNo" id="PhoneNo"  onkeypress="phonenochange(event); return Common.isNumberKey(event);" maxlength="12" type="text">
+                        </article>
+                    </article>
+                      </article>
+                     <article class="part-row b-p10 clearfix">
+                    <article class="part-6">
+                        <article class="clearfix r-p10 tablet-r-p5 mobile-r-p0">                            
+                              <article class="clearfix dropdown">
+                        <select class="dropdown-select ui-select" id="DonationProgram" name="DonationProgram">
+                          <option value="">Donation Cause <span class="font15">*</span></option>
+                            @if (lstDonationCategories != null && lstDonationCategories.Count != 0)
+                                    {
+                                        foreach (var item in lstDonationCategories)
+                                        { 
+                                        <option value="@item.CategoryName">@item.CategoryName</option>
+                                        }
+                                    }
+                        </select>
+                      </article>
+                        </article>
+                    </article>
+                    <article class="part-6">
+                        <article class="clearfix l-p10 tablet-l-p5 mobile-l-p0">                            
+                            <input class="form-control border-radius0" placeholder="Address" name="Address" id="Address" type="text">
+                        </article>
+                    </article>
+                </article>
+                <article class="part-row  b-p10 mobile-l-p0 clearfix">
+                    <article class="part-12">
+                        <article class="clearfix tablet-l-p5 mobile-l-p0">                            
+                           <textarea cols="4" rows="3" placeholder="Comments *" name="DonationCause" id="DonationCause"  class="form-control b-m10" style="border-radius:2px;"></textarea>
+                        </article>
+                    </article>
+                   
+                </article> 
+                <article class="clearfix font13 poppinsregular l-h24 tabhorizontal-p10">
+                    @*<article class="clearfix border2 border-radius10 bluegrayborder t-b-m10 p10 l-m5 shadow" style="border-color:#396dad;">
+             <article class="clearfix part-row">
+             <article class="clearfix part-5">
+             <article class="clearfix l-p10 mobile-l-p0">
+             <h4 class="Poppins-Regular b-m10 t-p10 l-h20 font18 dk-t mobile-t-m0">Amount(<span class="red-t">$</span>)<span class="red-t">*</span></h4>
+
+             <input placeholder="Amount *" id="Amount" name="Amount" onkeypress="return Common.isNumberKey(event);" maxlength="4" style="width:200px;" class="form-control border-radius0" type="text" />
+                          <span id="spanAmount" class="field-validation-error"></span>
+                     </article>
+             </article>
+             <article class="clearfix part-7">
+                 <article class="clearfix font13 poppinsregular l-h24 tabhorizontal-p10 b-p5">
+        <h4 class="clearfix Poppins-Regular blue-t l-h20 font18 b-m15 border-b dis-in b-p5 mobile-font18 mobile-t-b-m0 mobilev-b-m5">Payment by using PayPal</h4>
+                     <br>
+                     <img src="Content/images/paypal.jpg" alt="PayPal" width="116" height="59">
+                     </article>
+                     </article>
+                 </article>
+                 </article>*@
+                    <article class="clearfix row-fluid t-b-p15">
+                        <article class="clearfix span10">
+                            <article class="clearfix part-row">
+                                <article class="clearfix part-6">
+                                    <label class="font15 dkdark-t radiostyle b-m0">
+                                        <input value="1" name="pmethod" checked="checked" onclick="checkhide();" type="radio">
+                                        <span class="dis-in" for="radio1">Instant Checkout  through PayPal </span>
+                                    </label>
+                                </article>
+                                <article class="clearfix part-3">
+                                    <label class="font16 dkdark-t radiostyle b-m0">
+                                        <input value="2" name="pmethod" onClick="zellashow();" type="radio">
+                                        <span class="dis-in Montserrat-Regular font14" for="radio1">Zelle</span>
+                                    </label>
+                                </article>
+                                @*<article class="clearfix part-6">
+                        <label class="font15 dkdark-t radiostyle b-m0">
+                            <input type="radio" value="0" name="pmethod" onclick="checkshow();">
+                            <span class="dis-in" for="radio1">Cash/Cheque</span>
+                        </label>
+                    </article>*@
+                            </article>
+                        </article>
+                    </article>
+                    <article class="clearfix border gray-border white-bg shadow-b p10 t-m20" id="zellepay" style="display:none;">
+
+                        <article class="clearfix">
+                            <article class="clearfix part-row">
+                                <article class="clearfix part-3">
+                                    <article class="clearfix t-c mobile-b-p0 l-p30 mobile-t-l mobile-l-p0">
+                                        <img src="Content/images/zelle.png" class="" alt="zelle" width="150" height="">
+                                    </article>
+                                </article>
+                                <article class="clearfix part-4 t-p10 l-p10 mobile-t-p0">
+                                    <article class="clearfix part-row">
+                                        <article class="part-4 t-p5 tablet-t-p10 mobile-t-p0 mobile-t-c">
+                                            @* <span class="v-align-m OpenSans font15 mobilev-font12"> Amount : </span>*@
+                                        </article>
+                                        <article class="part-6 t-p5 t-l tablet-t-p10 mobile-t-c">
+                                            @*   <b class="font18 red-t">
+                                    <span id="totalamount">$0</span>
+                                </b>*@
+                                        </article>
+                                    </article>
+                                    @*   <article class="clearfix f-l">
+                        <span class="v-align-m OpenSans font15 t-p5 blue-t">Service charge : 2%</span>
+                            </article>*@
+                                </article>
+                                <article class="clearfix part-5 r-p20 mobile-r-p0">
+
+                                    <h4 class="Poppins-Regular b-m10 l-h20 font18 dk-t mobile-t-m0">
+                                        <span class="b-p10">Amount(<span class="red-t">$</span>)<span class="red-t">*</span></span>
+                                        <span class="font18 red-t l-p5 t-m1n font-w-b">
+                                            <input placeholder="Amount *" id="AmountZelle" name="AmountZelle" onkeypress="return Common.isNumberKey(event);" maxlength="4" style="width:200px;" class="form-control border-radius0" type="text">
+                                            <span id="spanAmountZelle" class="field-validation-error"></span>
+                                        </span>
+                                    </h4>
+                                </article>
+                            </article>
+                        </article>
+                        <article class="clearfix">
+                            <article class="clearfix b-p5"> <span class="Muli-Light font13 red-t2">Here are the Zelle details you should know for the transfer</span> </article>
+
+                            <article class="clearfix b-p5"> <span class="Muli-Light font13 red-t2 font-w-b">Zelle Name: <a>Washington Telugu Samithi</a> </span> </article>
+                            <article class="clearfix b-p5"> <span class="Muli-Light font13 red-t2 font-w-b">Zelle Email Id: <a href="mailto:fintec@watsweb.org">fintec@watsweb.org</a> </span> </article>
+
+                            <article class="clearfix b-p5"> <span class="Muli-Light font13 red-t2">Please <b>use your Order Number (available once you place order)</b> as the Payment reference.</span> </article>
+
+                        </article>
+                        <article class="clearfix">
+                            <article class="clearfix part-row b-p10">
+                                <label class="dkdark-t radiostyle dis-in">
+                                    <span class="dis-in t-p10">Zelle Transaction Id - </span>
+                                </label>
+                                <input placeholder="Zelle Transaction Id" name="TransactionId" id="TransactionId" class="b-m0 form-control" style="max-height: 30px; max-width:200px; display:inline-block!important; font-size:12px;" type="text">
+                            </article>
+                        </article>
+
+                    </article>
+                    <article style="display: none;" class="Poppins-Regular font14" id="check">
+
+                        <article class="clearfix border2 border-radius10 bluegrayborder t-b-m10 p10 l-m5 shadow" style="border-color: #396dad;">
+                            <article class="black-t l-h22 b-p5">
+                                You will receive a confirmation email once the payment is credited to WATSWEB account.<br>
+                                <span class="latoitalic font13 red-t2">Check should be payable to “WATSWEB” and mail it to “</span>P.O. Box No : 3322, 1171 Bellevue Way NE, Bellevue, WA 98004.<span class="latoitalic font13 red-t2">
+                                    ”<br>
+                                    Phone:
+                                </span>+1 (425) 586-0319<span class="latoitalic font13 red-t2">, &nbsp; Email: <a href="mailto:board@watsweb.org">board@watsweb.org</a>.</span>
+                            </article>
+                            <article class="clearfix b-p10 row-fluid">
+                                <label class="dkdark-t radiostyle b-m0">
+                                    <input type="radio" onclick="paymentbyhide();" name="Cash/Cheque" id="mailed">
+                                    <span class="dis-in" for="radio1">Mailed the cheque already to Washington Telugu Samithi (WATS)</span>
+                                </label>
+                            </article>
+                            <article class="clearfix part-row b-p10">
+                                <article class="clearfix part-4">
+                                    <label class="dkdark-t radiostyle">
+                                        <input type="radio" onclick="paymentbyshow();" id="rpaymentby" name="Cash/Cheque">
+                                        <span class="dis-in t-p10" for="radio1">Handed the cash/cheque to - </span>
+                                    </label>
+                                </article>
+                                <article class="clearfix part-4">
+                                    <input type="text" placeholder="Handed the cash/cheque to" name="PaymentBy" id="PaymentBy" class="b-m0 input-block-level">
+                                </article>
+                            </article>
+                        </article>
+                    </article>
+                    <article class="clearfix border2 border-radius4 t-b-m10 p10 l-m5 shadow" id="paypaldiv" style="border-color: #17275d;">
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-5">
+                                <article class="clearfix l-p10 mobile-l-p0">
+                                    <h4 class="Poppins-Regular b-m10 t-p10 l-h20 font18 dk-t mobile-t-m0">Amount(<span class="red-t">$</span>)<span class="red-t">*</span></h4>
+
+                                    <input placeholder="Amount *" id="AmountPayPal" name="AmountPayPal" onkeypress="return Common.isNumberKey(event);" maxlength="4" style="width:200px;" class="form-control border-radius0" type="text" />
+                                    <span id="spanAmount" class="field-validation-error"></span>
+                                </article>
+                            </article>
+                            <article class="clearfix part-7">
+                                <article class="clearfix font13 poppinsregular l-h24 tabhorizontal-p10 b-p5">
+                                    <h4 class="clearfix Poppins-Regular blue-t l-h20 font18 b-m15 border-b dis-in b-p5 mobile-font18 mobile-t-b-m0 mobilev-b-m5">Payment by using PayPal</h4>
+                                    <br>
+                                    <img src="Content/images/paypal.jpg" alt="PayPal" width="116" height="59">
+                                </article>
+                            </article>
+                        </article>
+                    </article>
+                    <article class="clearfix t-p10 sm-row mobile-t-b-p10">
+                        <article class="sm-4">
+                            <article class="clearfix r-p10 tabhorizontal-r-p5 mobilev-r-p0">
+                                <input placeholder="Security Code" class="form-control" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" id="txtCaptcha" name="DCaptcha" type="text" />
+                                <span class="field-validation-error" id="spanCaptcha"></span>
+                            </article>
+                        </article>
+                        <article class="sm-8">
+                            <article class="clearfix l-p10 tabhorizontal-l-p5 mobilev-l-p0">
+                                <img alt="Captcha" width="91" border="0" height="33" id="CUcaptcha" src="Members/ShowCaptchaImage" style="min-height:38px!important;" />
+                                <a href="javascript:CreloadCaptcha();">
+                                    <img src="Content/images/refresh.png" alt="Refresh" width="33" border="0" height="33" />
+                                </a>
+                            </article>
+                        </article>
+                    </article>
+                    @* <label class="checkboxstyle dis-in b-m15 effectpart">
+            <input value="Remember" name="Terms" id="Terms" type="checkbox" />
+            <span for="radio" class="Poppins-Regular l-h20 font13"><a class="black-t">I accept Terms of Services Privacy Policy</a></span>
+            <span id="spanTerms" class="red-t"></span>
+        </label>*@
+                </article>
+                      <article class="clearfix t-b-p10 pull-right">
+                        <input type="submit" value="SUBMIT" onclick="return Validate();" class="btn btn-danger btn-sm btn-block font18 l-r-p45 t-t-u border-radius0"  style="max-width:290px;"/>
+                      </article>
+                    </article>
+                      }
+                  </article>
+               

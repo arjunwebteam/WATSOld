@@ -1,0 +1,599 @@
+﻿@{
+    ViewBag.Title = "AddTeluguBadiRegistrations";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var objTeluguBadiRegistrations = (WATS.Entities.TeluguBadiRegistrations)ViewBag.objTeluguBadiRegistrationsorders;
+    var lstTeluguBadiTypes = (List<WATS.Entities.TeluguBadiTypes>)objTeluguBadiRegistrations.lstTeluguBadiTypes;
+    var lstPaymentMethod = (List<WATS.Entities.PaymentMethods>)objTeluguBadiRegistrations.lstPaymentMethod;
+    var lstPaymentStatus = (List<WATS.Entities.PaymentStatus>)objTeluguBadiRegistrations.lstPaymentStatus;
+    var objTeluguBadiRegistrationsorders = (WATS.Entities.TeluguBadiRegistrations)ViewBag.objTeluguBadiRegistrationsorders;
+    List<WATS.Entities.TeluguBadiOrders> lstTeluguBadiOrders = ViewBag.lstTeluguBadiOrders;
+
+
+}
+
+<script type="text/javascript">
+    
+    $(document).ready(function () {
+        $('#wTeluguBadiRegistrations').addClass('active');
+        $('#MWebsite').addClass('active');
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+    });
+
+
+ 
+
+</script>
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+
+        <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+        <li><a href="@Url.Action("Index", "TeluguBadiRegistrations")">TeluguBadi Registration</a> <span class="divider">/</span></li>
+        <li class="active">Add TeluguBadi Registration</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a>View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<script type="text/javascript" src="ckeditor/ckeditor.js"></script>
+<script type="text/javascript" src="ckfinder/ckfinder.js"></script>
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r p_b"><a class="clearfix" href="@Url.Action("Index", "TeluguBadiRegistrations")">← back to TeluguBadi Registrations</a> </div>
+                <h3 class="title">View TeluguBadi Registrations</h3>
+                <div class="sectionTabNav visible">
+                    <div class="btn-group">
+                        <a class="btn active" href="@Url.Action("Index", "TeluguBadiRegistrations")">Registrations</a>
+                        @*<a class="btn" href="@Url.Action("Index", "TeluguBadiOrders")">TeluguBadi Orders</a>*@
+                        <a class="btn" href="@Url.Action("Index", "TeluguBadiTypes")">Types</a>
+                        @*<a class="btn" href="@Url.Action("Index", "Volunteers")">Volunteers</a>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            {@Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            {@Html.Raw(ViewBag.message.ToString())}
+        </div>
+
+
+        <input type="hidden" id="TRegistrationId" name="TRegistrationId" value="@objTeluguBadiRegistrationsorders.TRegistrationId" />
+
+        <div class="custom-adn grayBackground nobL nobR">
+            <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Personal Details</b></h3>
+                <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                    <div class="filedsetInner clearfix">
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Father First Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.FatherFirstName
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Father Email :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.FatherEmail
+
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Mother First Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.MotherFirstName
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="span6">
+                                <div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Father Last Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.FatherLastName
+                                            <span class="field-validation-error" id="spanFatherLastName"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Father Phone No :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.FatherPhoneNo
+
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Mother Last Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.MotherLastName
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Mother Email :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.MotherEmail
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">TeluguBadi CenterName :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.TeluguBadiCenterName
+
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">State :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.State
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="span6">
+                                <div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Mother Phone No :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.MotherPhoneNo
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Volunteer For :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.VolunteerFor
+
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">ZipCode :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.ZipCode
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">City :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.City
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="span6">
+                                <div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Address :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.Address
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="custom-adn grayBackground nobL nobR">
+            <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>TeluguBadi Students Details</b></h3>
+                <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                    <div class="filedsetInner clearfix">
+                        <table cellspacing="0" cellpadding="0" border="0" class="tbl membership" width="100%">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <table id="TeluguBadiStudentstbl" name="TeluguBadiStudentstbl" width="1000" cellspacing="0" cellpadding="0" border="0" class="table table-hover span12 omb table_vam table-black tvm">
+                                            <thead>
+                                                <tr>
+                                                    <th width="200">Name</th>
+                                                    <th width="200">Last Name</th>
+                                                    <th width="200" align="center">Age</th>
+                                                    <th width="200" align="center">Level Offerings</th>
+
+                                                    <th width="200" align="center">TeluguBudi Centers</th>
+
+
+                                                    @* <th width="270" align="center">Skills/Interests</th>*@
+                                                    @*<th width="90" align="center">
+                                                        <input type="button" onclick="javascript: addRow();" name="add-child" class="btn" value="Add Siblings">
+                                                    </th>*@
+                                                </tr>
+
+                                                @if (objTeluguBadiRegistrationsorders.lstTeluguBadiStudents != null && objTeluguBadiRegistrationsorders.lstTeluguBadiStudents.Count != 0)
+                                                {
+                                                    Int64 i = 0;
+                                                    foreach (var Item in objTeluguBadiRegistrationsorders.lstTeluguBadiStudents)
+                                                    {
+                                                        <input id="TStudentId-@(i)" name="[@(i)].TStudentId" value="@(Item.TStudentId)" type="hidden" />
+                                                        <tr>
+                                                            <td width="200">
+                                                                @Item.FirstName
+                                                            </td>
+                                                            <td width="200">
+                                                                @Item.LastName
+                                                            </td>
+                                                            <td width="200" align="center">
+                                                                @Item.Age
+
+                                                            </td>
+
+                                                            @*<td width="100" align="center">
+
+
+                                                                <select class="input-block-level b-m0" id="Age-@i" name="[@i].Age">
+                                                                    <option value="">Select</option>
+                                                                    <option @(Item.LevelOfferings == "" ? "selected='selected'" : "") value="1">Male</option>
+                                                                    <option @(Item.LevelOfferings == "" ? "selected='selected'" : "") value="0">Female</option>
+                                                                </select>
+                                                            </td>*@
+
+                                                            <td width="200" align="center">
+                                                                @Item.LevelOfferings
+
+                                                            </td>
+
+                                                            <td width="200" align="center">
+                                                                @Item.Field1
+
+                                                            </td>
+
+
+                                                            @*<td width="90" align="center"><a class="pagedelete t-p10" href="@Url.Action("DeleteTeluguBadiStudents", "TeluguBadiRegistrations", new { TStudentId = @Item.TStudentId, TRegistrationId = Item.TRegistrationId })" onclick="return confirm('Do you want to delete this item.')" title="Delete"><i class="icon-trash"></i></a></td>*@
+
+                                                        </tr>
+                                                        i++;
+                                                    }
+                                                }
+
+
+                                            </thead>
+                                        </table>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="custom-adn grayBackground nobL nobR">
+            <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0">
+                    <span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Latest Order Details</b>
+                    <span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>
+                        <a href="" class='lightview rightmost' data-lightview-group='example' data-lightview-type='iframe' data-lightview-options="width: 800" data-lightview-caption="@objTeluguBadiRegistrationsorders.objTeluguBadiOrders.TRegistrationId">TRegistrationId : @objTeluguBadiRegistrationsorders.objTeluguBadiOrders.TRegistrationId</a>
+                    </b>
+                </h3>
+                <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                    <div class="filedsetInner clearfix">
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <div class="clearfix rp10">
+
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Father First Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @(objTeluguBadiRegistrationsorders.objTeluguBadiOrders.FatherFirstName)
+
+                                        </div>
+                                    </div>
+
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">TeluguBadi Type :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @(objTeluguBadiRegistrationsorders.objTeluguBadiOrders.Type)
+
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Transaction Id  :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.objTeluguBadiOrders.TransactionId
+
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Payment Method :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @objTeluguBadiRegistrationsorders.objTeluguBadiOrders.PaymentMethod
+
+                                        </div>
+                                    </div>
+                                    @*<div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Bank Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <input type="text" class="input-block-level" id="BankName" value="@objTeluguBadiOrders.BankName" name="BankName">
+                                            <span class="field-validation-error" id="spanBankName"></span>
+                                        </div>
+                                    </div>*@
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Expiry Date :</label>
+                                        </div>
+                                        <div class="span6">
+                                            @*<input type="text" class="input-block-level" readonly="true" value="@(objTeluguBadiOrders.ExpiryDate == DateTime.MinValue ? "" : objTeluguBadiOrders.ExpiryDate.ToString("MM/dd/yyyy"))" id="ExpiryDate" name="ExpiryDate">
+                                            <span class="field-validation-error" id="spanExpiryDate"></span>*@
+                                            @*<input type="text" class="input-block-level Odate" value="@(objTeluguBadiOrders.ExpiryDate == DateTime.MinValue ? "" : objTeluguBadiOrders.ExpiryDate.ToString("MM/dd/yyyy"))" id="ExpiryDate" name="ExpiryDate">*@
+                                            @objTeluguBadiRegistrationsorders.objTeluguBadiOrders.ExpiryDate.ToString("dd-MM-yyyy")
+
+                                        </div>
+                                    </div>
+                                    @*<div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Admin Comment :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <textarea type="text" value="" class="input-block-level" id="AdminComment" name="AdminComment">@objTeluguBadiOrders.AdminComment</textarea>
+                                            <span class="field-validation-error" id="spanAdminComment"></span>
+                                        </div>
+                                    </div>*@
+
+                                </div>
+                            </div>
+                            <div class="span6">
+
+                                <div class="row-fluid">
+                                    <div class="span5">
+                                        <label class="t-p5">Father Last Name :</label>
+                                    </div>
+                                    <div class="span6">
+                                        @(objTeluguBadiRegistrationsorders.objTeluguBadiOrders.FatherLastName)
+                                    </div>
+                                </div>
+
+
+                                <div class="row-fluid">
+                                    <div class="span5">
+                                        <label class="t-p5">Amount :</label>
+                                    </div>
+                                    <div class="span6 t-p10 b-m25">
+                                        @(objTeluguBadiRegistrationsorders.objTeluguBadiOrders.Amount)
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span5">
+                                        <label class="t-p5">Payment Status :</label>
+                                    </div>
+                                    <div class="span6">
+                                        @(objTeluguBadiRegistrationsorders.objTeluguBadiOrders.PaymentStatus)
+
+                                    </div>
+                                </div>
+
+                                <div class="row-fluid">
+                                    <div class="span5">
+                                        <label class="t-p5">Order Date :</label>
+                                    </div>
+                                    <div class="span6">
+                                        @objTeluguBadiRegistrationsorders.objTeluguBadiOrders.OrderDate.ToString("dd-MM-yyyy")
+                                    </div>
+                                </div>
+                                @*<div class="row-fluid">
+                                    <div class="span5">
+                                        <label class="t-p5">Cheque No :</label>
+                                    </div>
+                                    <div class="span6">
+                                        <input type="text" class="input-block-level" value="@objTeluguBadiOrders.ChequeNo" id="ChequeNo" name="ChequeNo">
+                                        <span class="field-validation-error"></span>
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span5">
+                                        <label class="t-p5">Cheque Date :</label>
+                                    </div>
+                                    <div class="span6">
+                                        <input type="text" class="input-block-level Cdate" value="@(objTeluguBadiOrders.ChequeDate == DateTime.MinValue ? "" : objTeluguBadiOrders.ChequeDate.ToString("MM/dd/yyyy"))" id="ChequeDate" name="ChequeDate">
+                                        <span class="field-validation-error"></span>
+                                    </div>
+                                </div>*@
+                                @*<div class="row-fluid">
+                                    <div class="span5">
+                                        <label class="t-p5">User Comment :</label>
+                                    </div>
+                                    <div class="span6">
+                                        <textarea class="input-block-level" id="UserComment" name="UserComment">@objTeluguBadiOrders.UserComment</textarea>
+                                        <span class="field-validation-error"></span>
+                                    </div>
+                                </div>*@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-adn grayBackground nobL nobR">
+            <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Orders Details</b></h3>
+                <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                    <div class="filedsetInner clearfix">
+                        <table cellspacing="0" cellpadding="0" border="0" class="tbl membership" width="100%">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <table id="TeluguBadiStudentstbl" name="TeluguBadiStudentstbl" width="1000" cellspacing="0" cellpadding="0" border="0" class="table table-hover span12 omb table_vam table-black tvm">
+                                            <thead>
+                                                <tr>
+                                                    @* <th class="table_checkbox"> <input type="checkbox" name="mainchk" onclick="javascript: Select('mainchk');" /></th>*@
+                                                    <th width="5%" align="center">S.No.</th>
+
+
+                                                    <th width="17%">
+                                                        Name
+
+                                                    </th>
+                                                    <th width="12%">
+
+                                                        Type
+
+                                                    </th>
+                                                    <th width="12%">
+
+                                                        Expire Date
+
+                                                    </th>
+                                                    <th width="12%">
+
+                                                        Order Date
+
+                                                    </th>
+                                                    <th width="12%">
+                                                        Payment Method
+
+                                                    </th>
+                                                    <th width="9%">
+
+                                                        P Status
+
+                                                    </th>
+
+                                                </tr>
+
+
+                                                @if (lstTeluguBadiOrders != null && lstTeluguBadiOrders.Count != 0)
+                                                {
+                                                    Int64 i = 1;
+                                                    foreach (var Item1 in lstTeluguBadiOrders)
+                                                    {
+                                                        <tr>
+                                                            @* <td><input type="checkbox" name="checkbox" id="checkbox-@i" value= "@{@item.MemberId}" /></td>*@
+                                                            <td>@i</td>
+
+                                                            <td>
+                                                                @Item1.FatherFirstName
+                                                            </td>
+
+                                                            <td>
+                                                                @Item1.Type
+                                                            </td>
+                                                            <td>
+                                                                @(Item1.ExpiryDate==DateTime.MinValue?"": Item1.ExpiryDate.ToString("dd-MM-yyyy"))
+                                                            </td>
+                                                            <td>
+                                                                @(Item1.OrderDate==DateTime.MinValue?"": Item1.OrderDate.ToString("dd-MM-yyyy"))
+                                                            </td>
+                                                            <td>
+                                                                @Item1.PaymentMethod
+                                                            </td>
+                                                            <td>
+                                                                @Item1.PaymentStatus
+                                                            </td>
+                                                            @*<td>
+                                                                <a href="@Url.Action("EditTeluguBadiOrder", "TeluguBadiOrders", new {OrderId=Item1.OrderId })" title="Edit"><i class="icon-pencil"></i></a>
+                                                                <a class="pagedelete" onclick="javascript:Delete(@Item1.OrderId);" id="1" title="Delete"><i class="icon-trash"></i></a>
+                                                                <a title="Delete" class="sepV_a disable-alpha"><i class="icon-trash"></i></a>
+                                                            </td>*@
+                                                        </tr>
+                                                        i++;
+                                                    }
+                                                }
+
+
+                                            </thead>
+                                        </table>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <div class="actionButtons">
+                <a class="btn btn-inverse" href="@Url.Action("Index", "TeluguBadiRegistrations")">Cancel</a>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>

@@ -1,0 +1,376 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+        $('#AddUser').dialog
+           ({
+               autoOpen: false,
+               width: 450,
+               modal: true
+           });
+        $('#EditUser').dialog
+          ({
+              autoOpen: false,
+              width: 450,
+              modal: true
+          });
+        $('#divuserroles').dialog
+         ({
+             autoOpen: false,
+             width: 450,
+             modal: true
+         });
+        $('#ViewUser').dialog
+          ({
+              autoOpen: false,
+              width: 450,
+              modal: true
+          });
+    });
+
+    function Add() {
+        clearUser();
+        $("#AddUser").dialog("open");
+        $('#lbltitle').html('Add User');
+    }
+
+    function clearUser() {
+
+        $('#UserName').val('');
+        $('#spanUserName').html('');
+        $('#Email').val('');
+        $('#spanEmail').html('');
+        $('#Password').val('');
+        $('#spanPassword').html('');
+        $('#Designation').val('');
+        $('#spanDesignation').html('');
+        $('#MobilePhone').val('');
+        $('#spanMobilePhone').html('');
+
+        $('#UserName').focus().removeClass("red-border");
+        $('#Email').focus().removeClass("red-border");
+        $("#AddUser").dialog("close");
+        $("#EditUser").dialog("close");
+    }
+    function clearEditUser() {
+        $("#EditUser").dialog("close");
+    }
+    $(document).ready(function () {
+        $('#selectrole').val('@ViewBag.RoleName');
+        if ('@ViewBag.RoleName' == 'Admin') {
+            $('#Administrators').addClass('red-t');
+        }
+        else { $('#Users').addClass('red-t'); }
+        PagerClickBind();
+        print_country("Country");
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            UserBind($(this).text(), 'on');
+        });
+    }
+    function sortresult(sortcolumn) {
+
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        UserBind(1, 'on');
+    }
+
+
+    function UserBind(page, sort) {
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var pageno = Common.Pageno(page);
+        var username = $.trim($('#txtusername').val());
+        var email = $.trim($('#txtemail').val());
+        var role = '@ViewBag.RoleName';
+         $.ajax({
+             type: "GET",
+             cache: false,
+             url: '@Url.Action("UserList", "Users")', // the URL of the controller action method
+            data: { Items: $('#pgitems').val(), UserName: username, Email: email, RoleName: role, PageNo: pageno, SortOrder: sortorder, SortColumn: sortcolumn }, // optional data
+            success: function (result) {
+                $('#divUserList').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+    function GetUserRoles(userid) {
+        var UserId = userid;
+        $.ajax({
+            type: "GET",
+            cache: false,
+            url: '@Url.Action("UserAccess", "Users")', // the URL of the controller action method
+            data: { UserId: UserId}, // optional data
+             success: function (result) {
+                 $('#divuserroles').html(result);
+                 $('#divuserroles').dialog("open");
+                 $('#Rlbltitle').html('User Access');
+             }
+         });
+     }
+    function UserClear() {
+        $('#txtusername').val('');
+        $('#txtemail').val('');
+        $('#Country').val('');
+        $('#State').val('');
+        $('#hdnsortcolumn').val('');
+        $('#hdnsortorder').val('ASC');
+
+      
+        UserBind(1, 'on');
+    }
+    function CheckEmailAvailability(email) {
+
+        var returnval = null;
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CheckEmailAvailability", "Users")', // the URL of the controller action method
+            data: { Email: email }, // optional data
+            datatype: "JSON",
+            async: false,
+            success: function (result) {
+                if (result.ok) {
+                    returnval = result.data;
+                }
+            }
+        });
+        return returnval;
+    }
+    function CheckProfileEmailAvailability(email, userid) {
+        var returnval = null;
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CheckProfileEmailAvailability", "Users")', // the URL of the controller action method
+            data: { UserId:userid , Email: email }, // optional data
+            datatype: "JSON",
+            async: false,
+            success: function (result) {
+                if (result.ok) {
+                    returnval = result.data;
+                }
+            }
+        });
+        return returnval;
+    }
+
+    function CheckUserNameAvailability(username) {
+
+        var returnval = null;
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CheckUserNameAvailability", "Users")', // the URL of the controller action method
+            data: { UserName: username }, // optional data
+            datatype: "JSON",
+            async: false,
+            success: function (result) {
+                if (result.ok) {
+                    returnval = result.data;
+                }
+            }
+        });
+        return returnval;
+    }
+
+    function ValidateProfile() {
+
+        //Account Information
+        if ($.trim($('#UserName').val()) == '') { $('#spanUserName').html('Required.'); $('#UserName').focus().addClass("red-border"); return false; } else { $('#spanUserName').html(''); $('#UserName').focus().removeClass("red-border"); }
+        if ($.trim($('#UserName').val()).indexOf(' ') != -1) { $('#spanUserName').html('Please enter username without space.'); $('#UserName').focus().addClass("red-border"); return false; } else { $('#spanUserName').html(''); }
+        if (!CheckUserNameAvailability($.trim($('#UserName').val()))) { $('#spanUserName').html('User Name already exist.'); $('#UserName').focus().addClass("red-border"); return false; } else { $('#spanUserName').html(''); }
+        if ($.trim($('#Email').val()) == '') { $('#spanEmail').removeClass(); $('#spanEmail').addClass('field-validation-error'); $('#spanEmail').html('Required.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); $('#Email').focus().removeClass("red-border"); }
+        if (!Common.CheckEmail($.trim($('#Email').val()))) { $('#spanEmail').html('Please enter valid email address.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); }
+        if (!CheckEmailAvailability($.trim($('#Email').val()))) { $('#spanEmail').html('Email address is not available.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); }
+        //if ($('#NewPassword').val() == '') { $('#spanNewPassword').html('Required.'); $('#NewPassword').focus().addClass("red-border"); return false; } else { $('#spanNewPassword').html(''); }
+        //if (!Common.ValidatePassword($('#NewPassword').val())) { $('#spanPassword').html('Please enter minimum 8 charecters (atleast one special charecter & one numeric charecter).'); $('#NewPassword').focus().addClass("red-border"); return false; } else { $('#spanPassword').html(''); }
+        i
+        return true;
+    }
+
+    function EValidateProfile() {
+        //Account Information
+        if ($.trim($('#EEmail').val()) == '') { $('#EspanEmail').removeClass(); $('#EspanEmail').addClass('field-validation-error'); $('#EspanEmail').html('Required.'); $('#EEmail').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); }
+        if (!Common.CheckEmail($.trim($('#EEmail').val()))) { $('#EspanEmail').html('Please enter valid email address.'); $('#EEmail').focus().addClass("red-border"); return false; } else { $('#EspanEmail').html(''); }
+        if (!CheckProfileEmailAvailability($.trim($('#EEmail').val()), $('#UserId').val())) { $('#EspanEmail').html('Email address is not available.'); $('#EEmail').focus().addClass("red-border"); return false; } else { $('#EspanEmail').html(''); }
+       
+        return true;
+    }
+
+    function UserEdit(UserId) {
+        $.ajax({
+            url: '@Url.Action("EditUser", "Users")',
+            type: 'POST',
+            data: { UserId: UserId },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objUser = result.data;
+                    $('#EUserName').html(objUser.UserName);
+                    $('#UserId').val(objUser.UserId);
+                    $('#EEmail').val(objUser.Email);
+                    $('#EDesignation').val(objUser.Designation);
+                    $('#EMobilePhone').val(objUser.MobilePhone);
+                    $('#EditUser').dialog("open");
+                    $('#Elbltitle').html('Edit User');
+                }
+                else {
+                    alert(result.data);
+                }
+            }
+        });
+    }
+    
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="UserId" />
+<input id="hdnsortorder" type="hidden" value="ASC" />
+<input id="hdnuserid" type="hidden" value="0" />
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    <li><a href="@Url.Action("Index","InnerPages")">Web Pages</a> <span class="divider">/</span></li>
+    <li class="active">Admins</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+</ul></div>
+<div id="maincontainer">
+    <div class="mainContent">
+        @Html.Partial("MainMenu", "SuperAdmin")
+        @Html.Partial("LeftMenu", "SuperAdmin")
+         <div id="divmessage" class="divmessage">@if (TempData["message"] != null)
+        {@Html.Raw(TempData["message"].ToString())}</div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" class="text12">
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="pageHeadingBlock ">
+                            <div class="grayBackground">
+                                <div class="fR t-r"><a class="btn btn-small btn-primary coursesMenu" onclick="Add();">Add Admin</a> </div>
+                                <h3 class="title">Admins</h3>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <tbody>
+                                <tr>
+                                    <td align="right" height="34"></td>
+                                </tr>                                
+                                <tr>
+                                    <td>
+                                        <div id="divUserList">
+                                            @{Html.RenderAction("UserList", "Users");}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="AddUser" style="display: none;">
+    <div class="dialog-title"><span id="lbltitle"></span></div>
+    <div class="dialog-content">
+         @using (Html.BeginForm("CreateUser", "Users", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span5">User Name :</div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="UserName" name="UserName">
+                    <span class="field-validation-error" id="spanUserName"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Email Id :</div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="Email" name="Email">
+                    <span class="field-validation-error" id="spanEmail"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Designation :</div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="Designation" name="Designation">
+                    <span class="field-validation-error" id="spanDesignation"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Mobile :</div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="MobilePhone" name="MobilePhone">
+                    <span class="field-validation-error" id="spanMobilePhone"></span>
+                </div>
+            </div>
+            <div class="clearfix t-r t-p5">
+                <input type="submit" class="btn btn-primary font-w7" value="Submit" onclick="return ValidateProfile();" />
+                <a class="btn font-w7" onclick=" $('#AddUser').dialog('close')">Cancel</a>
+            </div>
+        </div>
+         }
+    </div>
+</div>
+
+<div id="EditUser" style="display: none;">
+    <div class="dialog-title"><span id="Elbltitle"></span></div>
+    <div class="dialog-content">
+         @using (Html.BeginForm("UpdateUser", "Users", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+               @Html.Hidden("UserId")
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span5">User Name :</div>
+                <div class="span7">
+                    <span id="EUserName" name="UserName"></span>
+                    <span class="field-validation-error" id="EspanUserName"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Email Id :</div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="EEmail" name="Email">
+                    <span class="field-validation-error" id="EspanEmail"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Designation :</div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="EDesignation" name="Designation">
+                    <span class="field-validation-error" id="EspanDesignation"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Mobile :</div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="EMobilePhone" name="MobilePhone">
+                    <span class="field-validation-error" id="EspanMobilePhone"></span>
+                </div>
+            </div>
+            <div class="clearfix t-r t-p5">
+                <input type="submit" class="btn btn-primary font-w7" value="Submit" onclick="return EValidateProfile();" />
+                <a class="btn font-w7" onclick=" $('#EditUser').dialog('close')">Cancel</a>
+            </div>
+        </div>
+         }
+    </div>
+</div>
+
+
+<div id="divuserroles">
+
+</div>

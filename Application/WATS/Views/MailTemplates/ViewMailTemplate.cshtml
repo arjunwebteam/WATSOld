@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "ViewMailTemplate";
+    Layout = null;
+
+    WATS.Entities.MailTemplates objTemplates = ViewBag.objTemplates;
+    objTemplates.Description = objTemplates.Description.Replace("[usersiteurl]", System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]);
+}
+@{var baseurl = System.Configuration.ConfigurationManager.AppSettings["baseurl"];}
+<base href="@(baseurl)" />
+<link href="Content/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" type="text/css" href="Content/jquery-ui.css" />
+<link href="Content/admin-style.css" rel="stylesheet" media="screen">
+<link href="Content/admin-comman-styles.css" rel="stylesheet" media="screen">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700' rel='stylesheet' type='text/css'>
+  <h3 class="title t-t-c">@objTemplates.Heading</h3>
+@Html.Raw(objTemplates.Description)

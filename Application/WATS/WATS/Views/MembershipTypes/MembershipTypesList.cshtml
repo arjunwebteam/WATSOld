@@ -1,0 +1,71 @@
+﻿@{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+    List<WATS.Entities.MembershipTypes> lstMembershipType = ViewBag.lstMembershipTypes;    
+}
+<script>
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+        Common.mfadeout();
+    });
+</script>
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div> 
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+                <thead>
+                    <tr>
+                        <th width="44" align="center">S.No.</th>
+                        <th><a onclick="javascript:sortresult('MembershipType');" class="white-t-u">Type @if (sortcolumn == "MembershipType")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+                        <th width="20%">
+                            <a onclick="javascript:sortresult('Price');" class="white-t-u">Price @if (sortcolumn == "Price")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="20%">Validity (Months)</th>
+                        <th width="9%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                     @if (lstMembershipType.Count != 0)
+                     {
+                         foreach (var item in lstMembershipType)
+                         { 
+                    <tr>
+                        <td valign="top">@item.RId</td>
+                        <td style="text-align: left">@item.MembershipType</td>
+                         <td style="text-align: left">@item.Price</td>
+                          <td style="text-align: left">@{var str = ""; if (item.Validity == 0) { str = "Life Time"; } else { str = @item.Validity.ToString(); }@str}</td>
+                        <td>
+                          @*  <a title="View" onclick="MembershipTypeView(@item.MembershipTypeId);"  target="_blank"><i class="icon-eye-open"></i></a>*@
+                            <a title="Edit"onclick="MembershipTypeEdit(@item.MembershipTypeId);" ><i class="icon-pencil"></i></a>
+                            <a title="Delete" id="10" onclick="javascript:Delete(@item.MembershipTypeId);" class="scdelete"><i class="icon-trash"></i></a>
+                            @*<a title="Delete" class="sepV_a disable-alpha"><i class="icon-trash"></i></a>*@
+                        </td>
+                    </tr>
+                         }
+                     }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="9">No Records Found.</td>
+                        </tr>
+                    }
+            </table>
+        }
+    </div>
+</div>
+  @Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

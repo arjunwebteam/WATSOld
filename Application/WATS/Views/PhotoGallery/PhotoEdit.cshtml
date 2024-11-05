@@ -1,0 +1,164 @@
+﻿@{
+    ViewBag.Title = "PhotoEdit";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    WATS.Entities.Photos objPhotos = ViewBag.objPhotos;
+    List<WATS.Entities.PhotoCategories> lstPhotoCategories = ViewBag.lstPhotoCategories;
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+
+    });
+    function Validate() {
+        if ($('#PhotoCategoryId').val() == "") { $('#spanPhotoCategoryId').html('Required.'); $('#PhotoCategoryId').focus(); return false; } else { $('#spanPhotoCategoryId').html(''); }
+        if ($('#file1').val() != "") {
+            if (!Common.isImage($('#file1').val())) { $('#spanfile1').html('Sorry image is invalid. Only allowed extensions are:<b>jpg, png, PNG, gif, jpeg, JPEG</b>.'); $('#file1').focus(); return false; } else { $('#spanfile1').html(''); }
+            //if ($('#hdnimgvalidate').val() == '0') { $('#spanfile1').html('Please select image with diemensions equal to 250 * 200.'); $('#file1').focus(); return false; } else { $('#spanfile1').html(''); }
+        }
+        return true;
+    }
+</script>
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+     
+    <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+    <li><a href="@Url.Action("Index", "PhotoGallery")">Photo Categories</a> <span class="divider">/</span></li>
+     <li class="active">Edit Photo</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a target="_blank" href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]">View Mainsite</a></li>
+</ul></div>
+<!-- end breadcumb -->
+
+
+<input type="hidden" id="hdnimgvalidate" value="0" />
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r"><a class="clearfix" href="@Url.Action("Photos", "PhotoGallery", new { PhotoCategoryId = objPhotos.PhotoCategoryId })">← back to Photos</a> </div>
+                <h3 class="title">Edit Photo</h3>
+               
+            </div>
+        </div>
+        <h1></h1>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" class="text12">
+            <tbody>
+                <tr>
+                    <td height="34">
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="text12">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div id="messages"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td height="10"></td>
+                                </tr>
+                                <tr>
+                                    <td class="box2">
+                                        @using (Html.BeginForm("AddPhoto", "PhotoGallery", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                        { 
+                                            <input type="hidden" name="IsHome" id="IsHome" />
+                                            <input type="hidden" name="PhotoId" id="PhotoId" value="@objPhotos.PhotoId" />
+                                            <table width="100%" cellspacing="0" cellpadding="3" border="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <div class="l-r-p20">
+                                                            <div class="clearfix">
+                                                                <b style="color: #f00">Note :</b> Image size should be maintained width * height (250 * 200)
+                                                            </div>
+                                                        </div>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="24%" align="right">Category :&nbsp;</td>
+                                                        <td width="76%">
+                                                            <select id="PhotoCategoryId" style="width: 263px" class="inputstyle" name="PhotoCategoryId">
+                                                                <option value="">-- Select Category --</option>
+                                                                @if (lstPhotoCategories.Count > 0)
+                                                                {
+                                                                    foreach (var item in lstPhotoCategories)
+                                                                    {
+                                                                    <option @(item.PhotoCategoryId == objPhotos.PhotoCategoryId ? "selected = selected" : "") value="@(item.PhotoCategoryId)">@(item.CategoryName)</option>
+                                                                    }
+                                                                }
+                                                            </select>
+                                                            <label id="spanPhotoCategoryId" class="field-validation-error"></label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="24%" align="right">Image Description :&nbsp;</td>
+                                                        <td width="76%">
+                                                            <input type="text" value="@objPhotos.ImageDescription" style="width: 250px"  class="inputstyle" id="ImageDescription" name="ImageDescription">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="24%" align="right">Display Order :&nbsp;</td>
+                                                        <td width="76%">
+                                                            <input type="text" maxlength="3" onkeypress="return Common.isNumberKey(event)" value="@objPhotos.DisplayOrder" style="width: 250px" class="inputstyle" id="DisplayOrder" name="DisplayOrder">
+                                                            <label id="spanDisplayOrder" class="field-validation-error"></label>
+                                                        </td>
+                                                    </tr>
+                                                    
+                                                    <tr>
+                                                        <td align="right">Image :&nbsp;</td>
+                                                        <td>
+                                                            <input type="file" id="file1" name="file1">
+                                                            <label id="spanfile1" class="field-validation-error"></label>
+                                                            (It automatically generate thumb also)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="24%" align="right">Album Link :&nbsp;</td>
+                                                        <td width="76%">
+                                                            <input type="text" value="@objPhotos.AlbumLink" style="width: 250px"  class="inputstyle" id="AlbumLink" name="AlbumLink">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td align="right" height="43">&nbsp;</td>
+                                                        <td>
+                                                            <input type="submit" onclick="return Validate()" class="btn btn-primary" id="Button1" value="Submit" name="send">
+                                                             <a class="btn btn-inverse" href="@Url.Action("Photos", "PhotoGallery", new { PhotoCategoryId = objPhotos.PhotoCategoryId})">Cancel</a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        }
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    var _URL = window.URL || window.webkitURL;
+    $("#file1").change(function (e) {
+        var file, img;
+        if ((file = this.files[0])) {
+            img = new Image();
+            img.onload = function () {
+                if (this.width == 250 && this.height == 200) {
+                    $('#hdnimgvalidate').val('1');
+                }
+                else {
+                    $('#hdnimgvalidate').val('0');
+                }
+            };
+            img.src = _URL.createObjectURL(file);
+        }
+    });
+
+</script>

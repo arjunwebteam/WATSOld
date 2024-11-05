@@ -1,0 +1,317 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    List<WATS.Entities.MembershipTypes> lstMembershipTypes = ViewBag.lstMembershipTypes;
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#AddCoupon').dialog
+           ({
+               autoOpen: false,
+               width: 450,
+               modal: true
+           });
+        $('#MMembers').addClass('active');
+        $('#ViewCoupon').dialog
+           ({
+               autoOpen: false,
+               width: 450,
+               modal: true
+           });
+        PagerClickBind();
+    });
+
+    function sortresult(sortcolumn) {
+
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        Onload(1);
+    }
+
+    function Onload(Pageno) {
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+        var Search = $('#txtsearch').val();
+
+        $.ajax({
+            url: '@Url.Action("CouponsList", "Coupons")',
+            type: 'GET',
+            cache: false,
+            data: { Search: Search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items },
+            success: function (result) {
+                $('#divCoupon').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            Onload($(this).text());
+        });
+    }
+
+    function CouponsEdit(Id) {
+        $.ajax({
+            url: '@Url.Action("EditCoupon", "Coupons")',
+            type: 'POST',
+            data: { CouponId: Id },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objCoupon = result.data;
+                    $('#CouponId').val(objCoupon.CouponId);
+                    $('#MembershipTypeId').val(objCoupon.MembershipTypeId);
+                    $('#CouponName').val(objCoupon.CouponName);
+                    $('#RedirectUrl').val(objCoupon.RedirectUrl);
+                    $('#Description').val(objCoupon.Description);
+                    $('#AddCoupon').dialog("open");
+                    $('#lbltitle').html('Edit Coupon');
+                    $('#spanfile').html('');
+                }
+                else {
+                    $('#divmessage').val(result.data);
+                }
+            }
+        });
+    }
+
+    function ViewCoupon(Id) {
+        $.ajax({
+            url: '@Url.Action("ViewCoupon", "Coupons")',
+            type: 'POST',
+            data: { CouponId: Id },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objCoupon = result.data;
+                    $('#CouponId').val(objCoupon.CouponId);
+                    $('#lblMembershipType').html(objCoupon.MembershipType);
+                    $('#lblCouponName').html(objCoupon.CouponName);
+                    $('#lblRedirectUrl').html(objCoupon.RedirectUrl);
+                    $('#lblDescription').html(objCoupon.Description);
+                    $('#ViewCoupon').dialog("open");
+                    $('#lbltitle1').html('View Coupon');
+                    $('#spanfile').html('');
+                }
+                else {
+                    $('#divmessage').val(result.data);
+                }
+            }
+        });
+    }
+
+    function Add() {
+        clearInnerPageCategory();
+        $("#AddCoupon").dialog("open");
+        $('#lbltitle').html('Add Coupon');
+    }
+
+    function clearInnerPageCategory() {
+        $('#CouponId').val('0');
+        $('#LogoUrl').val('');
+        $('#DocumentUrl').val('');
+        $('#CouponName').val('');
+        $('#Description').val('');
+        $('#RedirectUrl').val('');
+        $('#Target').val('');
+        $('#spanfile').html('');
+        $('#spanDocumentUrl').html('');
+        $('#spanLogoUrl').html('');
+        $('#spanCouponName').html('');
+        $('#spanDescription').html('');
+        $('#spanRedirectUrl').html('');
+        $('#CouponName').focus().removeClass("red-border");
+        $('#Description').focus().removeClass("red-border");
+        $('#RedirectUrl').focus().removeClass("red-border");
+
+    }
+    function Validate() {
+        if ($('#CouponId').val() == "0") {
+            if ($('#LogoUrl').val() == "") { $('#spanLogoUrl').html('Required.'); $('#LogoUrl').focus(); return false; } else { $('#spanLogoUrl').html(' '); }
+            if (!Common.isImage($('#LogoUrl').val())) { $('#spanLogoUrl').html('Sorry image is invalid. Only allowed extensions are:<b>jpg, png, PNG, gif, jpeg, JPEG</b>.'); $('#LogoUrl').focus(); return false; } else { $('#spanLogoUrl').html(''); }
+            if ($('#DocumentUrl').val() == "") { $('#spanDocumentUrl').html('Required.'); $('#DocumentUrl').focus(); return false; } else { $('#spanDocumentUrl').html(' '); }
+            if (!Common.isImage($('#DocumentUrl').val())) { $('#spanDocumentUrl').html('Sorry image is invalid. Only allowed extensions are:<b>jpg, png, PNG, gif, jpeg, JPEG</b>.'); $('#DocumentUrl').focus(); return false; } else { $('#spanDocumentUrl').html(''); }
+        }
+        if ($('#CouponName').val() == "") { $('#spanCouponName').html('Required.'); $('#CouponName').focus().addClass("red-border"); return false; } else { $('#spanCouponName').html(''); $('#CouponName').focus().removeClass("red-border"); }
+        if ($('#MembershipTypeId').val() == "") { $('#spanMembershipTypeId').html('Required.'); $('#MembershipTypeId').focus(); return false; } else { $('#spanMembershipTypeId').html(''); }
+
+        return true;
+    }
+
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="CouponId" />
+<input id="hdnsortorder" type="hidden" value="ASC" />
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    
+    <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+    <li class="active">Coupon</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+</ul></div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r spcT_c"><a onclick="Add();" class="btn btn-primary coursesMenu">Add Coupon</a> </div>
+                <h3 class="title">Coupons</h3>
+                <div class="sectionTabNav">
+                    <div class="btn-group">
+                        <a class="btn" href="@Url.Action("Index", "Members")">Members</a>
+                        <a class="btn"  href="@Url.Action("Index", "MembersOrders")">Orders</a>
+                        <a class="btn" href="@Url.Action("Index", "MailTemplates")">Mail Templates</a>
+                        <a class="btn" href="@Url.Action("Index", "MembershipTypes")">Membership Types</a>
+                        <a class="btn active" href="@Url.Action("Index", "Coupons")">Coupons</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="text9">
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="divmessage">
+                            @if (TempData["message"] != null)
+                            { @Html.Raw(TempData["message"].ToString())}
+
+                            @if (ViewBag.message != null)
+                            { @Html.Raw(ViewBag.message.ToString())}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td height="10" colspan="2"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="divCoupon">
+                            @{Html.RenderAction("CouponsList", "Coupons");}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div style="display: none;" id="AddCoupon">
+
+    @using (Html.BeginForm("AddCoupons", "Coupons", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <input type="hidden" id="CouponId" name="CouponId" value="0" />
+        <div class="dialog-title"><span id="lbltitle"></span></div>
+        <div class="dialog-content">
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span5">Logo :</div>
+                    <div class="span7">
+                        <input type="file" name="LogoUrl" id="LogoUrl" />
+                        <span style="padding-top: 7px;" class="field-validation-error" id="spanLogoUrl"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Coupon :</div>
+                    <div class="span7">
+                        <input type="file" name="DocumentUrl" id="DocumentUrl" />
+                        <span style="padding-top: 7px;" class="field-validation-error" id="spanDocumentUrl"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Coupon Name :</div>
+                    <div class="span7">
+                        <input type="text" name="CouponName" id="CouponName" value="" class="inputstyle">
+                        <span id="spanCouponName" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Membership Type :</div>
+                    <div class="span7">
+                        <select class="inputstyle" name="MembershipTypeId" id="MembershipTypeId">
+                            <option value="">Select</option>
+                            @if (lstMembershipTypes != null)
+                            {
+                                foreach (var item in lstMembershipTypes)
+                                { 
+                                <option value="@item.MembershipTypeId">@item.MembershipType</option>
+                                }
+                            }
+                        </select>
+                        <span id="spanMembershipTypeId" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Redirect URL :</div>
+                    <div class="span7">
+                        <input type="text" name="RedirectUrl" id="RedirectUrl" value="" class="inputstyle">
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Description :</div>
+                    <div class="span7">
+                        <textarea type="text" name="Description" id="Description" value="" class="inputstyle"></textarea>
+                        <span id="spanDescription" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <div class="clearfix t-r t-p5">
+                    <input type="submit" onclick="return Validate();" value="Submit" class="btn btn-primary font-w7">
+                    <a onclick=" $('#AddCoupon').dialog('close')" class="btn font-w7">Cancel</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div style="display: none;" id="ViewCoupon">
+    <div class="dialog-title"><span id="lbltitle1"></span></div>
+    <div class="dialog-content">
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span5">Coupon Name :</div>
+                <div class="span7">
+                    <label id="lblCouponName"></label>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Membership Type :</div>
+                <div class="span7">
+                    <label id="lblMembershipType"></label>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Redirect URL :</div>
+                <div class="span7">
+                    <label id="lblRedirectUrl"></label>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Description :</div>
+                <div class="span7">
+                    <label id="lblDescription"></label>
+                </div>
+            </div>
+            <div class="clearfix t-r t-p5">
+                <a onclick=" $('#ViewCoupon').dialog('close')" class="btn font-w7">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+</div>

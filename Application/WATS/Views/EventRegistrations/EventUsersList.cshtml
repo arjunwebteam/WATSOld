@@ -1,0 +1,261 @@
+﻿@{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+    var imglocNormal = System.Configuration.ConfigurationManager.AppSettings["usersiteurl"] + "Content/CulturalEvent/";
+    List<WATS.Entities.EventUserInfo> lstEventUserInfo = ViewBag.lstEventUserInfo;
+    var userRole = "";
+}
+@{ HttpContext ctx = HttpContext.Current;
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+
+    if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null)
+    {
+        authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+        userRole = authTicket.UserData;
+    }
+
+
+}
+
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+    function EventUserInfoStatus(EventUserInfoId) {
+        $('#load' + EventUserInfoId + '').show();
+        $('#divStatus' + EventUserInfoId + '').hide();
+
+        var type = 'Event';
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("EventUserInfoStatus", "EventRegistrations")', // the URL of the controller action method
+            data: { EventUserInfoId: EventUserInfoId, type: type }, // optional data
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    Onload($('#hdnPageNo').val());
+                    $('#load' + EventUserInfoId + '').hide();
+                    $('#divStatus' + EventUserInfoId + '').show();
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                }
+            }
+        });
+    }
+
+
+    function ResendQR(EventUserInfoId) {
+        $('#loadQR' + EventUserInfoId + '').show();
+        $('#divQR' + EventUserInfoId + '').hide();
+        var type = 'Event';
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ResendQRCode", "EventRegistrations")', // the URL of the controller action method
+            data: { EventUserInfoId: EventUserInfoId, type: type }, // optional data
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    Onload($('#hdnPageNo').val());
+                    $('#loadQR' + EventUserInfoId + '').hide();
+                    $('#divQR' + EventUserInfoId + '').show();
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                }
+            }
+        });
+    }
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div>
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+                <thead>
+                    <tr>
+                        @* <th class="table_checkbox"> <input type="checkbox" name="mainchk" onclick="javascript: Select('mainchk');" /></th>*@
+                        <th width="3%" align="center">S.No.</th>
+                        <th width="12%">
+                            <a onclick="javascript:sortresult('FirstName');" class="white-t-u">
+                                First Name @if (sortcolumn == "FirstName")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+                        <th width="12%">
+                            <a onclick="javascript:sortresult('LastName');" class="white-t-u">
+                                Last Name @if (sortcolumn == "LastName")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+                        <th width="10%">
+                            <a onclick="javascript:sortresult('ItemCategory');" class="white-t-u">
+                                Type @if (sortcolumn == "ItemCategory")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+                        <th width="8%">
+                            <a onclick="javascript:sortresult('IsApproved');" class="white-t-u">
+                                Status @if (sortcolumn == "IsApproved")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+
+                        <th width="10%">
+                            <a onclick="javascript:sortresult('Status');" class="white-t-u">
+                                Check-In Status @if (sortcolumn == "Status")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+
+                        <th width="10%">
+                            <a onclick="javascript:sortresult('InsertedTime');" class="white-t-u">
+                                Posted Date @if (sortcolumn == "InsertedTime")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+                        <th width="8%">
+                            <a onclick="javascript:sortresult('PaymentMethod');" class="white-t-u">
+                                Payment @if (sortcolumn == "PaymentMethod")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+                        <th width="7%">
+                            <a onclick="javascript:sortresult('PaymentStatus');" class="white-t-u">
+                                P Status @if (sortcolumn == "PaymentStatus")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+                        <th width="11%" style="text-align:center;">
+                            Resend
+                        </th>
+                        <th width="9%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (lstEventUserInfo.Count != 0)
+                    {
+                        Int64 i = 1;
+                        foreach (var item in lstEventUserInfo)
+                        {
+                            <tr>
+                                @* <td><input type="checkbox" name="checkbox" id="checkbox-@i" value= "@{@item.MemberId}" /></td>*@
+                                <td>@item.RId</td>
+                                @*  <td style="text-align: left">@(item.MemberId.ToString()=="0"?"":item.MemberId.ToString())</td>*@
+                                <td>
+                                    @item.FirstName
+                                </td>
+
+                                <td>
+                                    @item.LastName
+                                </td>
+                                <td>
+                                    @(item.ItemCategory)
+                                </td>
+                                <td>
+                                    <div id="divStatus@(item.EventUserInfoId)">
+                                        @{
+                                            var isactive = "";
+                                            var active = "";
+                                            var disable = "";
+                                            if (item.IsApproved == true)
+                                            {
+                                                isactive = "Verified";
+                                                disable = "style=\"cursor: pointer;\" onclick=\"javascript:EventUserInfoStatus(" + item.EventUserInfoId + ");\"";
+                                            }
+                                            else
+                                            {
+                                                isactive = "Un Verified";
+                                                active = "style=\"cursor: pointer;\" onclick=\"javascript:EventUserInfoStatus(" + item.EventUserInfoId + ");\"";
+                                            }
+                                            <div class="admin-active">
+                                                @isactive
+                                                <ul>
+                                                    <li><a @Html.Raw(active)>Verified</a></li>
+                                                    <li><a @Html.Raw(disable)>Un Verified</a></li>
+                                                </ul>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div id="load@(item.EventUserInfoId)" class="hide">
+                                        <img alt="load" class="" src="Content/images/loader.gif" />
+                                    </div>
+                                </td>
+
+                                <td style="text-align:center;">
+                                    @(item.Status != null && item.Status != "" ? item.Status : "--")
+                                </td>
+                                <td>
+                                    @item.InsertedTime.ToString("MMM-dd yyyy")
+                                </td>
+                                <td>
+                                    @(item.PaymentMethod == null ? "Free" : item.PaymentMethod)
+                                </td>
+                                <td>
+                                    @item.PaymentStatus
+                                </td>
+                                <td style="text-align:center">
+                                    @if (item.IsApproved == true)
+                                    {
+                                        <div id="divQR@(item.EventUserInfoId)">
+                                            <a title="Resend QR Code" onclick="javascript:ResendQR(@item.EventUserInfoId);"><img src="Content/images/resend.png" width="25" height="25" /></a>
+                                        </div>
+                                        <div id="loadQR@(item.EventUserInfoId)" class="hide">
+                                            <img alt="load" class="" src="Content/images/loader.gif" />
+                                        </div>
+                                    }
+
+                                </td>
+                                <td>
+                                    @if (item.DocumentUrl != null)
+                                    {
+                                        <a download="@item.DocumentUrl" title="Download Group Image" href="@(imglocNormal + item.DocumentUrl)" target="_blank"><i class="icon-download-alt"></i></a>
+                                    }
+
+                                    @if (item.Address != null)
+                                    {
+                                        <a download="@item.Address" title="Download Audio/Video file" href="@(imglocNormal + item.Address)" target="_blank"><i class="icon-download-alt"></i></a>
+                                    }
+                                    @if (userRole.Contains("Treasurer"))
+                                    {
+                                        <a rel="colorbox" class="details cboxElement" href="@Url.Action("ViewEventUser", "EventRegistrations", new { EventUserInfoId = item.EventUserInfoId })" title="view"><i class="icon-eye-open"></i></a>
+                                        <a href="@Url.Action("EditEventUser", "EventRegistrations", new { EventUserInfoId = item.EventUserInfoId })" title="Edit"><i class="icon-pencil"></i></a>
+                                    }
+                                    else
+                                    {
+                                        <a title="Send Mail" href="@Url.Action("SendMail", "Home", new { EventUserInfoId = item.EventUserInfoId })"><i class="icon-envelope"></i></a>
+                                        @*<a href="@Url.Action("ViewEventUser", "EventRegistrations", new {EventUserInfoId=item.EventUserInfoId })" title="view" ><i class="icon-eye-open"></i></a>*@
+                                        <a rel="colorbox" class="details cboxElement" href="@Url.Action("ViewEventUser", "EventRegistrations", new { EventUserInfoId = item.EventUserInfoId })" title="view"><i class="icon-eye-open"></i></a>
+                                        <a href="@Url.Action("EditEventUser", "EventRegistrations", new { EventUserInfoId = item.EventUserInfoId })" title="Edit"><i class="icon-pencil"></i></a>
+                                        <a class="pagedelete" onclick="javascript:Delete(@item.EventUserInfoId);" id="1" title="Delete"><i class="icon-trash"></i></a>
+                                    }
+                                    @*<a title="Delete" class="sepV_a disable-alpha"><i class="icon-trash"></i></a>*@
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="9">No Records Found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    </div>
+</div>
+@Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

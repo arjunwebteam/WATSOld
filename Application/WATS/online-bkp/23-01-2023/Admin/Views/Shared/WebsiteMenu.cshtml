@@ -1,0 +1,36 @@
+﻿@using System.Configuration;
+@{
+    Layout = null;
+    HttpContext ctx = HttpContext.Current;
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+
+    authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+
+    string UserRole = authTicket.UserData;
+}
+
+<div class="sectionTabNav">
+    <div class="btn-group">
+
+            @if (UserRole.Contains("InnerPages") || UserRole.Contains("SuperAdmin"))
+            {
+        <a id="wInnerPages" href="@Url.Action("Index", "InnerPages")" class="btn">Web Pages</a>
+            }
+            @if (UserRole.Contains("Sponsors") || UserRole.Contains("SuperAdmin") || UserRole.Contains("WebMaster"))
+            {
+        <a id="wSponsors" href="@Url.Action("Index", "Sponsors")"  class="btn">Sponsors</a>
+            }
+            @if (UserRole.Contains("ThemeBanners") || UserRole.Contains("SuperAdmin") || UserRole.Contains("WebMaster"))
+            {
+        <a id="wWebsiteBanners" href="@Url.Action("Index", "WebsiteBanners")" class="btn">Theme Banners</a>}
+                @if (UserRole.Contains("Enquiries") || UserRole.Contains("SuperAdmin") || UserRole.Contains("WebMaster"))
+            {
+        <a id="wEnquiries" href="@Url.Action("Index", "Enquiry")" class="btn">Enquiries</a>}
+         @if (UserRole.Contains("SuperAdmin"))
+            {
+         <a id="wMailTemplates" class="btn" href="@Url.Action("Index", "MailTemplates")">Mail Templates</a>
+         }
+    </div>
+</div>

@@ -1,0 +1,123 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var lstCommittees = (List<WATS.Entities.Committees>)ViewBag.lstCommittees;
+    List<WATS.Entities.CommitteeCategories> lstCommitteeCategories = ViewBag.lstCommitteeCategories;
+    var Type = ViewBag.Type;
+    var imglocNormal = System.Configuration.ConfigurationManager.AppSettings["adminimgurl"] + "committees/normalphoto/";
+    var catlocNormal = System.Configuration.ConfigurationManager.AppSettings["adminimgurl"] + "CommitteeCategories/";
+    ViewBag.heading = "Committee";
+}
+<script>
+    $(document).ready(function () {
+        $('#Li' + '@Type').addClass('active');
+        $('#MCommittees').addClass('active');
+    });
+
+</script>
+
+<article class="clearfix border t-m1 poppins-medium font14 l-h24 black-t" style="min-height: 1150px;">
+    <article class="clearfix curve position-r t-m4n b-p15">
+        @if (Type == "board-of-trustees")
+        {
+            <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">Board History</h2>
+        }
+        else
+        {
+            <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">Committee</h2>
+        }
+    </article>
+    <article class="clearfix p30 t-p15 tabhorizontal-p10">
+        @if (lstCommitteeCategories != null && lstCommitteeCategories.Count != 0)
+        {
+            int j = 0;
+            foreach (var category in lstCommitteeCategories)
+            {
+                if (category.CommitteeMemberCount != 0 && lstCommittees != null && lstCommittees.Count != 0)
+                {
+                    Int64 i = 0;
+                    Int64 k = 0;
+            <h1 class="Impact dkblack-t font24 l-h22 t-b-m0 title-bor mobilev-font22 @(j != 0 ? "t-b-p25" : "b-p25") t-t-c">@category.CategoryName</h1> 
+                    foreach (var item in lstCommittees)
+                    {
+                        if (item.CommitteeCategoryId == category.CommitteeCategoryId)
+                        {
+                            if (item.DisplayOrder == 1)
+                            {
+            <article class="clearfix p10 tablet-p5 shadow-bg">
+                <article class="clearfix box-row">
+                    <article class="clearfix box-5">
+                        <article class="clearfix profilepic-roundcircle tablet-r-m10 pull-right r-m20">
+                            <article style="max-width: 110px;" class="clearfix">
+                                @if (item.ImageUrl != null && item.ImageUrl != "")
+                                {
+                                    <img width="110" height="109" border="0" src="@(imglocNormal + item.ImageUrl)" alt="@item.Name" title=""/> 
+                                }
+                                else
+                                {
+                                    <img width="87" height="80" border="0" src="@(imglocNormal + "no-image.png")" alt="@item.Name" title=""/> 
+                                }
+
+                            </article>
+                        </article>
+                    </article>
+                    <article class="clearfix box-7">
+                        <article class="clearfix t-p15 l-m10">
+                            <h5 class="poppins-medium dkblack-t t-b-m0 l-h24 mobilev-font14 mobilev-l-h18 font14">@item.Name<span class="poppinsregular dis-b dkdark-t font13">@item.Designation</span></h5>
+                            <a class="red-t font12" href="mailto:@item.Email">@item.Email</a>
+                            <label class="greent-t poppins-medium font15 b-m0 t-p5">@item.PhoneNo</label>
+                        </article>
+                    </article>
+                </article>
+            </article>
+                                k++;
+                            }
+                            else
+                            {
+                                if (k == 1 || i == 0)
+                                {
+            @Html.Raw("<ul class=\"clearfix list-pn list-f m0 committee-list part-row\">")
+                                }
+            <li class="part-6 border-b gray-border">
+                <article class="clearfix p15 tablet-p10 committee-item">
+                    <article class="clearfix box-row">
+                        <article class="box-3">
+                            @if (item.ImageUrl != null && item.ImageUrl != "")
+                            {
+                                <article class="clearfix r-p10 r-m5 tablet-r-p10">
+                                    <img width="80" height="80" border="0"  src="@(imglocNormal + item.ImageUrl)" alt="@item.Name" title="" style="min-height:80px!important"/>
+                                </article>
+                            }
+                            else
+                            {
+                                <article class="clearfix r-p10 tablet-r-p10"> 
+                                    <img width="87" height="80" border="0" src="@(imglocNormal + "no-image.png")" alt="@item.Name" title="" style="min-height:80px!important"/>
+                                </article>
+                            }
+
+                        </article>
+                        <article class="box-9">
+                            <h5 class="poppins-medium black-t t-b-m0 l-h20 font14">@item.Name <span class="dis-b font13 dk-t">@item.Designation</span></h5>
+                            <a class="red-t font13" href="mailto:@item.Email">@item.Email</a>
+                            <label class="greent-t poppins-medium font15 b-m0 t-p5">@item.PhoneNo</label>
+                        </article>
+                    </article>
+                </article>
+            </li>
+                            k--;
+                            }
+                            i++;
+                        }
+                    }
+            @Html.Raw("</ul>")
+                }
+                j++;
+            }
+        }
+        else
+        {
+            <h2 class="font30 l-h48 poppins-medium orange-t t-c tbm5 tbp5">Committee will update soon...</h2> 
+        }
+
+    </article>
+
+</article>

@@ -1,0 +1,253 @@
+﻿@{
+    ViewBag.Title = "EditYouth";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    WATS.Entities.YouthUserInfo objYouthUserInfo = ViewBag.objYouthUserInfo;
+}
+
+<script>
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+    });
+
+    function Validate() {
+        if ($('#FirstName').val() == "") { $('#FirstName').focus().addClass("red-border"); $('#spanFirstName').html('Required.'); return false; } else { $('#spanFirstName').html(''); $('#FirstName').focus().removeClass("red-border"); }
+        //if ($('#Grade').val() == "") { $('#Grade').focus().addClass("red-border"); $('#spanGrade').html('Required.'); return false; } else { $('#spanGrade').html(''); $('#Grade').focus().removeClass("red-border"); }
+        if ($('#LastName').val() == "") { $('#LastName').focus().addClass("red-border"); $('#spanLastName').html('Required.'); return false; } else { $('#spanLastName').html(''); $('#LastName').focus().removeClass("red-border"); }
+        //if ($('#Age').val() == "") { $('#Age').focus().addClass("red-border"); $('#spanAge').html('Required.'); return false; } else { $('#spanAge').html(''); $('#Age').focus().removeClass("red-border"); }
+        if ($('#Email').val() == "") { $('#Email').focus().addClass("red-border"); $('#spanEmail').html('Required.'); return false; } else { $('#spanEmail').html(''); $('#Email').focus().removeClass("red-border"); }
+        if (!Common.CheckEmail($('#Email').val())) { $('#spanEmail').html('Invalid email address.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); }
+        if ($('#Mobile').val() == "") { $('#Mobile').focus().addClass("red-border"); $('#spanMobile').html('Required.'); return false; } else { $('#spanMobile').html(''); $('#Mobile').focus().removeClass("red-border"); }
+        return true;
+    }
+</script>
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+
+        <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+        <li class="active">Edit Youth</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r p_b"><a class="clearfix" href="@Url.Action("Index", "Youth")">← back to Youth list</a> </div>
+                <h3 class="title">Edit Youth Details</h3>
+
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            { @Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            { @Html.Raw(ViewBag.message.ToString())}
+        </div>
+        @using (Html.BeginForm("AddYouth", "Youth", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <input id="YouthUserInfoId" name="YouthUserInfoId" type="hidden" value="@(objYouthUserInfo.YouthUserInfoId)" />
+            
+
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Youth Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>First Name :<span class="red">*</span> </label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" value="@objYouthUserInfo.FirstName" id="FirstName" name="FirstName">
+                                                <span id="spanFirstName" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>Grade : </label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" value="@objYouthUserInfo.Grade" name="Grade" id="Grade">
+                                                <span id="spanGrade" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>Last Name :<span class="red">*</span> </label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" value="@objYouthUserInfo.LastName" id="LastName" name="LastName">
+                                                <span id="spanLastName" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>Age :</label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" value="@objYouthUserInfo.Age" name="Age" id="Age">
+                                                <span id="spanAge" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Contact Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>Email :<span class="red">*</span> </label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" value="@objYouthUserInfo.Email" id="Email" name="Email">
+                                                <span id="spanEmail" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>Phone : <span class="red">*</span></label>
+                                            </div>
+                                            <div class="span7">
+                                                <input type="text" value="@objYouthUserInfo.Mobile" name="Mobile" id="Mobile">
+                                                <span id="spanMobile" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Other Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>Hobbies &amp; Interest : </label>
+                                            </div>
+                                            <div class="span7">
+                                                <textarea rows="5" id="Hobbies" name="Hobbies">@objYouthUserInfo.Hobbies</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>Is WATS Member : </label>
+                                            </div>
+                                            <div class="span7">
+                                                <select name="IsMember" id="IsMember">
+                                                    <option @(objYouthUserInfo.IsMember==false?"selected='selected'":"")  value="false">No</option>
+                                                    <option  @(objYouthUserInfo.IsMember==true?"selected='selected'":"")  value="true">Yes</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>Why become  Youth Committee Member : </label>
+                                            </div>
+                                            <div class="span7">
+                                                <textarea rows="7" id="WhyCommitteeMember" name="WhyCommitteeMember">@objYouthUserInfo.WhyCommitteeMember</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Admin Review</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                        <div class="filedsetInner clearfix">
+
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>Admin Comments : </label>
+                                            </div>
+                                            <div class="span7">
+                                                <textarea name="AdminComment" id="AdminComment">@objYouthUserInfo.AdminComment</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <div class="actionButtons">
+                    <input type="submit" value="Update" onclick="return Validate();" class="button2 btn btn-primary">&nbsp;&nbsp;			
+                    <a class="btn btn-inverse" href="@Url.Action("Index", "Youth")">Cancel</a>
+                </div>
+            </div>
+        }
+
+
+
+    </div>
+
+
+
+</div>

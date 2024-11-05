@@ -1,0 +1,286 @@
+﻿@using System.Configuration;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    var catlist = (List<WATS.Entities.RegistrationCategories>)ViewBag.catlist;
+    var Memberslist = (List<WATS.Entities.Members>)ViewBag.Memberslist;
+    var eventlist = (List<WATS.Entities.Events>)ViewBag.Eventlist;
+
+    var objMembers = (WATS.Entities.Members)ViewBag.objMembers;
+    var lstPaymentMethod = (List<WATS.Entities.PaymentMethods>)objMembers.lstPaymentMethod;
+    var lstPaymentStatus = (List<WATS.Entities.PaymentStatus>)objMembers.lstPaymentStatus;
+}
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#Event Registration Form5').addClass('active');
+        $('#wForm5').addClass('active');
+        $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+        $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+        PagerClickBind();
+    });
+
+    function getEvents() {
+        var RegistrationCategoryId = ($('#RegistrationCategoryId').val());
+
+        $.ajax({
+            url: '@Url.Action("GetEventssByCategory", "Events")',
+            type: 'POST',
+            data: { RegistrationCategoryId: RegistrationCategoryId },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var lstEvents = result.data;
+                    var sb = "";
+                    sb = sb + "<select id=\"EventId\" name=\"EventId\" class=\"form-control\">";
+                    sb = sb + "<option selected=\"selected\" value=\"\">--Select Event--</option>";
+                    if (lstEvents != null) {
+                        for (var i = 0; i < lstEvents.length; i++) {
+                            sb = sb + "<option  value=\"" + lstEvents[i].EventId + "\">" + lstEvents[i].EventName + "</option>";
+                        }
+                    }
+                    sb = sb + "</select> <span class=\"error3\" id=\"spanEventId\"></span>";
+                    $('#divEvents').html(sb);
+                }
+            }
+        });
+    }
+
+    function sortresult(sortcolumn) {
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        Form5Bind(1);
+    }
+
+    function VolunteerView(EventRegistrationForm5Id) {
+        $.ajax({
+            url: '@Url.Action("EditForm5", "Form5")',
+            type: 'POST',
+            data: { EventRegistrationForm5Id: EventRegistrationForm5Id },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objEventRegistrationForm5 = result.data;
+                    $('#lblAddTitle').html(objEventRegistrationForm5.AddTitle);
+
+                    $("#Form5View").dialog("open");
+
+                }
+                else {
+                    alert(result.data);
+                }
+            }
+        });
+
+    }
+    function Form5Bind(Pageno) {
+
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+        var Search = ($.trim($('#txtsearch').val()));
+        var catid = $('#RegistrationCategoryId').val();
+        var EventId = $('#EventId').val();
+        var MemberId = $('#MemberId').val();
+        var PaymentMethodId = $('#PaymentMethodId').val();
+        var PaymentStatusId = $('#PaymentStatusId').val();
+
+        $.ajax({
+            url: '@Url.Action("Form5List", "Form5")',
+            type: 'GET',
+            cache: false,
+            data: { Search: Search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items, RegistrationCategoryId: catid, EventId: EventId, MemberId: MemberId, PaymentMethodId: PaymentMethodId, PaymentStatusId: PaymentStatusId},
+            success: function (result) {
+                $('#divDetails').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+
+    function Delete(EventRegistrationForm5Id) {
+        var val2 = confirm("Do you want to delete this record?");
+        if (val2) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("DeleteDetails", "Form5")',  // the URL of the controller action method
+                data: { EventRegistrationForm5Id: EventRegistrationForm5Id }, // optional data
+                success: function (result) {
+                    $("#divmessage").html(result.data);
+                    $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                    Form5Bind($('#hdnPageNo').val());
+                },
+                error: function (req, status, error) {
+                    $("#divmessage").html(result.data);
+                    $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                }
+            });
+        }
+    }
+
+
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            Form5Bind($(this).text());
+        });
+    }
+
+    function SearchClear() {
+        $('#txtsearch').val('');
+        Form5Bind(1);
+    }
+    function ClearSearch() {
+        $('#txtsearch').val('');
+        $('#EventRegistrationForm5Id').val('');
+        $('#hdnPageNo').val(1);
+        $('#RegistrationCategoryId').val('');
+        $('#EventId').val('');
+        $('#PaymentMethodId').val('');
+        $('#PaymentStatusId').val('');
+        Form5Bind(1);
+    }
+
+
+     function ExporttoExcel() {
+
+        var sortcolumn = $('#hdnsortcolumn').val();
+         var sortorder = $('#hdnsortorder').val();
+         var RegistrationCategoryId = $('#RegistrationCategoryId').val();
+
+         window.location.href = "Form5/ExportToForm5?Search=" + $('#txtsearch').val() + "&RegistrationCategoryId=" + RegistrationCategoryId + "&EventId=" + $('#EventId').val() + "&MemberId=" + $('#MemberId').val() +  "&PaymentMethodId=" + $('#PaymentMethodId').val() +"&PaymentStatusId=" + $('#PaymentStatusId').val() + "&sortcolumn=" + $('#hdnsortcolumn').val() + "&sortorder=" + $('#hdnsortorder').val();
+    }
+
+
+
+</script>
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="UpdatedDate" />
+<input id="hdnsortorder" type="hidden" value="ASC" />
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <h3 class="title">Event Registration Form5</h3>
+
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" class="main-text">
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="divmessage">
+                            @if (TempData["message"] != null)
+                            {@Html.Raw(TempData["message"].ToString())}
+
+                            @if (ViewBag.message != null)
+                            {@Html.Raw(ViewBag.message.ToString())}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="grayBackground nobL nobR">
+                            <div id="filterReg" class="ui-accordion">
+                                <h4><b>Search</b></h4>
+                                <div>
+                                    <div class="filedsetInner clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span4">
+                                                <label>Registration Category</label>
+                                                <select name="RegistrationCategoryId" id="RegistrationCategoryId" class="input-block-level" onchange="getEvents();">
+                                                    <option value="">-- Select --</option>
+                                                    @if (catlist != null)
+                                                    {
+                                                        foreach (var item in catlist)
+                                                        {
+                                                            if (item.Type == "Form5")
+                                                            {
+                                                                <option value="@item.RegistrationCategoryId">@item.CategoryName</option>
+                                                            }
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="span4">
+                                                <label>Events </label>
+                                                <div id="divEvents">
+                                                    <select name="EventId" id="EventId" class="input-block-level">
+                                                        <option value="">-- Select --</option>
+
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="span4">
+                                                <label>Payment Status</label>
+                                                <select name="PaymentStatusId" id="PaymentStatusId" class="input-block-level">
+                                                    <option value="">-- Select --</option>
+                                                    @if (lstPaymentStatus != null)
+                                                    {
+                                                        foreach (var item in lstPaymentStatus)
+                                                        {
+                                                            <option value="@item.PaymentStatusId">@item.PaymentStatus1</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span3">
+                                                <label>Payment Method</label>
+                                                <select name="PaymentMethodId" id="PaymentMethodId" class="input-block-level">
+                                                    <option value="">-- Select --</option>
+                                                    @if (lstPaymentMethod != null)
+                                                    {
+                                                        foreach (var item in lstPaymentMethod)
+                                                        {
+                                                            <option value="@item.PaymentMethodId">@item.PaymentMethod</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="span3">
+                                                <label>Search</label>
+                                                <input type="text" placeholder="FullName/Email/PhoneNo" name="txtsearch" id="txtsearch" class="input-block-level" />
+                                            </div>
+                                            <div class="span3">
+                                                <button class="btn btn-primary filterAction" type="submit" onclick="Form5Bind(1);">Search</button>
+                                                <button class="btn btn-inverse filterAction wC" type="submit" onclick="ClearSearch();">Clear</button>
+                                            </div>
+                                            <div class="span3">
+                                                <div class="fR t-r spcT_c white-t">
+                                                    <a onclick="ExporttoExcel();" class="btn btn-primary filterAction white-t">Export Details to Excel</a>
+                                                    <a href="@Url.Action("AddForm5Registration","Form5")" class="btn btn-inverse filterAction wC">Add Form5 Registration</a>
+                                               </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="divDetails">
+                            @{Html.RenderAction("Form5List", "Form5");}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

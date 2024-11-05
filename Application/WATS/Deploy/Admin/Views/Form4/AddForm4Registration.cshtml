@@ -1,0 +1,419 @@
+﻿@{
+    ViewBag.Title = "AddForm4";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    List<WATS.Entities.RegistrationCategories> lstRegistrationCategories = ViewBag.lstRegistrationCategories;
+
+    var cssloc = System.Configuration.ConfigurationManager.AppSettings["usersiteurl"] + "Content/Admin/front-end-style.css";
+
+    //Int64 RegistrationCategoryId = ViewBag.RegistrationCategoryId;
+
+    var objMembers = (WATS.Entities.Members)ViewBag.objMembers;
+    var lstPaymentMethod = (List<WATS.Entities.PaymentMethods>)objMembers.lstPaymentMethod;
+    var lstPaymentStatus = (List<WATS.Entities.PaymentStatus>)objMembers.lstPaymentStatus;
+    var eventlist = (List<WATS.Entities.Events>)ViewBag.lstEvents;
+}
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#Registrations').addClass('active');
+        $('#wForm4').addClass('active');
+       $("#ApprovedDate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-10:+10", altFormat: 'mm/dd/yy' });
+        $("#PaymentDate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-10:+10", altFormat: 'mm/dd/yy' });
+        $("#ChequeDate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-10:+10", altFormat: 'mm/dd/yy' });
+         $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+        $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+    });
+
+     function getEvents() {
+        var RegistrationCategoryId = ($('#RegistrationCategoryId').val());
+
+        $.ajax({
+            url: '@Url.Action("GetEventssByCategory", "Events")',
+            type: 'POST',
+            data: { RegistrationCategoryId: RegistrationCategoryId },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var lstEvents = result.data;
+                    var sb = "";
+                    sb = sb + "<select id=\"EventId\" name=\"EventId\" class=\"form-control\">";
+                    sb = sb + "<option selected=\"selected\" value=\"\">--Select Event--</option>";
+                    if (lstEvents != null) {
+                        for (var i = 0; i < lstEvents.length; i++) {
+                            sb = sb + "<option  value=\"" + lstEvents[i].EventId + "\">" + lstEvents[i].EventName + "</option>";
+                        }
+                    }
+                    sb = sb + "</select> <span class=\"error3\" id=\"lblEventId\"></span>";
+                    $('#divEvents').html(sb);
+                }
+            }
+        });
+    }
+
+    function Validate() {
+
+        var return_val = true;
+        if ($('#RegistrationCategoryId').val() == "") { $('#RegistrationCategoryId').focus(); $('#lblRegistrationCategoryId').html('Required.'); return false; } else { $('#lblRegistrationCategoryId').html(''); }
+        if ($('#EventId').val() == "") { $('#EventId').focus(); $('#lblEventId').html('Required.'); return false; } else { $('#lblEventId').html(''); }
+       if ($('#Type').val() == "") { $('#Type').focus().addClass("red-border"); $('#spanType').html('Required.'); return false; } else { $('#spanType').html(''); $('#Type').focus().removeClass("red-border"); }
+        if ($('#BusinessName').val() == "") { $('#BusinessName').focus().addClass("red-border"); $('#spanBusinessName').html('Required.'); return false; } else { $('#spanBusinessName').html(''); $('#BusinessName').focus().removeClass("red-border"); }
+        if ($('#FullName').val() == "") { $('#FullName').focus().addClass("red-border"); $('#spanFullName').html('Required.'); return false; } else { $('#spanFullName').html(''); $('#FullName').focus().removeClass("red-border"); }
+        if ($('#Field2').val() == "") { $('#Field2').focus().addClass("red-border"); $('#spanField2').html('Required.'); return false; } else { $('#spanField2').html(''); $('#Field2').focus().removeClass("red-border"); }
+        if ($('#Email').val() == "") { $('#spanEmail').html('Required.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); $('#Email').focus().removeClass("red-border"); }
+        if (!Common.CheckEmail($('#Email').val())) { $('#spanEmail').html('Please enter valid email address.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); $('#Email').focus().removeClass("red-border"); }
+        if ($('#PhoneNo').val() == "") { $('#PhoneNo').focus().addClass("red-border"); $('#spanPhoneNo').html('Required.'); return false; } else { $('#spanPhoneNo').html(''); $('#PhoneNo').focus().removeClass("red-border"); }
+        if ($('#ApprovedDate').val() == "") { $('#ApprovedDate').focus().addClass("red-border"); $('#spanApprovedDate').html('Required.'); return false; } else { $('#spanApprovedDate').html(''); $('#ApprovedDate').focus().removeClass("red-border"); }
+
+        if ($('#TransactionId').val() == "") { $('#TransactionId').focus().addClass("red-border"); $('#spanTransactionId').html('Required.'); return false; } else { $('#spanTransactionId').html(''); $('#TransactionId').focus().removeClass("red-border"); }
+        if ($('#BankName').val() == "") { $('#BankName').focus().addClass("red-border"); $('#spanBankName').html('Required.'); return false; } else { $('#spanBankName').html(''); $('#BankName').focus().removeClass("red-border"); }
+        if ($('#AmountPaid').val() == "") { $('#AmountPaid').focus().addClass("red-border"); $('#spanAmountPaid').html('Required.'); return false; } else { $('#spanAmountPaid').html(''); $('#AmountPaid').focus().removeClass("red-border"); }
+        if ($('#PaymentDate').val() == "") { $('#PaymentDate').focus().addClass("red-border"); $('#spanPaymentDate').html('Required.'); return false; } else { $('#spanPaymentDate').html(''); $('#PaymentDate').focus().removeClass("red-border"); }
+        if ($('#ChequeNo').val() == "") { $('#ChequeNo').focus().addClass("red-border"); $('#spanChequeNo').html('Required.'); return false; } else { $('#spanChequeNo').html(''); $('#ChequeNo').focus().removeClass("red-border"); }
+        if ($('#ChequeDate').val() == "") { $('#ChequeDate').focus().addClass("red-border"); $('#spanChequeDate').html('Required.'); return false; } else { $('#spanChequeDate').html(''); $('#ChequeDate').focus().removeClass("red-border"); }
+
+
+
+        return return_val;
+    }
+
+</script>
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+         <li class="active">Add Form4</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r p_b"><a class="clearfix" href="@Url.Action("Index", "Form4")">← back to Form4 list</a> </div>
+                <h3 class="title">Add Form4</h3>
+
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            {@Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            {@Html.Raw(ViewBag.message.ToString())}
+        </div>
+        @using (Html.BeginForm("AddForm4Registration", "Form4", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Registration Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Registration Category : <span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <select name="RegistrationCategoryId" id="RegistrationCategoryId" class="input-block-level" onchange="getEvents();">
+                                                    <option value="">-- Select Category --</option>
+                                                    @if (lstRegistrationCategories != null && lstRegistrationCategories.Count != 0)
+                                                    {
+                                                        foreach (var item in lstRegistrationCategories)
+                                                        {
+                                                            if (item.Type == "Form4")
+                                                            {
+                                                                <option value="@item.RegistrationCategoryId">@item.CategoryName</option>
+                                                            }
+                                                        }
+                                                    }
+                                                </select>
+                                                <span id="lblRegistrationCategoryId" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Type :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="Type" name="Type" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanType"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">First Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="FullName" name="FullName" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanFullName"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Email :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="Email" name="Email" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanEmail"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Approved Date :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" data-mask="" data-inputmask="'alias': 'mm/dd/yyyy'" id="ApprovedDate" name="ApprovedDate" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanApprovedDate"></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Admin Comments :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea type="text" id="AdminComments" name="AdminComments" class="input-block-level"></textarea>
+                                               
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Event Name : <span class="red-t">*</span></label>
+
+                                            </div>
+                                            <div class="span6">
+                                                <div id="divEvents">
+                                                    <select name="EventId" id="EventId" class="input-block-level">
+                                                        <option value="">-- Select Event Name --</option>
+
+                                                    </select>
+                                                    <span class="field-validation-error" id="lblEventId"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Business Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="BusinessName" name="BusinessName" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanBusinessName"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">LastName :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="Field2" name="Field2" onkeypress="ResetValidateClass();" onclick="ResetValidateClass();" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanField2"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Phone No :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" onkeypress="return Common.isNumberKey(event);" maxlength="10" id="PhoneNo" name="PhoneNo" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanPhoneNo"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Notes :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea type="text" id="Notes" name="Notes" class="input-block-level"></textarea>
+
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Describe planning to sell :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea type="text" id="Field1" name="Field1" class="input-block-level"></textarea>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Payment Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Transaction Id :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="TransactionId" name="TransactionId" class="input-block-level">
+                                                <span class="field-validation-error" id="spanTransactionId"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Amount Paid :<span class="red-t">*</span> </label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" onkeypress="return Common.isNumberKey(event)" id="AmountPaid" name="AmountPaid" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanAmountPaid"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Cheque No :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="ChequeNo" name="ChequeNo" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanChequeNo"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>Payment Method</label>
+                                            </div>
+                                            <div class="span6">
+                                                <select class="input-block-level" name="PaymentMethodId" id="PaymentMethodId">
+                                                    @if (lstPaymentMethod != null)
+                                                    {
+                                                        <option value="">Select</option>
+                                                        foreach (var item in lstPaymentMethod)
+                                                        {
+                                                            <option value="@item.PaymentMethodId">@item.PaymentMethod</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <span class="field-validation-error" id="spanPaymentMethodId"></span>
+                                            </div>
+                                        </div>
+
+                                        
+
+
+
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+
+
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Bank Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="BankName" name="BankName" class="input-block-level">
+                                                <span class="field-validation-error" id="spanBankName"></span>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Payment Date :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="PaymentDate" name="PaymentDate" class="input-block-level">
+                                                <span class="field-validation-error" id="spanPaymentDate"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Cheque Date :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="ChequeDate" name="ChequeDate" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanChequeDate"></span>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label>Payment Status</label>
+                                            </div>
+                                            <div class="span6">
+                                                <select class="input-block-level" name="PaymentStatusId" id="PaymentStatusId">
+                                                    @if (lstPaymentStatus != null)
+                                                    {
+                                                        <option value="">Select</option>
+                                                        foreach (var item in lstPaymentStatus)
+                                                        {
+                                                            <option value="@item.PaymentStatusId">@item.PaymentStatus1</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <span class="field-validation-error" id="spanState"></span>
+                                            </div>
+                                        </div>
+                                       
+                                      
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="form-actions">
+                <div class="actionButtons">
+                    <input type="submit" value="Submit" onclick="return Validate()" name="send" class="button2 btn btn-primary">
+                    <a class="btn btn-inverse" href="@Url.Action("Index", "Form4")">Cancel</a>
+                </div>
+            </div>
+
+        }
+        <div class="adminfooter"></div>
+    </div>
+                </div>
+

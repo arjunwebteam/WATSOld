@@ -1,0 +1,364 @@
+﻿@{
+    //Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    List<WATS.Entities.EventParticipants> lstEventParticipants = ViewBag.lstEventParticipants;
+
+    List<WATS.Entities.Events> lstEvents = ViewBag.lstEvents;
+
+    var ChoreographerId = ViewBag.ChoreographerId;
+    Int64 EventUserInforId = 0;
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+    });
+
+    function addRow() {
+
+        var table = document.getElementById("moreusers");
+
+        var rowCount = table.rows.length;
+        var row = table.insertRow(rowCount);
+        row.id = rowCount;
+
+        var cell1 = row.insertCell(0);
+        var element1 = document.createElement("input");
+        element1.type = "text";
+        element1.name = "[" + (rowCount - 1) + "].FirstName";
+        element1.id = "FirstName-" + (rowCount - 1);
+        element1.placeholder = "First Name";
+        element1.className = "form-control b-m0";
+        cell1.appendChild(element1);
+
+        var cell2 = row.insertCell(1);
+        var element2 = document.createElement("input");
+        element2.type = "text";
+        element2.name = "[" + (rowCount - 1) + "].LastName";
+        element2.id = "LastName-" + (rowCount - 1);
+        element2.placeholder = "Last Name";
+        element2.className = "form-control b-m0";
+        cell2.appendChild(element2);
+
+        var cell3 = row.insertCell(2);
+        var element3 = document.createElement("input");
+        element3.type = "text";
+        element3.name = "[" + (rowCount - 1) + "].Age";
+        element3.id = "Age-" + (rowCount - 1);
+        element3.placeholder = "Age";
+        element3.className = "form-control b-m0";
+        cell3.appendChild(element3);
+
+
+        var cell4 = row.insertCell(3);
+        cell4.innerHTML = "<input class='form-control b-m0' name='[" + (rowCount - 1) + "].Mobile' id='Mobile-" + (rowCount - 1) + "' type='text' placeholder ='Member Id' />";
+        //var element3 = document.createElement("input");
+        //element3.type = "text";
+        //element3.className = "form-control b-m0";
+        //element3.name = "[" + (rowCount - 1) + "].Mobile";
+        //element3.id = "Mobile-" + (rowCount - 1);
+        //cell3.appendChild(element3);
+        ////CheckMemberIdAvailability(element3);
+
+
+
+        //    //var cell4 = row.insertCell(3);
+        //    //var element4 = document.createElement("input");
+        //    //element4.type = "text";
+        //    //element4.className = "form-control b-m0";
+        //    //element4.name = "[" + (rowCount - 1) + "].Mobile";
+        //    //element4.id = "Mobile-" + (rowCount - 1);
+
+        //document.getElementById("Mobile-" + (rowCount - 1)).onChange = function () { MemberCheck(rowCount - 1) };
+        var cell5 = row.insertCell(4);
+        cell5.innerHTML = '<a onclick="javascript:deleteRow(' + rowCount + ')" class="grayborder dis-in p5 border-radius"><img src="Content/images/delete-icon.png" width="" height="" class="r-p3"/>Remove</a>';
+        $('#hdnRowCount').val(rowCount);
+
+        if (rowCount < 3) {
+            $('#btnrow').show();
+        }
+        else { $('#btnrow').hide(); }
+    }
+
+    function deleteRow(i) {
+        try {
+            var row = document.getElementById(i);
+            row.parentNode.removeChild(row);
+            getrowcount();
+        } catch (e) {
+            alert(e);
+        }
+    }
+
+    function getrowcount() {
+        var table = document.getElementById("moreusers");
+        var rowCount = table.rows.length;
+
+        if (rowCount - 1 < 4) {
+            $('#btnrow').show();
+        }
+        else { $('#btnrow').hide(); }
+    }
+
+    function EventsParticipantDetailsBind() {
+        $.ajax({
+            url: '@Url.Action("EventParticipantsList", "Choreographer")',
+            type: 'GET',
+            cache: false,
+            data: { ChoreographerId: '@ChoreographerId' },
+            success: function (result) {
+                $('#divParticipantDetailsBind').html(result);
+            }
+        });
+    }
+
+    function ParticipantDetailsEdit(EventParticipantId) {
+      $('#view-' + EventParticipantId).hide();
+      $('#edit-' + EventParticipantId).show();
+    }
+
+    function PaticipantsUpdate(EventParticipantId, EventId, EventUserInfoId) { 
+            var objEventPaticipants = {};
+            objEventPaticipants.EventParticipantId = EventParticipantId;
+            objEventPaticipants.EventId = EventId;
+            objEventPaticipants.EventUserInfoId = EventUserInfoId;
+            objEventPaticipants.FirstName = $('#FirstName-' + EventParticipantId).val();
+            objEventPaticipants.LastName = $('#LastName-' + EventParticipantId).val();
+            objEventPaticipants.Age = $('#Age-' + EventParticipantId).val();
+            objEventPaticipants.Mobile = $('#Mobile-' + EventParticipantId).val();
+
+
+            $.ajax({
+                url: '@Url.Action("AddEventRegistrationTypes", "Event")',
+                type: 'POST',
+                data: JSON.stringify(objEventPaticipants),
+                datatype: "JSON",
+                contentType: 'application/json',
+                success: function (result) {
+                    if (result.ok) {
+                        $("#divmessage1").html(result.data);
+                        window.location.href = "@Request.Url.AbsoluteUri";
+                        $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                    }
+                    else {
+                        $("#spanFirstName").html(result.data);
+                        $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                    }
+                }
+            }); 
+    }
+
+    //function MemberIdChange() {
+    //    if ($("#AMobileNo").val() != '') {
+    //        if (CheckMemberIdAvailability($("#AMobileNo").val(), $("#ALastName").val())) {
+
+    //            $("#AMobileNo").val('');
+    //            $("#AMobileNo").attr('placeholder', 'Member Id not exist.');
+    //            alert('Last Name And Member Id mismatched');
+    //            $("#AMobileNo").focus().addClass("validate"); return false;
+    //        }
+    //        else { $("#AMobileNo").removeClass("validate"); }
+    //    }
+    //    return true;
+    //}
+
+    function CheckMemberIdAvailability(Mobile,LastName) {
+        var returnval = null;
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CheckMemberIdAvailability", "Members")', // the URL of the controller action method
+            data: { SpouseCell: Mobile,LastName :LastName }, // optional data
+            datatype: "JSON",
+            async: false,
+            success: function (result) {
+                if (result.ok) {
+                    returnval = result.data;
+                }
+            }
+        });
+        return returnval;
+    }
+
+    function PaticipantsAdd() { 
+            var objEventPaticipants = {};
+            objEventPaticipants.EventParticipantId = $('#AEventParticipantId').val();
+            objEventPaticipants.EventId = $('#AEventId').val();
+            objEventPaticipants.EventUserInfoId = $('#AEventUserInfoId').val();
+            objEventPaticipants.FirstName = $('#AFirstName').val();
+            objEventPaticipants.LastName = $('#ALastName').val();
+            objEventPaticipants.Age = $('#AAge').val();
+            objEventPaticipants.Mobile = $('#AMobileNo').val();
+
+
+            $.ajax({
+                url: '@Url.Action("AddEventRegistrationTypes", "Event")',
+                type: 'POST',
+                data: JSON.stringify(objEventPaticipants),
+                datatype: "JSON",
+                contentType: 'application/json',
+                success: function (result) {
+                    if (result.ok) {
+                        $("#divmessage1").html(result.data);
+                        window.location.href = "@Request.Url.AbsoluteUri";
+                        $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                    }
+                    else {
+                        $("#spanFirstName").html(result.data);
+                        $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                    }
+                }
+            }); 
+    }
+
+    function DeleteEventParticipants(EventParticipantId) {
+        var val2 = confirm("Do you want to delete this?");
+        if (val2) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("DeleteEventParticipants", "Event")',  // the URL of the controller action method
+                data: { EventParticipantId: EventParticipantId }, // optional data
+                success: function (result) {
+                    $("#divmessage").html(result.data);
+                    EventsParticipantDetailsBind();;
+                    $('.alert-success').append('<i class="fa fa-check"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                },
+                error: function (req, status, error) {
+                    $("#divmessage").html(result.data);
+                    $('.alert-danger').append('<i class="fa fa-ban"></i><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>');
+                }
+            });
+        }
+    }
+
+
+</script>
+
+<article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height: 1150px;">
+    @*<article class="clearfix curve position-r t-m4n b-p15">
+        <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">Event Participants</h2>
+    </article>*@
+    <article class="clearfix p30 t-p15 tabhorizontal-p10">
+         
+        <article class="clearfix t-p15">
+
+            <div id="divParticipantDetailsBind">
+                @if (lstEvents != null && lstEvents.Count != 0)
+                {
+                    foreach (var eitem in lstEvents)
+                    {
+                        List<WATS.Entities.EventParticipants> lstEventUsers = lstEventParticipants.FindAll(x => x.EventId == eitem.EventId); 
+                        if ((lstEventUsers != null && lstEventUsers.Count != 0) && eitem.EventParticipantsCount != 0)
+                        {
+                            WATS.Entities.EventParticipants objParticipant = lstEventUsers.FirstOrDefault();
+                            EventUserInforId = objParticipant.EventUserInfoId;
+
+                            <h4 class="font16 pink-t Roboto-Medium t-m0"> <b> @eitem.EventName </b> - Event Participants </h4>
+                            <article class="clearfix border-b2 orangeborder1 b-m20" style="max-width: 225px;"></article>
+
+                            int i = 1;
+                            <table width="100%" class="table table-bordered table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th width="5%">S.no</th>
+                                        <th width="25%">First Name</th>
+                                        <th width="25%">Last Name</th>
+                                        <th width="10%">Age</th>
+                                        <th width="20%">Member Id</th>
+                                        
+                                            <th width="15%">Action</th> 
+                                        </tr>
+                                    @foreach (var item in lstEventUsers)
+                                    {
+                                    <tr id="view-@item.EventParticipantId">
+                                        <td width="5%">
+                                            <label>@i</label>
+                                        </td>
+                                        <td width="25%">
+                                            <label>@item.FirstName</label>
+                                        </td>
+                                        <td width="25%">
+                                            <label>@item.LastName</label>
+                                        </td>
+                                        <td width="10%">@item.Age</td>
+                                        <td width="20%">@item.Mobile</td>
+                                        @if (Convert.ToDateTime(eitem.TopLine) >= DateTime.UtcNow.Date)
+                                        {
+                                            <td width="13%">
+                                                <a onclick="ParticipantDetailsEdit(@item.EventParticipantId, @item.EventId, @item.EventUserInfoId);" title="Edit"><i class="edit-icon"></i></a>
+                                                <a title="Delete" onclick="DeleteEventParticipants(@item.EventParticipantId)" class="pagedelete"><i class="delete-icon"></i></a>
+                                            </td>
+                                        }
+                                        </tr>
+
+                                        <tr id="edit-@item.EventParticipantId" style="display:none;">
+                                            <td width="5%">@i</td>
+                                            <td width="25%">
+                                                <input type="text" class="form-control" id="FirstName-@item.EventParticipantId" name="RegistrationTitle-@item.EventParticipantId" value="@item.FirstName" />
+                                            </td>
+                                            <td width="25%">
+                                                <input type="text" class="form-control" id="LastName-@item.EventParticipantId" name="MemberAmount-@item.EventParticipantId" value="@item.LastName" />
+                                            </td>
+                                            <td width="10%">
+                                                <input type="text" class="form-control" id="Age-@item.EventParticipantId" name="NonMemberAmount-@item.EventParticipantId" value="@item.Age" />
+                                            </td>
+                                            <td width="20%">
+                                                <input type="text" class="form-control" id="Mobile-@item.EventParticipantId" name="Mobile-@item.EventParticipantId" value="@item.Mobile" />
+                                            </td>
+
+                                            <td width="13%">
+                                                <a onclick="PaticipantsUpdate(@item.EventParticipantId, @item.EventId, @item.EventUserInfoId);" title="Update">Update</a>
+                                            </td>
+                                        </tr>
+
+                                        i++;
+                                    }
+
+                                </tbody>
+                            </table>
+
+                            if (lstEventUsers.Count < 20)
+                            {
+                                
+                                    <input type="hidden" value="@eitem.EventId" id="AEventId" name="EventId" />
+                                    <input type="hidden" value="@ChoreographerId" id="AChoreographerId" name="ChoreographerId" />
+                                    <input type="hidden" value="@EventUserInforId" id="AEventUserInfoId" name="EventUserInfoId" />
+
+                                    <table width="100%" class="table table-bordered table-hover" id="moreusers">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <input type="text" class="form-control b-m0" name="FirstName" style="height: 40px!important; min-height: 40px!important;" placeholder="FirstName" id="AFirstName">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control b-m0" name="LastName" style="height: 40px!important; min-height: 40px!important;" placeholder="LastName" id="ALastName">
+                                                </td>
+
+                                                <td>
+                                                    <input type="text" class="form-control b-m0" name="Age" onkeypress="return Common.isNumberKey(event)" style="height: 40px!important; min-height: 40px!important;" placeholder="Age" id="AAge">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control b-m0" name="MobileNo" style="height: 40px!important; min-height: 40px!important;" placeholder="MemberId" id="AMobileNo">
+                                                </td>
+                                                <td width="13%" style="text-align:center; font-family:Impact; font-size:16px; vertical-align:middle; letter-spacing:0.5px;">
+                                                    <a onclick="PaticipantsAdd();" title="Add"> Add</a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table> 
+                            }
+                            @*if (lstEventUsers.Count < 20)
+                            {
+                                    <article class="clearfix t-r">
+                                        <a onclick="addRow();" class="btn btn-primary Roboto-Medium font13 t-t-u l-r-m4 l-r-p10 t-b-p5 mobile-l-r-p30 mobilev-b-m10" style="background-color: #ff1b1b; border:none;">Add Row</a>
+                                    </article>
+                                }*@
+                            }
+                        }
+                    }
+            </div>
+             
+            
+        </article>
+    </article>
+</article>

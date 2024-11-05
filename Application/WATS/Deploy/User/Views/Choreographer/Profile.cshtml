@@ -1,0 +1,164 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    WATS.Entities.ChoreographerInfo objChoreographerInfo = ViewBag.objChoreographerInfo;
+
+    var objChoreographerDetails = (WATS.Entities.ChoreographerInfo)ViewBag.objChoreographerInfo;
+    var MembershipType = ViewBag.MembershipType;
+
+    var location = System.Configuration.ConfigurationManager.AppSettings["userimgurl"] + "ChoreographerProfileImages/";
+}
+<script>
+    $(document).ready(function () {
+        $('#changepassword').dialog({
+            autoOpen: false,
+            width: 420,
+            modal: true
+        });
+    });
+    function ValidatePassword() {
+        var returnval = true;
+        if ($('#OldPassword').val() == '') { $('#OldPassword').focus().addClass("validate"); returnval = false; } else { $('#OldPassword').removeClass("validate"); }
+        if ($('#NewPassword').val() == '') { $('#NewPassword').focus().addClass("validate"); returnval = false; }
+        else {
+            $('#NewPassword').removeClass("validate");
+            var pwd = $('#NewPassword').val();
+            if (pwd.length < 6) { $('#NewPassword').addClass('validate'); $('#spanNewPassword').html('Reqired minimum 6 charecters'); returnval = false; } else { $('#spanNewPassword').html(''); $('#NewPassword').removeClass("validate"); }
+            //if (!Common.ValidatePassword($('#NewPassword').val())) { $('#spanNewPassword').html('Please enter minimum 8 characters (atleast one special character & one numeric character).'); $('#NewPassword').focus().addClass("validate"); returnval = false; } else { $('#spanNewPassword').html(''); $('#NewPassword').removeClass("validate"); }
+        }
+        if ($('#ConfPassword').val() == '') { $('#ConfPassword').focus().addClass("validate"); returnval = false; }
+        else {
+            $('#ConfPassword').removeClass("validate");
+            if ($('#NewPassword').val() != $('#ConfPassword').val()) { $('#ConfPassword').val(''); document.getElementsByName('ConfPassword')[0].placeholder = 'Password do not match.'; $('#ConfPassword').focus().addClass("validate"); returnval = false; } else { $('#ConfPassword').removeClass("validate"); }
+        }
+
+        return returnval;
+    }
+
+    function ChangePasswordshow() {
+        $('#spanNewPassword').html('');
+        $('#OldPassword').val('');
+        $('#NewPassword').val('');
+        $('#ConfPassword').val('');
+        $('#OldPassword').removeClass("validate");
+        $('#NewPassword').removeClass("validate");
+        $('#ConfPassword').removeClass("validate");
+        $('#changepassword').dialog('open');
+    }
+</script>
+<!--- DILOG BOX Change Password [start] --->
+<section id="changepassword" style="display: none; overflow: visible;">
+    <article class="clearfix dialog-title t-c white-bg border-b b-p5">
+        <span class="pull-right r-p10 t-p10"><a class="cursor-p latomedium red-t" onclick=" $('#changepassword').dialog('close')"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></span>
+        <h3 class="black-t font20 poppins-medium">Change Password</h3>
+    </article>
+    <article class="clearfix dialog-content">
+        <article class="clearfix p30 mobile-p10 border-radius4 dk-cream-bg">
+
+            @using (Html.BeginForm("ChangePassword", "Choreographer", FormMethod.Post, new { enctype = "multipart/form-data", @class = "validation" }))
+            {
+                @Html.Hidden("ChoreographerId", (Int64)objChoreographerInfo.ChoreographerId)
+
+                <input type="password" value="" class="form-control" id="OldPassword" name="OldPassword" placeholder="Old Password" />
+                <input type="password" value="" placeholder="New Password" class="form-control" id="NewPassword" name="NewPassword" />
+                <input type="password" value="" placeholder="Retype Password" class="form-control" id="ConfPassword" name="ConfPassword" />
+                <article class="clearfix t-p10 t-c">
+                    <input type="submit" value="UPDATE" class="btn btn-danger btn-block poppinssemibold font18 border-radius0" onclick="return ValidatePassword()" />
+
+                </article>
+            }
+        </article>
+    </article>
+</section>
+<!--- DILOG BOX  BOX Change Password [end] --->
+
+<article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height: 1150px;">
+    <article class="clearfix curve position-r t-m4n b-p15">
+        <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">Choreographer <span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16">Profile</span></h2>
+    </article>
+    <article class="clearfix p30 t-p0 tabhorizontal-p10">
+        <article class="clearfix res-item2 b-p20">
+            <article class="clearfix font14 mobile-p10 border-radius5 pull-right" style="max-width: 350px;">
+                <a onclick="$(&quot;#changepassword&quot;).dialog(&quot;open&quot;);" class="btn btn-primary Roboto-Medium font13 t-t-u l-r-m4 l-r-p10 t-b-p5 mobile-l-r-p30 mobilev-b-m10" style="background-color: #ff1b1b; border:none;">Reset Password </a>
+
+            </article>
+            <article class="clearfix font14 mobile-p10 border-radius5 pull-right" style="max-width: 350px;">
+                <a href="@Url.Action("LogOff", "Members")" class="btn btn-primary Roboto-Medium font13 t-t-u l-r-m4 l-r-p10 t-b-p5 mobile-l-r-p30 mobilev-b-m10" style="background-color: #ff1b1b; border:none;"><span class="glyphicon glyphicon-off" aria-hidden="true"></span> Logout </a>
+
+            </article>
+        </article>
+        <article class="clearfix sep-row b-p10">
+            <article class="sep-12">
+                <article class="clearfix res-item2">
+                    <article class="clearfix font14 t-c mobile-p10 orangeborder1 border-t3 b-m10 innershadow border-radius5 l-r-m-auto" style="max-width: 350px;">
+
+                        <h3 class="merunred-t kaushan_scriptregular font22 l-h20 t-m5">@objChoreographerDetails.FirstName @objChoreographerDetails.LastName</h3>
+
+
+                        <article class="clearfix flower-design t-p25"></article>
+                        <article class="clearfix p4 l-r-m-auto white-bg border-radius50 shadow" style="max-width: 109px;">
+                            <img alt="" title="" src="@WATS.BLL.Common.ValidateImage((location + objChoreographerDetails.ImageUrl), "Content/images/profile-img.jpg")" class="border-radius50" height="104" width="109">
+                        </article>
+                        @*<article class="clearfix t-p7 poppins-medium font12"><a onclick="$(&quot;#changeimage&quot;).dialog(&quot;open&quot;);" class="red-t"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span>Edit Profile Pic</a></article>*@
+
+                        <h5 class="clearfix SegoePrint font15 l-h24 black-t t-m5 b-m3">@objChoreographerDetails.Email</h5>
+                        @*<a onclick="$(&quot;#changemail&quot;).dialog(&quot;open&quot;);" class="red-t poppins-medium font12"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span>Change mail id</a>*@
+                        <article class="clearfix flower-design t-p25"></article>
+                    </article>
+                </article>
+            </article>
+            <article class="sep-8 l-p25">
+
+                @*<article class="clearfix l-p20 tabhorizontal-l-p0 Poppins-Regular dk-t">
+                        <article class="clearfix res-item2">
+                            <h4 class="font16 black-t poppins-medium t-m0">Personal Information <span class="pull-right t-p5 font13"><a id="editprofilebtn" onclick="editprofile()" class="dkblue2-t"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span>Edit Profile</a></span></h4>
+                            <article class="clearfix border-b" style="max-width: 125px;"></article>
+
+                        </article>
+                    </article>*@
+
+            </article>
+        </article>
+
+        @using (Html.BeginForm("MediaUpdate", "Event", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <input type="hidden" value="@objChoreographerDetails.ChoreographerId" id="ChoreographerId" name="ChoreographerId" />
+
+            <article id="divParticipantDetailsBind">
+                <h3 class="merunred-t kaushan_scriptregular font22 l-h20 t-b-m10"> Program Details </h3>
+            </article>
+            <article class="clearfix part-row b-p3">
+                <article class="part-4">
+                    <article class="clearfix l-p10 tablet-l-p5 mobile-l-p0">
+                        <label class="font14 black-t"> Group/Choreographer Image  <span class="red-t">*</span></label>
+                        <input type="file" name="DocumentUrl" id="DocumentUrl" />
+                        <span class="field-validation-error" id="Aspanfile" style="display: inline-block; padding-top: 5px;"></span>
+                    </article>
+                </article>
+                <article class="part-4">
+                    <article class="clearfix l-p10 tablet-l-p5 mobile-l-p0">
+                        <article class="part-7">
+                            <label class="font14 black-t">Audio(.mp3)/Video(.mp4)file<span class="red-t">*</span></label>
+                            <input type="file" name="Address" id="Address" />
+                            <span class="field-validation-error" id="AspanAddress" style="display: inline-block; padding-top: 5px;"></span>
+                        </article>
+                    </article>
+                </article>
+                <article class="part-4">
+                    <article class="clearfix l-p10 tablet-l-p5 mobile-l-p0">
+                        <article class="part-7">
+                            <img src="Content/images/search-loading.gif" id="loadalert" class="hide" alt="Loading" />
+                            <input type="submit" id="altbtn" value="Submit" class="btn btn-danger btn-sm btn-block font18 l-r-p25 t-t-u border-radius0">
+                        </article>
+                    </article>
+                </article>
+            </article>
+        }
+
+        <article id="divParticipantDetailsBind">
+            <h3 class="merunred-t kaushan_scriptregular font22 l-h20 t-b-m10"> Event Participant Details </h3>
+
+            @{Html.RenderAction("EventParticipantsList", "Choreographer", new { ChoreographerId = objChoreographerDetails.ChoreographerId });}
+        </article>
+    </article>
+
+</article>

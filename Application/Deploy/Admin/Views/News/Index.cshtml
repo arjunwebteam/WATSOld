@@ -1,0 +1,186 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        PagerClickBind();
+        $('#NewsView').dialog
+            ({
+                autoOpen: false,
+                width: 550,
+                modal: true
+            });
+    });
+
+    function Onload(Pageno) {
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+        var Search = $('#txtsearch').val();
+
+        $.ajax({
+            url: '@Url.Action("NewsList", "News")',
+            type: 'GET',
+            cache: false,
+            data: { Search: Search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items },
+            success: function (result) {
+                $('#divNewsList').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+
+    function NewsView(Id) {
+        $.ajax({
+            url: '@Url.Action("View", "News")',
+            type: 'POST',
+            data: { NewsId: Id },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objNews = result.data;
+                    $('#lblTitle').html(objNews.Title);
+                    $('#lblNewsText').html(objNews.NewsText);
+                    $('#lblOrderNo').html(objNews.OrderNo);
+
+                    $('#NewsView').dialog('open');
+                }
+                else {
+                    alert(result.data);
+                }
+            }
+        });
+    }
+
+    function sortresult(sortcolumn) {
+
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        Onload(1);
+    }
+
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            Onload($(this).text());
+        });
+    }
+    function ClearSearch() {
+        $('#txtsearch').val('');
+        $('#hdnPageNo').val(1);
+        Onload(1);
+    }
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="NewsId" />
+<input id="hdnsortorder" type="hidden" value="ASC" />
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+
+        <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+        <li class="active">News</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r">
+                    <a href="@Url.Action("Save", "News")" class="btn btn-small btn-primary coursesMenu">Add News</a>
+                </div>
+                <h3 class="title">News</h3>
+
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            { @Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            { @Html.Raw(ViewBag.message.ToString())}
+        </div>
+        <div class="grayBackground nobL nobR">
+            <div id="filterReg" class="ui-accordion">
+                <h4><b>Search</b></h4>
+                <div>
+                    <div class="filedsetInner clearfix">
+                        <div class="row-fluid">
+                            <div class="span4">
+                                <label>Search </label>
+                                <input type="text" name="txtsearch" id="txtsearch" style="width: 300px;" value="" placeholder="News Title " />
+                            </div>
+                            <div class="span3">
+                                <button class="btn btn-primary filterAction" onclick="Onload(1);">Search</button>
+                                <a class="btn btn-inverse filterAction wC" onclick="ClearSearch();">Clear</a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <table width="100%" border="0" cellpadding="0" cellspacing="0" class="text12">
+
+            <tr>
+                <td>
+                    <div id="divNewsList">
+                        @{Html.RenderAction("NewsList", "News");}
+                    </div>
+
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 12px 0"></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div id="NewsView" style="display: none;">
+    <div class="dialog-title">View News</div>
+    <div class="dialog-content">
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span5">News Title :</div>
+                <div class="span7">
+                    <span id="lblTitle"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Order No :</div>
+                <div class="span7">
+                    <span id="lblOrderNo"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Description :</div>
+            </div>
+            <div class="row-fluid">
+                <span id="lblNewsText"></span>
+            </div>
+            <div class="buttons-container t-r">
+                <a class="btn" onclick=" $('#NewsView').dialog('close')">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>

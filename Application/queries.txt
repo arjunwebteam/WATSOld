@@ -1,0 +1,19 @@
+UPDATE MembershipOrders
+SET MembershipOrders.OrderDate = Members.InsertedTime
+FROM Members
+WHERE MembershipOrders.OrderDate IS NULL AND MembershipOrders.MembershipTypeId = 12
+AND Members.InsertedTime <= '2023-05-11';
+
+
+
+
+
+
+SELECT * FROM MembershipOrders MO
+INNER JOIN Members M ON M.MemberId = MO.MemberId
+WHERE MO.TransactionId IS NULL AND MO.PaymentMethodId = 1 
+AND MO.MembershipTypeId = 9 AND M.InsertedTime <= '2023-05-11'
+
+UPDATE MembershipOrders sET PaymentMethodId = 2 where MemberId IN (22793)
+
+sELECT * fROM Members ORDER By InsertedTime ASC

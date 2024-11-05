@@ -1,0 +1,103 @@
+﻿@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    WATS.Entities.News objNews = ViewBag.objNews;
+    var cssloc = System.Configuration.ConfigurationManager.AppSettings["usersiteurl"] + "Content/front-end-style.css";
+}
+
+<script type="text/javascript" src="ckeditor/ckeditor.js"></script>
+<script type="text/javascript" src="ckfinder/ckfinder.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+    });
+
+    function Validate() {
+        if ($('#Title').val() == "") { $('#Title').focus().addClass("red-border"); $('#spanTitle').html('Required.'); return false; } else { $('#spanTitle').html(''); $('#Title').focus().removeClass("red-border"); }
+
+        if (CKEDITOR.instances.Description.getData() == "") { $('#Description').focus().addClass("red-border"); $('#lblDescription').html('Required.'); return false; } else { $('#Description').val(CKEDITOR.instances.Description.getData()); $('#lblDescription').html(''); }
+        return true;
+    }
+</script>
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+    <li><a href="@Url.Action("Index", "News")">News</a> <span class="divider">/</span></li>
+    <li class="active">Edit News</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+</ul></div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r"><a class="clearfix" href="@Url.Action("Index", "News")">←back to news</a>  </div>
+                <h3 class="title">Edit News</h3>
+               
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        @using (Html.BeginForm("Save", "News", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <input type="hidden" name="NewsId" id="NewsId" value="@objNews.NewsId" />
+            
+            <div class="l-r-p20 t-b-p10 clearfix font13">
+                <div class="row-fluid">
+                    <div class="span2 t-p5 dkgray-t">Title : <span class="red-t">*</span></div>
+                    <div class="span10">
+                        <input type="text" class="span4 b-m0 " value="@objNews.Title" name="Title" id="Title">
+                        <span id="spanTitle" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <br />
+                <div class="row-fluid">
+                    <div class="span2 t-p5 dkgray-t">Order No : </div>
+                    <div class="span10">
+                        <input type="text" onkeypress="return Common.isNumberKey(event)" value="@objNews.OrderNo" class="span4 b-m0 " name="OrderNo" id="OrderNo">
+                        <span id="spanOrderNo" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <br />
+                <div class="row-fluid">
+                    <div class="span2 t-p5 dkgray-t">Image Url : </div>
+                    <div class="span10">
+                        <input type="file" class="span4 b-m0" id="ImageUrl" name="ImageUrl">
+                        <span id="spanImageUrl" class="field-validation-error"></span>
+                    </div>
+                </div>
+                <br />
+                <div class="row-fluid">
+                    <div class="span2 t-p5 dkgray-t">Description : <span class="red-t">*</span></div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span10">
+                        <textarea rows="10" name="NewsText" id="Description" cols="80" style="visibility: hidden; display: none;">@objNews.NewsText</textarea>
+                        <span id="lblDescription" class="field-validation-error"></span>
+                        <script type="text/javascript">
+                            var editor = CKEDITOR.replace('Description', { contentsCss: '@(cssloc)' });
+                            CKFinder.setupCKEditor(editor, '@(System.Configuration.ConfigurationManager.AppSettings["baseurl"])ckfinder/');
+                        </script>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <div class="actionButtons">
+                        <input type="submit" class="button2 btn btn-primary" onclick="return Validate()" name="send" value=" Submit ">
+                        <a href="@Url.Action("Index", "News")" class="btn btn-inverse">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

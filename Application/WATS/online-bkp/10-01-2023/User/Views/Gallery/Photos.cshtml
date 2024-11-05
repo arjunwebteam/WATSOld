@@ -1,0 +1,53 @@
+﻿@{
+    ViewBag.Title = "Photos";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var lstPhoto = (List<WATS.Entities.Photos>)ViewBag.lstPhotos;
+    var lstPhotoCategories = (List<WATS.Entities.PhotoCategories>)ViewBag.lstPhotoCategories;
+
+    var imglocNormal = System.Configuration.ConfigurationManager.AppSettings["adminimgurl"] + "photogallery/normalphoto/";
+    ViewBag.heading = "Gallery";
+}
+
+
+         <article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height:1150px;">
+                    <article class="clearfix curve position-r t-m4n b-p15">
+     <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">Photo <span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16">Gallery </span></h2></article>
+     <article class="clearfix p30 t-p15 tabhorizontal-p10">
+          @if (lstPhotoCategories != null && lstPhotoCategories.Count != 0 && lstPhoto.Count != 0)
+        {
+            foreach (var PhotoCategory in lstPhotoCategories)
+            {
+                    if (lstPhoto != null && lstPhoto.Count != 0 && PhotoCategory.PhotosCount != 0)
+                    {
+                         <h2 class="Poppins-Regular merunred-t l-h18 t-b-p10 t-m0">@PhotoCategory.CategoryName</h2>
+                    }
+                    if (lstPhoto != null && lstPhoto.Count != 0)
+                    {        
+<ul class="clearfix list-pn list-f m0 p-g-list black-t tabhorizontal-t-p10">
+     @foreach (var item in lstPhoto)
+                {
+                    if (item.PhotoCategoryId == PhotoCategory.PhotoCategoryId)
+                    {     
+                            <li class="effectpart3">
+                                <article class="clearifx white-bg border p7">
+                                <figure class="clearfix position-r overflow-h maskeffect imggrow border shadow-b">
+                                   <a  target="_blank" href="@item.AlbumLink"> <img width="350" height="250" title="@item.ImageDescription" alt="@item.ImageDescription" src="@(imglocNormal + item.ImageUrl)"> </a></figure>
+                                    </article>
+                                  <h5 class="font15 merunred-t t-m5 b-m0 l-h22"> <a  target="_blank" href="@item.AlbumLink">@item.ImageDescription</a></h5>
+                            </li>
+     }
+     }
+                             
+                    </ul>
+          }
+          }
+          }
+
+         else
+         {
+               <h4 class="clearfix kaushan_scriptregular font24 merunred-t">No Photos Found.</h4>
+          }
+
+</article>
+         </article>
+   

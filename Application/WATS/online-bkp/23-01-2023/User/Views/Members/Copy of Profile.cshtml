@@ -1,0 +1,488 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    WATS.Entities.Members objMember = ViewBag.objMembers;
+    var location = System.Configuration.ConfigurationManager.AppSettings["userimgurl"] + "MemberProfileImages/";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#LiProfile').addClass('active');
+        $('#changemail').dialog
+           ({
+               autoOpen: false,
+               width: 680,
+               modal: true
+           });
+        $('#changeimage').dialog({
+            autoOpen: false,
+            width: 680,
+            modal: true
+        });
+        $('#membership').dialog({
+            autoOpen: false,
+            width: 680,
+            modal: true
+        });
+        $('#changepassword').dialog({
+            autoOpen: false,
+            width: 680,
+            modal: true
+        });
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+    function emailclose() {
+        $('#Email').val('');
+        $('#spanEmail').html('');
+
+        $('#changeemail').dialog('close');
+    }
+    function emailchange() {
+        $('#PEmail').removeClass("validate");
+        $('#PEmail').val('@objMember.Email');
+        $('#changeemail').dialog('open');
+    }
+    function ValidateEmail() {
+        if ($.trim($('#PEmail').val()) == '') { $('#PEmail').focus().addClass("validate"); return false; } else { $('#PEmail').focus().removeClass("validate"); }
+        if (!Common.CheckEmail($('#PEmail').val())) { $('#PEmail').val(''); document.getElementsByName('Email')[0].placeholder = 'Invalid email address'; $('#PEmail').focus().addClass("validate"); return false; } else { $('#PEmail').removeClass("validate"); }
+        if (!CheckEmailAvailability($('#PEmail').val())) { $('#PEmail').val(''); document.getElementsByName('Email')[0].placeholder = 'Email already exist.'; $('#PEmail').focus().addClass("validate"); return false; } else { $('#PEmail').removeClass("validate"); }
+
+        return true;
+    }
+    function ResetEmailValidateClass() {
+        $('#PEmail').removeClass("validate");
+
+    }
+    function CheckEmailAvailability(email) {
+        var returnval = null;
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CheckProfileEmailAvailability", "Members")', // the URL of the controller action method
+            data: { MemberId: @(objMember.MemberId), Email: email }, // optional data
+            datatype: "JSON",
+            async: false,
+            success: function (result) {
+                if (result.ok) {
+                    returnval = result.data;
+                }
+            }
+        });
+        return returnval;
+    }
+    function Photochange()
+    {
+        $('#file').val('');
+        $('#spanfile').html('');
+        $('#changeimage').dialog('open');
+    }
+    function mobileonchange()
+    {
+        var phone = $('#MobilePhone').val();
+        if(phone.length == 3){$('#MobilePhone').val(phone+'-');}
+        else if(phone.length == 7){$('#MobilePhone').val(phone+'-');}
+    }
+    function mobileonchange1()
+    {
+        var phone = $('#HomePhone').val();
+        if(phone.length == 3){$('#HomePhone').val(phone+'-');}
+        else if(phone.length == 7){$('#HomePhone').val(phone+'-');}
+    }
+    function profileEditvalidate() {
+        var returnvalue = true;
+        if ($('#FirstName').val() == '') { $('#FirstName').focus().addClass('validate'); returnvalue = false } else { $('#FirstName').removeClass('validate'); }
+        if ($('#HomePhone').val() == '') { $('#HomePhone').focus().addClass('validate'); $('#spanPhone').html(''); returnvalue = false }
+        else {
+            $('#HomePhone').removeClass('validate');
+            var phone = $('#HomePhone').val();
+            if (phone.length != 12) { $('#HomePhone').focus().addClass('validate'); $('#spanPhone').html('Enter your 10 digit phone no.'); returnvalue = false } else { $('#HomePhone').removeClass('validate'); }
+        }
+        if ($('#MobilePhone').val() == '') { $('#MobilePhone').focus().addClass('validate'); $('#spanPhone').html(''); returnvalue = false }
+        else {
+            $('#MobilePhone').removeClass('validate');
+            var phone = $('#MobilePhone').val();
+            if (phone.length != 12) { $('#MobilePhone').focus().addClass('validate'); $('#spanPhone').html('Enter your 10 digit phone no.'); returnvalue = false } else { $('#MobilePhone').removeClass('validate'); }
+        }
+
+        if ($('#City').val() == '') { $('#City').focus().addClass('validate'); returnvalue = false } else { $('#City').removeClass('validate'); }
+        if ($('#State').val() == '') { $('#State').focus().addClass('validate'); returnvalue = false } else { $('#State').removeClass('validate'); }
+        if ($('#ZipCode').val() == '') { $('#ZipCode').focus().addClass('validate'); returnvalue = false } else { $('#ZipCode').removeClass('validate'); }
+        return returnvalue;
+    } 
+
+    function ValidatePassword() {
+        var returnval = true;
+        if ($('#OldPassword').val() == '') { $('#OldPassword').focus().addClass("validate"); returnval = false; } else { $('#OldPassword').removeClass("validate"); }
+        if ($('#NewPassword').val() == '') { $('#NewPassword').focus().addClass("validate"); returnval = false; } 
+        else { 
+            $('#NewPassword').removeClass("validate"); 
+            var pwd = $('#NewPassword').val();
+            if (pwd.length < 6) { $('#NewPassword').addClass('validate'); $('#spanNewPassword').html('Reqired minimum 6 charecters'); returnval = false; } else { $('#spanNewPassword').html(''); $('#NewPassword').removeClass("validate"); }
+            //if (!Common.ValidatePassword($('#NewPassword').val())) { $('#spanNewPassword').html('Please enter minimum 8 characters (atleast one special character & one numeric character).'); $('#NewPassword').focus().addClass("validate"); returnval = false; } else { $('#spanNewPassword').html(''); $('#NewPassword').removeClass("validate"); }
+        }
+        if ($('#ConfPassword').val() == '') { $('#ConfPassword').focus().addClass("validate"); returnval = false; } 
+        else { 
+            $('#ConfPassword').removeClass("validate"); 
+            if ($('#NewPassword').val() != $('#ConfPassword').val()) { $('#ConfPassword').val(''); document.getElementsByName('ConfPassword')[0].placeholder = 'Password do not match.'; $('#ConfPassword').focus().addClass("validate"); returnval = false; } else { $('#ConfPassword').removeClass("validate"); }
+        }
+        
+        return returnval;
+    }
+
+    function ChangePasswordshow() {
+        $('#spanNewPassword').html('');
+        $('#OldPassword').val('');
+        $('#NewPassword').val('');
+        $('#ConfPassword').val('');
+        $('#OldPassword').removeClass("validate");
+        $('#NewPassword').removeClass("validate");
+        $('#ConfPassword').removeClass("validate");
+        $('#changepassword').dialog('open');
+    }
+    function ValidateImg() {
+        if ($('#file').val() == "") { $('#spanfile').html('Required.'); $('#file').focus(); return false; }
+        if (!Common.isImage($('#file').val())) { $('#spanfile').html('Invalid Image.'); $('#file').focus(); return false; }
+        return true;
+    }
+</script>
+
+<article id="changemail" style="display: none; overflow: visible;">
+  <article class="clearfix dialog-title t-c"> <span class="popupclosebtn"><a class="cursor-p Poppins-Regular font13 white-t" onClick=" $('#changemail').dialog('close')">Close <span class="close-icon dis-in v-align-m"></span></a></span> 
+  </article>
+  <article class="clearfix dialog-content p10">
+    <article class="clearfix t-c t-p5 poplogo">
+      <img src="Content/images/popup-logo.png" alt="Bay Area Telangana Association" width="345" height="140" border="0"/>
+    </article>
+    <article class="clearfix gray-bg p50 t-b-p40 border-radius4 tabhorizontal-p30 mobile-p20">
+      <h3 class="poppins-medium font24 black-t t-m0 b-p3">Change Email Id</h3>
+      @using (Html.BeginForm("ProfileEmailUpdate", "Members", FormMethod.Post, new { enctype = "multipart/form-data", @class = "validation" }))
+                    {
+                        @Html.Hidden("MemberId", (Int64)@objMember.MemberId)
+      <label>Email :</label>
+      <input type="text" class="input-block-level" onkeypress="ResetEmailValidateClass();" onclick="ResetEmailValidateClass();" placeholder="Email Id" id="PEmail" name="Email" value="@objMember.Email" />
+      <div class="clearfix t-p15 t-r">
+        <input type="submit" value="UPDATE" onclick="return ValidateEmail();" class="btn btn-danger btn-lg btn-block poppins-medium font14 l-h26 t-t-u t-b-p10 border-t0 border-l0 border-r0 border-radius4 tabhorizontal-t-c" style="border-bottom:#5b3c3f 4px solid;" />
+      </div>
+      }
+    </article>
+  </article>
+</article>
+<article id="changeimage" style="display: none; overflow: visible;">
+  <article class="clearfix dialog-title t-c"> <span class="popupclosebtn"><a class="cursor-p Poppins-Regular font13 white-t" onClick=" $('#changeimage').dialog('close')">Close <span class="close-icon dis-in v-align-m"></span></a></span> 
+  </article>
+  <article class="clearfix dialog-content p10">
+    <article class="clearfix t-c t-p5 poplogo">
+      <img src="Content/images/popup-logo.png" alt="Bay Area Telangana Association" width="345" height="140" border="0"/>
+    </article>
+    <article class="clearfix gray-bg p50 t-b-p40 border-radius4 tabhorizontal-p30 mobile-p20">
+      <h3 class="poppins-medium font24 black-t t-m0 b-p3">Change Profile Picture</h3>
+       @using (Html.BeginForm("ProfilePic", "Members", FormMethod.Post, new { enctype = "multipart/form-data", @class = "b-m0 validation" }))
+                {
+                    @Html.Hidden("MemberId", (Int64)@objMember.MemberId)
+      <label>Uploade Image :</label>
+      <div class="clearfix border p8 white-bg">
+        <input type="file" id="file" name="file" class="form-control p0 border0 b-m0 white-bg" />
+      </div>
+      <div class="clearfix t-p15 t-r">
+        <input type="submit" onclick="return ValidateImg();" value="UPDATE" class="btn btn-danger btn-lg btn-block poppins-medium font14 l-h26 t-t-u t-b-p10 border-t0 border-l0 border-r0 border-radius4 tabhorizontal-t-c" style="border-bottom:#5b3c3f 4px solid;" />
+      </div>
+       }
+    </article>
+  </article>
+</article>
+
+<article id="membership" style="display: none; overflow: visible;">
+  <article class="clearfix dialog-title t-c"> <span class="popupclosebtn"><a class="cursor-p Poppins-Regular font13 white-t" onClick=" $('#membership').dialog('close')">Close <span class="close-icon dis-in v-align-m"></span></a></span> 
+  </article>
+  <article class="clearfix dialog-content p10">
+    <article class="clearfix t-c t-p5 poplogo">
+      <img src="Content/images/popup-logo.png" alt="Bay Area Telangana Association" width="345" height="140" border="0"/>
+    </article>
+    <article class="clearfix gray-bg p50 t-b-p40 border-radius4 tabhorizontal-p30 mobile-p20">
+      <h3 class="poppins-medium font24 black-t t-m0 b-p3">Membership Details</h3>
+          <form class="clearfix m0" method="post">
+      <div class="container-fluid dkgray-t">
+        <div class="box-row">
+          <div class="box-5 t-p3">User Name</div>
+          <div class="box-7">
+            <div class="clearfix p5 b-p0"><span> <span class="dis-in r-m7">:</span>@objMember.FirstName </span></div>
+          </div>
+        </div>
+        <div class="box-row">
+          <div class="box-5 t-p3">Member Id</div>
+          <div class="box-7">
+            <div class="clearfix p5 b-p0"><span><span class="dis-in r-m7">:</span> @objMember.MemberId </span></div>
+          </div>
+        </div>
+        <div class="box-row">
+          <div class="box-5 t-p3">Membership Type</div>
+          <div class="box-7">
+            <div class="clearfix p5 b-p0"><span><span class="dis-in r-m7">:</span> @objMember.MembershipType </span></div>
+          </div>
+        </div>
+        <div class="box-row">
+          <div class="box-5 t-p3">ExpiryDate</div>
+          <div class="box-7">
+            <div class="clearfix p5 b-p0"><span> <span class="dis-in r-m7">:</span>@objMember.ExpiryDate.ToString("MMM-dd yyyy") </span></div>
+          </div>
+        </div>
+      </div>
+      <div class="clearfix t-p15 t-r">
+        <input type="button" value="Cancel" class="btn btn-warning btn-lg btn-block poppins-medium font14 l-h26 t-t-u t-b-p10 border-t0 border-l0 border-r0 border-radius4 tabhorizontal-t-c" style="border-bottom:#5b3c3f 4px solid;" onClick=" $('#membership').dialog('close')" />
+      </div>
+    </form>
+    </article>
+  </article>
+</article>
+<article id="changepassword" style="display: none; overflow: visible;">
+  <article class="clearfix dialog-title t-c"> <span class="popupclosebtn"><a class="cursor-p Poppins-Regular font13 white-t" onClick=" $('#changepassword').dialog('close')">Close <span class="close-icon dis-in v-align-m"></span></a></span> 
+  </article>
+  <article class="clearfix dialog-content p10">
+    <article class="clearfix t-c t-p5 poplogo">
+      <img src="Content/images/popup-logo.png" alt="Bay Area Telangana Association" width="345" height="140" border="0"/>
+    </article>
+    <article class="clearfix gray-bg p50 t-b-p40 border-radius4 tabhorizontal-p30 mobile-p20">
+      <h3 class="poppins-medium font24 black-t t-m0 b-p3">Change Password</h3>
+       @using (Html.BeginForm("ChangePassword", "Members", FormMethod.Post, new { enctype = "multipart/form-data", @class = "validation" }))
+                                    {
+                                        @Html.Hidden("MemberId", (Int64)objMember.MemberId) 
+      <label>Current Password :</label>
+      <input id="OldPassword" name="OldPassword" placeholder="Old Password" type="Password" class="input-block-level" />
+      <label>New Password :</label>
+      <input placeholder="Reset Password" id="NewPassword" name="NewPassword" type="Password" class="input-block-level" />
+      <label>Retype Password :</label>
+      <input id="ConfPassword" name="ConfPassword" placeholder="Confirm Password" type="Password" class="input-block-level"  />
+      <div class="clearfix t-p15 t-r">
+        <input type="submit" onclick="return ValidatePassword()" value="UPDATE" class="btn btn-danger btn-lg btn-block poppins-medium font14 l-h26 t-t-u t-b-p10 border-t0 border-l0 border-r0 border-radius4 tabhorizontal-t-c" style="border-bottom:#5b3c3f 4px solid;" />
+      </div>
+                                    }
+    </article>
+  </article>
+</article>
+
+
+
+
+
+<article class="clearfix p35 tablet-p10 tabhorizontal-p20 p10-1024 tabhorizontal-minheight0" style="min-height:1450px;">
+             <h1 class="BerkshireSwash-Regular font32 lired-t t-b-m0 b-p15 l-h28 border-b grayborder mobile-font26 mobile-b-p5 tabhorizontal-b-m10 tabhorizontal-b-p10">Profile</h1>
+                          <article class="clearfix gray-bg gray-t2 t-p30 l-p30 raleway-medium font14 tablet-minheight0 tablet-bor-r0 mobile-b-p10 tablet-b-p15 tabhorizontal-minheight0">
+                          
+                    <article class="clearfix sm-row">
+                  <article class="clearfix box-3">
+                      <img src="@WATS.BLL.Common.ValidateImage((location + objMember.ProfileImage), "Content/images/profile-img.jpg")" alt="Profile Pic" width="160" height="160" border="0" class="border-radius6"/>
+                         <h5 class="clearfix t-c r-p35 mobilev-r-p0 mobilev-t-c tablet-t-c tablet-r-p0 t-b-m3 font18 tablet-font14 l-h18 t-b-p5"><a class="raleway-medium black-t font13" onClick="$(&quot;#changeimage&quot;).dialog(&quot;open&quot;);">Edit Profile Pic</a></h5></article>
+                          <article class="clearfix box-9"> 
+                          <article class="clearfix r-p30 t-p20 tablet-l-p10 mobilev-p10">
+                      <h4 class="font30 Poppins-Regular t-l dark-black-t tablet-l-r-p10 t-b-m0 tablet-t-b-p0 mobilev-font20">@objMember.FirstName <span class="font15 clearfix mobilev-font12">@objMember.Email<a onClick="$(&quot;#changemail&quot;).dialog(&quot;open&quot;);" class="light-blue-t dis-in l-p5 mobilev-l-p0"> - Change mail id</a></span></h4>
+                       </article>
+                      </article>
+                       </article>
+                    </article>
+                        <article class="clearfix profile-list t-m10"> 
+                        <ul class="clearfix list-pn font14 m0 listhover poppins-medium list-f">
+                            <li class="active"> <a class="black-t"><span class="dis-in r-p5 v-align-m"><i class="icon-user"></i></span>Profile</a><i class="width100 position v-align-m t-c position"><img src="Content/images/profile-curve.png" alt="" width="22" height="7" border="0" class="mobile-hide tablet-hide" /></i> </li>
+                             <li> <a onClick="$(&quot;#membership&quot;).dialog(&quot;open&quot;);" class="black-t t-m0"><span class="dis-in r-p5 v-align-m"><i class="icon-membership"></i></span>Membership</a> </li> 
+                           
+                            
+                             <li> <a onClick="$(&quot;#changepassword&quot;).dialog(&quot;open&quot;);" class="black-t"><span class="dis-in r-p5 v-align-m"><i class="icon-off"></i></span>Change Password</a> </li>
+                           
+                          </ul></article>
+                    <article class="clearfix gray-t3 poppins-medium mobile-t-p10 t-b-p25 l-r-p30 tabhorizontal-p20 tablet-p15 mobilev-font12 mobilev-l-r-p10">
+                      <h4 class="font16 dark-red-t Poppins-Regular t-b-m0 t-b-p5 tablet-t-b-p0">Personal Information <span class="pull-right t-p5 font13"><a id="editprofilebtn" onClick="editprofile()" class="black-t btn shaow-b" > Edit Profile</a></span></h4>
+                      <article class="clearfix border-b" style="max-width:125px;"></article>
+                      <article class="clearfix t-b-p10" >
+                        <article class="clearfix" id="viewdiv" >
+                          <article class="clearfix box-row b-p5">
+                            <article class="box-5">First Name<span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t"><span class="dis-in r-p15 pull-left">@objMember.FirstName </article>
+                          </article>
+                          <article class="clearfix box-row b-p5">
+                            <article class="box-5">Last Name<span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t">@objMember.LastName </article>
+                          </article>
+                          <article class="clearfix box-row b-p5">
+                            <article class="box-5">Email<span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t">@objMember.Email</article>
+                          </article>
+                          <article class="clearfix box-row b-p5">
+                            <article class="box-5">Mobile No <span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t">@objMember.MobilePhone</article>
+                          </article>
+                         <h4 class="font16 dark-red-t Poppins-Regular t-b-m0 t-b-p5 tablet-t-b-p0">Contact Information</h4>
+                            <article class="clearfix box-row b-p5">
+                            <article class="box-5">Location <span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t">@objMember.City</article>
+                          </article>
+                          <article class="clearfix box-row b-p5">
+                            <article class="box-5">Mobile Phone <span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t">@objMember.HomePhone</article>
+                          </article>
+                          
+                          <article class="clearfix box-row b-p5">
+                            <article class="box-5">State <span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t">@objMember.State </article>
+                          </article>
+                          
+                          <article class="clearfix box-row b-p5">
+                            <article class="box-5">Pincode <span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t">@objMember.ZipCode </article>
+                          </article>
+                        </article>
+                           @using (Html.BeginForm("ProfileEdit", "Members", FormMethod.Post, new { enctype = "multipart/form-data", @class = "validation b-m0" }))
+                            {  
+                        <article class="clearfix hide" id="editdiv" >
+                            <input type="hidden" value="@objMember.MemberId" id="MemberId" name="MemberId" />
+                          <article class="clearfix sm-row" >
+                            <article class="sm-6" >
+                              <article class="clearfix r-p10 mobilev-r-p0 tablet-r-p5">
+                                <label>First Name <strong class="red-t montserratregular font14s">*</strong></label>
+                                <input type="text" class="input-block-level" id="FirstName" value="@objMember.FirstName" name="FirstName" />
+                              </article>
+                            </article>
+                            <article class="sm-6" >
+                              <article class="clearfix l-p10 mobilev-l-p0 tablet-l-p5">
+                                <label>Last Name <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                <input type="text" class="input-block-level" id="LastName" value="@objMember.LastName" name="LastName" />
+                              </article>
+                            </article>
+                          </article>
+                                                                                                                   <article class="clearfix sm-row" >
+                            <article class="sm-6" >
+                              <article class="clearfix r-p10 mobilev-r-p0 tablet-r-p5">
+                                <label>Home No <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                <input type="text" class="input-block-level" value="@objMember.HomePhone" id="HomePhone" name="HomePhone" onkeypress="mobileonchange1(); return Common.isNumberKey(event);" maxlength="12" />
+                              </article>
+                            </article>
+                            <article class="sm-6" >
+                              <article class="clearfix l-p10 mobilev-l-p0 tablet-l-p5">
+                                <label>Mobile No <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                <input type="text" class="input-block-level" value="@objMember.MobilePhone" id="MobilePhone" name="MobilePhone" onkeypress="mobileonchange(); return Common.isNumberKey(event);" maxlength="12" />
+                              </article>
+                            </article>
+                          </article>
+                          
+                             <article class="clearfix sm-row" >
+                            <article class="sm-6" >
+                              <article class="clearfix r-p10 mobilev-r-p0 tablet-r-p5">
+                                <label>Location <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                <input type="text" class="input-block-level" id="City" name="City" value="@objMember.City" />
+                              </article>
+                            </article>
+                            <article class="sm-6" >
+                              <article class="clearfix l-p10 mobilev-l-p0 tablet-l-p5">
+                                <label>State <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                                      <article class="clearfix dropdown">
+                        <select class="dropdown-select ui-select" id="State" name="State">
+                          <option value="">Select State</option>
+                            <option @(objMember.State == "Alberta" ? "selected=selected" : "") value="Alberta">Alberta</option>
+                            <option @(objMember.State == "British Columbia" ? "selected=selected" : "") value="British Columbia">British Columbia</option>
+                            <option @(objMember.State == "Manitoba" ? "selected=selected" : "") value="Manitoba">Manitoba</option>
+                            <option @(objMember.State == "New Brunswick" ? "selected=selected" : "") value="New Brunswick">New Brunswick</option>
+                            <option @(objMember.State == "Newfoundland" ? "selected=selected" : "") value="Newfoundland">Newfoundland</option>
+                            <option @(objMember.State == "Northwest Territories" ? "selected=selected" : "") value="Northwest Territories">Northwest Territories</option>
+                            <option @(objMember.State == "Nova Scotia" ? "selected=selected" : "") value="Nova Scotia">Nova Scotia</option>
+                            <option @(objMember.State == "Nunavut" ? "selected=selected" : "") value="Nunavut">Nunavut</option>
+                            <option @(objMember.State == "Ontario" ? "selected=selected" : "") value="Ontario">Ontario</option>
+                            <option @(objMember.State == "Prince Edward Island" ? "selected=selected" : "") value="Prince Edward Island">Prince Edward Island</option>
+                            <option @(objMember.State == "Quebec" ? "selected=selected" : "") value="Quebec">Quebec</option>
+                            <option @(objMember.State == "Saskatchewan" ? "selected=selected" : "") value="Saskatchewan">Saskatchewan</option>
+                            <option @(objMember.State == "Yukon Territory" ? "selected=selected" : "") value="Yukon Territory">Yukon Territory</option>
+                            <option @(objMember.State == "Other" ? "selected=selected" : "") value="Other">Other</option>
+                            
+                                        
+                        </select>
+                      </article>
+                              </article>
+                            </article>
+                          </article>
+                          
+                          <article class="clearfix sm-row" >
+                            <article class="sm-6" >
+                              <article class="clearfix r-p10 mobilev-r-p0 tablet-r-p5">
+                                <label>Pincode <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                <input type="text" class="input-block-level" Placeholder="Pincode" id="ZipCode" name="ZipCode" value="@objMember.ZipCode" />
+                              </article>
+                            </article>
+                            
+                          </article>
+                          <article class="clearfix t-p10 t-r montserratregular">
+                            <input type="submit" class="btn btn-danger btn-lg font14 l-r-p15 poppinssemibold white-t border-radius0 t-t-u" onclick="return profileEditvalidate();" value="Update" >
+                            <a class="btn btn-warning btn-lg font14 l-r-p15 border-radius0 t-t-u white-t poppinssemibold" onClick="viewprofile();">Cancel</a> </article>
+                        </article>
+                           }
+                      </article>
+                      @*<h4 class="font16 dark-red-t Poppins-Regular t-b-m0 t-b-p5 tablet-t-b-p0">Contact Information <span class="pull-right t-p5 font13"><a id="editprofilebtn3" onClick="editprofile2()" class="btn shaow-b black-t" > Edit Contact</a></span></h4>
+                      <article class="clearfix border-b" style="max-width:125px;"></article>
+                      <article class="clearfix t-b-p10" >
+                        <article class="clearfix" id="viewdiv2" >
+                          <article class="clearfix box-row b-p5">
+                            <article class="box-5">Location <span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t">@objMember.City</article>
+                          </article>
+                          <article class="clearfix box-row b-p5">
+                            <article class="box-5">Mobile Phone <span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t">@objMember.HomePhone</article>
+                          </article>
+                          
+                          <article class="clearfix box-row b-p5">
+                            <article class="box-5">State <span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t">@objMember.State </article>
+                          </article>
+                          
+                          <article class="clearfix box-row b-p5">
+                            <article class="box-5">Pincode <span class="dis-in r-p15 pull-right mobilev-r-p5">:</span></article>
+                            <article class="box-7 black-t">@objMember.ZipCode </article>
+                          </article>
+                        </article>
+                        <article class="clearfix hide" id="editdiv2" >
+                          <article class="clearfix sm-row" >
+                            <article class="sm-6" >
+                              <article class="clearfix r-p10 mobilev-r-p0 tablet-r-p5">
+                                <label>Location <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                <input type="text" class="input-block-level" Placeholder="Location" />
+                              </article>
+                            </article>
+                            <article class="sm-6" >
+                              <article class="clearfix l-p10 mobilev-l-p0 tablet-l-p5">
+                                <label>Mobile Phone <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                <input type="text" class="input-block-level" Placeholder="000 000 0000" />
+                              </article>
+                            </article>
+                          </article>
+                          <article class="clearfix sm-row" >
+                            <article class="sm-6" >
+                              <article class="clearfix r-p10 mobilev-r-p0 tablet-r-p5">
+                                <label>City <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                <input type="text" class="input-block-level" Placeholder="City" />
+                              </article>
+                            </article>
+                            <article class="sm-6" >
+                              <article class="clearfix l-p10 mobilev-l-p0 tablet-l-p5">
+                                <label>State <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                <input type="text" class="input-block-level" Placeholder="State" />
+                              </article>
+                            </article>
+                          </article>
+                          <article class="clearfix sm-row" >
+                            <article class="sm-6" >
+                              <article class="clearfix r-p10 mobilev-r-p0 tablet-r-p5">
+                                <label>Country <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                <input type="text" class="input-block-level" Placeholder="Country" />
+                              </article>
+                            </article>
+                            <article class="sm-6" >
+                              <article class="clearfix l-p10 mobilev-l-p0 tablet-l-p5">
+                                <label>Pincode <strong class="red-t Poppins-Regular font14">*</strong></label>
+                                <input type="text" class="input-block-level" Placeholder="Pincode" />
+                              </article>
+                            </article>
+                          </article>
+                          <article class="clearfix t-p10 t-r montserratregular">
+                          <input type="submit" class="btn btn-danger btn-lg font14 l-r-p15 poppinssemibold white-t border-radius0 t-t-u" value="Update" >
+                            <a class="btn btn-warning btn-lg font14 l-r-p15 border-radius0 t-t-u white-t poppinssemibold" onClick="viewprofile2();">Cancel</a> </article>
+                        </article>
+                      </article>*@
+                    </article>
+                  </article>

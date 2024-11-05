@@ -1,0 +1,65 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var NewsId = ViewBag.NewsId;
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        PagerClickBind();
+        $('#load').hide();
+        $('#MNews').addClass('active');
+    });
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            NewsBind($(this).text(), $('#hdnsorting').val());
+        });
+    }
+
+    function NewsBind(Pageno) {
+        $('#load').show();
+        $('#divNewsList').hide();
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+
+        $.ajax({
+            url: '@Url.Action("NewsList", "Home")',
+            type: 'GET',
+            cache: false,
+            data: { PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items, NewsId: '@NewsId' },
+            success: function (result) {
+                $('#divNewsList').html(result);
+                $('#load').hide();
+                $('#prolist').show();
+                $('#divNewsList').show();
+                PagerClickBind();
+            }
+        });
+    }
+
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="E.UpdatedTime" />
+<input id="hdnsortorder" type="hidden" value="DESC" />
+
+
+                 <article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height:1150px;">
+                    <article class="clearfix curve position-r t-m4n b-p15">
+     <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">News </h2>
+   </article>
+                       @if (NewsId != 0)
+                {  
+<span class="pull-right t-m30n"><a href="@Url.Action("Index", "News")" class="btn-danger btn btn-sm poppins-medium r-m30">View All</a></span>
+                }  
+                      
+     <article class="clearfix p30 tabhorizontal-p10">
+               
+
+                       <article id="divNewsList">
+                @{Html.RenderAction("NewsList", "News", new { NewsId = NewsId });}
+            </article>
+                              </article>
+                  </article>
+             

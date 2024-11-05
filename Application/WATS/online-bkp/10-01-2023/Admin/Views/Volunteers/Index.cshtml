@@ -1,0 +1,188 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var userRole = "";
+}
+@{  HttpContext ctx = HttpContext.Current;
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+
+    if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null)
+    {
+        authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+        userRole = authTicket.UserData;
+    }
+
+    var catlist = (List<WATS.Entities.VolunteerCategories>)ViewBag.catlist;
+
+}
+
+<link rel="stylesheet" type="text/css" href="Content/lib/lightview/css/lightview/lightview.css" />
+<script type="text/javascript" src="Content/lib/lightview/js/spinners/spinners.js"></script>
+<script type="text/javascript" src="Content/lib/lightview/js/lightview/lightview.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#MMembers').addClass('active');
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+        PagerClickBind();
+    });
+
+    function sortresult(sortcolumn) {
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        Onload(1);
+    }
+
+    function Onload(Pageno) {
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+        var Search = $('#keyword').val();
+
+        $.ajax({
+            url: '@Url.Action("VolunteersList", "Volunteers")',
+            type: 'GET',
+            cache: false,
+            data: { Search: Search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items },
+            success: function (result) {
+                $('#divVolunteer').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            Onload($(this).text());
+        });
+    }
+    function ClearSearch() {
+        $('#keyword').val('');
+        $('#hdnPageNo').val(1);
+        Onload(1);
+    }
+
+    function ExporttoExcel() {
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var Search = $('#txtsearch').val();
+        var EventId = $('#EventId').val();
+        var VolunteerCategoryId = $('#VolunteerCategoryId').val();
+        window.location.href = "Volunteers/VolunteersExporttoExcel?Search=" + Search + "&VolunteerCategoryId=" + VolunteerCategoryId + "&SortColumn=" + sortcolumn + "&SortOrder=" + sortorder + "&EventId=" + EventId;
+    }
+
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="VolunteerId" />
+<input id="hdnsortorder" type="hidden" value="ASC" />
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+        <li><a href="@Url.Action("Index", "Members")">Members</a> <span class="divider">/</span></li>
+        <li class="active">Volunteers</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+
+                <div class="fR t-r">
+                    <a href="@Url.Action("AddVolunteer", "Volunteers")" class="btn btn-primary coursesMenu" style="padding-bottom:5px;">Add Volunteer</a>
+                    <a class="btn btn-primary coursesMenu" onclick="ExporttoExcel();">Export to Excel</a>
+                </div> 
+                <h3 class="title">Volunteers</h3>
+                @if (userRole.Contains("Volunteers") || userRole.Contains("SuperAdmin"))
+                {
+                    <div class="sectionTabNav hide">
+                        <div class="btn-group">
+                            <a class="btn" href="@Url.Action("Index", "Members")">Members</a>
+                            <a class="btn" href="@Url.Action("Index", "MembersOrders")">Orders</a>
+                            <a class="btn" href="@Url.Action("Index", "MembershipTypes")">Membership Types</a>
+                            <a class="btn active" href="@Url.Action("Index", "Volunteers")">Volunteers</a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="sectionTabNav">
+                        <div class="btn-group">
+                            <a class="btn" href="@Url.Action("Index", "Members")">Members</a>
+                            <a class="btn" href="@Url.Action("Index", "MembersOrders")">Orders</a>
+                            <a class="btn" href="@Url.Action("Index", "MembershipTypes")">Membership Types</a>
+                            <a class="btn active" href="@Url.Action("Index", "Volunteers")">Volunteers</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            { @Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            { @Html.Raw(ViewBag.message.ToString())}
+        </div>
+        <div class="grayBackground nobL nobR">
+            <div id="filterReg" class="ui-accordion">
+                <h4><b>Search</b></h4>
+                <div>
+                    <div class="filedsetInner clearfix">
+                        <div class="row-fluid">
+                            <div class="span4">
+                                <label>Search </label>
+                                <input type="text" name="keyword" id="keyword" class="span12" value="" />
+                            </div>
+                            <div class="span4">
+                                <label>Volunteer Category</label>
+                                <select onchange="getamount();" class="input-block-level" name="VolunteerCategoryId" id="VolunteerCategoryId">
+                                    @if (catlist != null)
+                                    {
+                                        foreach (var item in catlist)
+                                        {
+                                            <option value="@item.VolunteerCategoryId">@item.CategoryName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="span4">
+                                <button class="btn btn-primary filterAction" onclick="Onload(1);">Search</button>
+                                <a class="btn btn-inverse filterAction wC" onclick="ClearSearch();">Clear</a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="main-text">
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="divVolunteer">
+                            @{Html.RenderAction("VolunteersList", "Volunteers");}
+                        </div>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+</div>

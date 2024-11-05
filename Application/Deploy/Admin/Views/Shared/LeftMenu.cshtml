@@ -1,0 +1,116 @@
+﻿@{
+    Layout = null;
+    string Menu = (string)Model;
+    var userRole = "";
+}
+@{  HttpContext ctx = HttpContext.Current;
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+
+    if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null)
+    {
+        authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+        userRole = authTicket.UserData;
+    }
+        
+}
+
+<div id="sidepanel">
+    <div class="sidebar">
+        <div class="sidebar_inner">
+            <ul class="nav nav-list submenu">
+                <li><span class="groupHeading">MENU</span></li>
+                @if (userRole.Contains("Committees") || userRole.Contains("SuperAdmin") || userRole.Contains("WebMaster"))
+                {
+                    <li><a href="@Url.Action("Index", "CommitteeMaster")">Committees</a></li>}
+                @if (userRole.Contains("Photos") || userRole.Contains("SuperAdmin") || userRole.Contains("WebMaster"))
+                {
+                    <li><a href="@Url.Action("Index", "PhotoGallery")">Photo Gallery</a></li>}
+
+                @if (userRole.Contains("Videos") || userRole.Contains("SuperAdmin") || userRole.Contains("WebMaster"))
+                {
+                    <li><a href="@Url.Action("Videos", "VideoGallery")">Video Gallery </a></li>}
+                @if (userRole.Contains("Sponsors") || userRole.Contains("SuperAdmin") || userRole.Contains("WebMaster") || userRole.Contains("Treasurer") || userRole.Contains("VicePresident"))
+                {
+                    <li><a href="@Url.Action("Index", "Sponsors")">Sponsors</a></li>}
+                @if (userRole.Contains("News") || userRole.Contains("SuperAdmin") || userRole.Contains("WebMaster"))
+                {
+                    <li><a href="@Url.Action("Index", "News")">News</a></li>}
+
+
+                @if (userRole.Contains("SuperAdmin"))
+                {
+                    <li><a href="@Url.Action("Index", "EventCompetitions")">Event Competitions</a></li>}
+
+                @if (userRole.Contains("DonationCategories") || userRole.Contains("SuperAdmin") || userRole.Contains("WebMaster") || userRole.Contains("Treasurer") || userRole.Contains("VicePresident"))
+                {
+                    <li><a href="@Url.Action("Index", "DonationCategories")">Donation Categories</a></li>}
+                @if (userRole.Contains("Donors") || userRole.Contains("SuperAdmin") || userRole.Contains("WebMaster") || userRole.Contains("Treasurer") || userRole.Contains("VicePresident"))
+                {
+                    <li><a href="@Url.Action("Index", "Donors")">Donors</a></li>}
+                @if (userRole.Contains("SponsorRegistrationCategories") || userRole.Contains("SuperAdmin"))
+                {
+                    <li><a href="@Url.Action("Index", "SponsorRegistrationCategories")">Sponsor Registration Categories</a></li>}
+                @if (userRole.Contains("SponsorRegistration") || userRole.Contains("SuperAdmin") || userRole.Contains("WebMaster") || userRole.Contains("Treasurer") || userRole.Contains("VicePresident"))
+                {
+                    <li><a href="@Url.Action("Index", "SponsorRegistrations")">Sponsor Registration</a></li>}
+                @if (userRole.Contains("Volunteers") || userRole.Contains("SuperAdmin") || userRole.Contains("WebMaster") || userRole.Contains("VicePresident"))
+                {
+                    <li><a href="@Url.Action("Index", "VolunteerCategories")">Volunteer Categories</a></li>
+                    <li><a href="@Url.Action("Index", "Volunteers")">Volunteers</a></li>
+                }
+                @if (userRole.Contains("SuperAdmin") || userRole.Contains("WebMaster"))
+                {
+                    <li><a href="@Url.Action("Index", "Enquiry")">Enquiries</a></li>}
+                @if (userRole.Contains("SubAdmin") || userRole.Contains("SuperAdmin") || userRole.Contains("Cultural"))
+                {
+                    <li><a href="@Url.Action("Registrations", "EventRegistrations")">Cultural Registrations</a></li>}
+                @if (userRole.Contains("Asset") || userRole.Contains("SuperAdmin"))
+                {
+                    <li><a href="@Url.Action("Index", "Asset")">Asset Management</a></li>}
+
+                @if (userRole.Contains("NewsLetter") || userRole.Contains("SuperAdmin") || userRole.Contains("WebMaster"))
+                {
+                    <li><a href="@Url.Action("Index", "NewsLetter")">News Letter Subscribers</a></li>
+                }
+                @if (userRole.Contains("SuperAdmin"))
+                {
+                    <li><a href="@Url.Action("Index", "RegistrationCategories")">Registration Categories</a></li>
+                    <li><a href="@Url.Action("Index", "RegistrationCategoriesDropDown")">Categories</a></li>
+                    <li><a href="@Url.Action("Index", "Form1", new { Type = "Form1" })">Form1</a></li>
+                    <li><a href="@Url.Action("Index", "Form2", new { Type = "Form2" })">Form2</a></li>
+                    <li><a href="@Url.Action("Index", "Form3", new { Type = "Form3" })">Form3</a></li>
+                    <li><a href="@Url.Action("Index", "Form4", new { Type = "Form4" })">Form4</a></li>
+                    <li><a href="@Url.Action("Index", "Form5", new { Type = "Form5" })">Form5</a></li>
+                    <li><a href="@Url.Action("Index", "Form6", new { Type = "Form6" })">Form6</a></li>
+                }
+
+                <li class="divider"></li>
+                @if (userRole.Contains("SuperAdmin"))
+                {
+                    <li><span class="groupHeading">SETTINGS</span></li>}
+                @if (userRole.Contains("SuperAdmin"))
+                {
+                    <li><a href="@Url.Action("Profile", "Account")">Profile</a></li>}
+                @if (userRole.Contains("SuperAdmin"))
+                {
+                    <li><a href="@Url.Action("Index", "Users")">Admins</a></li>
+                }
+                    <li><a href="@Url.Action("ChangePassword", "Account")">Change Password</a></li>
+                    @if (userRole.Contains("SuperAdmin"))
+                    {
+                        <li><a href="@Url.Action("Index", "PaymentSettings")">Payment Settings</a></li>}
+                </ul>
+
+            <br />
+            Copyrights &copy; <a target="_blank" href="@Url.Action("Index", "Members")">WATS</a>.
+                        <br>
+            Developed by <a target="_blank" href="http://www.arjunweb.com">Arjunweb Solutions</a>.
+        </div>
+    </div>
+</div>
+
+
+
+    

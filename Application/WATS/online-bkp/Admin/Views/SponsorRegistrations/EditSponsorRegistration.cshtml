@@ -1,0 +1,298 @@
+﻿@{
+    ViewBag.Title = "EditDonor";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    List<WATS.Entities.SponsorRegistrationCategories> lstSponsorRegistrationCategories = ViewBag.lstSponsorRegistrationCategories;
+    WATS.Entities.SponsorRegistrations objSponsorRegistrations = ViewBag.objSponsorRegistrations;
+    WATS.Entities.Members objMembers = ViewBag.objMembers;
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#OrderDate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-10:+10", altFormat: 'mm/dd/yy' });
+        $('#MWebsite').addClass('active');
+    });
+
+    function Validate() {
+        if ($('#FirstName').val() == "") { $('#spanFirstName').html('Required.'); $('#FirstName').focus().addClass("red-border"); return false; } else { $('#spanFirstName').html(''); $('#FirstName').focus().removeClass("red-border"); }
+        if ($('#LastName').val() == "") { $('#spanLastName').html('Required.'); $('#LastName').focus().addClass("red-border"); return false; } else { $('#spanLastName').html(''); $('#LastName').focus().removeClass("red-border"); }
+        if ($('#SponsorRegistrationCategoryId').val() == "") { $('#spanSponsorRegistrationCategoryId').html('Required.'); $('#SponsorRegistrationCategoryId').focus(); return false; } else { $('#spanSponsorRegistrationCategoryId').html(''); $('#EventId').focus(); }
+
+        if ($('#SponsorRegistrationId').val() == "0") {
+            if ($('#ImageUrl').val() == "") { $('#Aspanfile').html('Required.'); $('#ImageUrl').focus(); return false; } else { $('#Aspanfile').html(' '); $('#Aspanfile').focus().removeClass("red-border"); }
+            if (!Common.isImage($('#ImageUrl').val())) { $('#Aspanfile').html('Sorry image is invalid. Only allowed extensions are:<b>jpg, png, PNG, gif, jpeg, JPEG</b>.'); $('#ImageUrl').focus(); return false; } else { $('#Aspanfile').html(''); $('#Aspanfile').focus().removeClass("red-border"); }
+            if ($('#hdnimgvalidate').val() == '0') { $('#Aspanfile').html('Please select image with diemensions equal to 176 * 81.'); $('#ImageUrl').focus(); return false; } else { $('#Aspanfile').html(''); }
+        }
+        else {
+            if ($('#ImageUrl').val() != "") {
+                if (!Common.isImage($('#ImageUrl').val())) { $('#Aspanfile').html('Sorry image is invalid. Only allowed extensions are:<b>jpg, png, PNG, gif, jpeg, JPEG</b>.'); $('#ImageUrl').focus(); return false; } else { $('#Aspanfile').html(''); $('#Aspanfile').focus().removeClass("red-border"); }
+                if ($('#hdnimgvalidate').val() == '0') { $('#Aspanfile').html('Please select image with diemensions equal to 176 * 81.'); $('#LogoUrl').focus(); return false; } else { $('#Aspanfile').html(''); }
+            }
+        }
+        if ($('#Email').val() == "") { $('#spanEmail').html('Required.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); $('#Email').focus().removeClass("red-border"); }
+        if (!Common.CheckEmail($('#Email').val())) { $('#spanEmail').html('Invalid email address.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); $('#Email').focus().removeClass("red-border"); }
+        return true;
+    }
+
+</script>
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+
+        <li><a href="@Url.Action("Index", "SponsorRegistrations")">Sponsor Registrations</a> <span class="divider">/</span></li>
+        <li class="active">Edit Sponsor Registration</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r p_b"><a class="clearfix" href="@Url.Action("Index", "SponsorRegistrations")">← back to list</a> </div>
+                <h3 class="title">Edit Sponsor Registration</h3>
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            { @Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            { @Html.Raw(ViewBag.message.ToString())}
+        </div>
+        @using (Html.BeginForm("AddSponsorRegistration", "SponsorRegistrations", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <input type="hidden" id="SponsorRegistrationId" name="SponsorRegistrationId" value="@objSponsorRegistrations.SponsorRegistrationId" />   
+            
+         
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Registration Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">First Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="FirstName" name="FirstName" value="@objSponsorRegistrations.FirstName" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanFirstName"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Category :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <select class="input-block-level" name="SponsorRegistrationCategoryId" id="SponsorRegistrationCategoryId">
+                                                    @if (lstSponsorRegistrationCategories != null)
+                                                    {
+                                                        <option value="">Select</option>
+                                                        foreach (var item in lstSponsorRegistrationCategories)
+                                                        { 
+                                                        <option  @(item.SponsorRegistrationCategoryId == objSponsorRegistrations.SponsorRegistrationCategoryId ? "selected=selected" : "") value="@item.SponsorRegistrationCategoryId">@item.CategoryName</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <span class="field-validation-error" id="spanSponsorRegistrationCategoryId"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Email :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="Email" name="Email" value="@objSponsorRegistrations.Email" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanEmail"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Amount :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="Amount" name="Amount" value="@objSponsorRegistrations.Amount" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanAmount"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Payment Status :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <select class="input-block-level" name="PaymentStatusId" id="PaymentStatusId">
+                                                    @if (objMembers.lstPaymentStatus != null)
+                                                    {
+                                                        <option value="">Select</option>
+                                                        foreach (var item in objMembers.lstPaymentStatus)
+                                                        { 
+                                                        <option  @(item.PaymentStatusId == objSponsorRegistrations.PaymentStatusId ? "selected=selected" : "") value="@item.PaymentStatusId">@item.PaymentStatus1</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <span class="field-validation-error" id="spanPaymentStatusId"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Order Date :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="OrderDate" name="OrderDate" value="@(objSponsorRegistrations.OrderDate == DateTime.MinValue ? "" : objSponsorRegistrations.OrderDate.ToString("MM-dd-yyyy"))" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanOrderDate"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Last Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="LastName" name="LastName" value="@objSponsorRegistrations.LastName" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanLastName"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Phone No :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="PhoneNo" name="PhoneNo" value="@objSponsorRegistrations.PhoneNo" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanPhoneNo"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Transaction Id :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="TransactionId" name="TransactionId" value="@objSponsorRegistrations.TransactionId" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanTransactionId"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Payment Method :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <select class="input-block-level" name="PaymentMethodId" id="PaymentMethodId">
+                                                    @if (objMembers.lstPaymentMethod != null)
+                                                    {
+                                                        <option value="">Select</option>
+                                                        foreach (var item in objMembers.lstPaymentMethod)
+                                                        { 
+                                                        <option  @(item.PaymentMethodId == objSponsorRegistrations.PaymentMethodId ? "selected=selected" : "")  value="@item.PaymentMethodId">@item.PaymentMethod</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <span class="field-validation-error" id="spanPaymentMethodId"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>    
+            
+     
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b> Description</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span4">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Address :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea  id="Address" name="Address" class="input-block-level">@objSponsorRegistrations.Address</textarea>
+                                                <span class="field-validation-error" id="spanAddress"></span>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                                <div class="span4">
+                                    <div class="clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Image :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="file" name="ImageUrl" id="ImageUrl" onchange="checkPhoto(this)" />
+                        <span style="padding-top: 7px;" class="field-validation-error" id="Aspanfile"></span>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                                 <div class="span4">
+                                    <div class="clearfix">
+                                <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Payment By :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea type="text" id="PaymentBy" name="PaymentBy" class="input-block-level">@objSponsorRegistrations.PaymentBy</textarea>
+                                                <span class="field-validation-error" id="spanPaymentBy"></span>
+                                            </div>
+                                        </div>
+                                        </div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <div class="actionButtons">
+                    <input type="submit" value="Update" onclick="return Validate()" name="send" class="button2 btn btn-primary">
+                    <a class="btn btn-inverse" href="@Url.Action("Index", "Donors")">Cancel</a>
+                </div>
+            </div>
+        }
+        <div class="adminfooter"></div>
+    </div>
+</div>
+
+<script>
+    var _URL = window.URL || window.webkitURL;
+    $("#LogoUrl").change(function (e) {
+        var file, img;
+        if ((file = this.files[0])) {
+            img = new Image();
+            img.onload = function () {
+                if (this.width == 176 && this.height == 81) {
+                    $('#hdnimgvalidate').val('1');
+                }
+                else {
+                    $('#hdnimgvalidate').val('0');
+                }
+            };
+            img.src = _URL.createObjectURL(file);
+        }
+    });
+
+</script>

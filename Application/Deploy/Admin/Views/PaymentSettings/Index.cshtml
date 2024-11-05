@@ -1,0 +1,251 @@
+﻿@model IEnumerable<WATS.Entities.PaymentSettings>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#MSettings').addClass('active');
+    });
+    $(document).ready(function () {
+        PagerClickBind();
+        IsActive();
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+        $('#PaymentSettings').addClass('active');
+        $('#PaymentSettingView').dialog
+            ({
+                autoOpen: false,
+                width: 550,
+                modal: true
+            });
+    });
+
+    function IsActive() {
+        $('#statustrue').removeClass('active');
+        $('#statusfalse').removeClass('active');
+        if ($('#hdnsorting').val() == "true") {
+            $('#statustrue').addClass('active');
+        }
+        else {
+            $('#statusfalse').addClass('active');
+        }
+    }
+
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode > 31 && (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+
+    function Onload(pageno) {
+        var pageno = Common.Pageno(pageno);
+        var search = $('#txtsearch').val();
+        $.ajax({
+            url: '@Url.Action("PartialList", "PaymentSettings")',
+            type: 'GET',
+            cache: false,
+            data: { search: search, PageNo: $('#hdnPageNo').val(), PageItems: $('#txtitems').val() },
+            success: function (result) {
+                $('#divbind').html(result);
+                PagerClickBind();
+            }
+        });
+        // IsActive();
+    }
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            Onload($(this).text(), $('#hdnsorting').val());
+        });
+    }
+
+    function validate(Id) {
+        if (Id == "") {
+            alert("Please select atleast one Item.");
+            return false;
+        }
+        return true;
+    }
+
+    function PaymentSettingView(Id) {
+        $.ajax({
+            url: '@Url.Action("View", "PaymentSettings")',
+            type: 'POST',
+            data: { Id: Id },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objPaymentSettings = result.data;
+                    $('#lblPaymentMethod').html(objPaymentSettings.PaymentMethod);
+                    $('#lblPaymentUrl').html(objPaymentSettings.PaymentUrl);
+                    $('#lblPaymentEmail').html(objPaymentSettings.PaymentEmail);
+                    $('#lblCurrencyCode').html(objPaymentSettings.CurrencyCode);
+                    $('#lblSuccessUrl').html(objPaymentSettings.SuccessUrl);
+                    $('#lblCancelUrl').html(objPaymentSettings.CancelUrl);
+                    $('#lblNotifyURL').html(objPaymentSettings.NotifyUrl);
+                    $('#lblTokenNo').html(objPaymentSettings.TokenNo);
+                    $('#lblAccountType').html(objPaymentSettings.AccountType);
+                    $('#PaymentSettingView').dialog('open');
+                }
+                else {
+                    alert(result.data);
+                }
+            }
+        });
+    }
+
+    function SearchClear() {
+        $('#txtsearch').val('');
+        Onload(1);
+    }
+
+</script>
+
+<input type="hidden" id="hdnPageNo" value="1" />
+<input type="hidden" id="hdnPaymentSettingId" value="0" />
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    
+    <li><a href="@Url.Action("Index", "ApplicationSettings")">Settings</a> <span class="divider">/</span></li>
+    <li class="active">Payment Settings</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+</ul></div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+           <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                  <div class="fR t-r ">
+                    <a href="@Url.Action("Add", "PaymentSettings")" class="btn btn-primary coursesMenu">Add  New Settings</a>
+                </div>
+                <h3 class="title">Payment Settings</h3>
+               @* <div class="sectionTabNav">
+                    <div class="btn-group"><a href="@Url.Action("Index","ApplicationSettings")" class="btn ">Application Settings</a>
+                         <a href="@Url.Action("Index","PaymentSettings")" class="btn active">Payment Settings</a> 
+
+                    </div>
+                </div>*@
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <table width="100%" border="0" cellpadding="0" cellspacing="0" class="text12">
+            <tr>
+                <td>
+                     <div id="divmessage">
+                            @if (TempData["message"] != null)
+                            { @Html.Raw(TempData["message"].ToString())}
+
+                            @if (ViewBag.message != null)
+                            { @Html.Raw(ViewBag.message.ToString())}
+                        </div>
+                </td>
+            </tr>
+            <tr>
+                <td height="">
+                   @* <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td>
+                                <form name="search" method="post" onsubmit="return validate4(this)">
+                                    <strong>Keyword :</strong>
+                                    <input type="text" name="keyword" id="txtsearch" class="input coursesMenu" style="width: 200px" value="" />
+                                    &nbsp;
+                  <input type="button" onclick="javascript: Onload(1);" name="register" value="Search" id="Button1" class="btn btn-primary" />
+                                    <a class="btn btn-inverse" onclick="javascript: SearchClear();">Clear</a>
+                                </form>
+                            </td>
+                        </tr>
+                    </table>*@
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="divbind">
+                       @{Html.RenderAction("PartialList", "PaymentSettings");}
+                    </div>
+
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 12px 0"></td>
+            </tr>
+        </table>
+
+    </div>
+    <div class="adminfooter"></div>
+</div>
+<div id="PaymentSettingView" style="display: none;">
+    <div class="dialog-title">Payment Settings</div>
+    <div class="dialog-content">
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span5">Payment Method :</div>
+                <div class="span7">
+                   <span id="lblPaymentMethod"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Payment Url :</div>
+                <div class="span7">
+                     <span id="lblPaymentUrl"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Payment Email :</div>
+                <div class="span7">
+                    <span id="lblPaymentEmail"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Currency Code :</div>
+                <div class="span7">
+                 <span id="lblCurrencyCode"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Success Url :</div>
+                <div class="span7">
+                    <span id="lblSuccessUrl"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Cancel Url :</div>
+                <div class="span7">
+                   <span id="lblCancelUrl"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Notify URL :</div>
+                <div class="span7">
+                 <span id="lblNotifyURL"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Token No:</div>
+                <div class="span7">
+                   <span id="lblTokenNo"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Account Type  :</div>
+                <div class="span7">
+                   <span id="lblAccountType"></span>
+                </div>
+            </div>
+            <div class="buttons-container t-r">
+                <a class="btn" onclick=" $('#PaymentSettingView').dialog('close')">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>

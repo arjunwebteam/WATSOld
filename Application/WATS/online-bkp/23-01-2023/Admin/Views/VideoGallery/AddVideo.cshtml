@@ -1,0 +1,167 @@
+﻿@{
+    ViewBag.Title = "AddVideo";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    List<WATS.Entities.VideoCategories> lstVideoCategories = ViewBag.lstVideoCategories;
+    Int64 VideoCategoryId = ViewBag.VideoCategoryId;
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+    });
+
+    function Validate() {
+        if ($('#VideoCategoryId').val() == "") { $('#spanVideoCategoryId').html('Required.'); $('#VideoCategoryId').focus(); return false; } else { $('#spanVideoCategoryId').html(''); }
+        if ($('#Heading').val() == "") { $('#spanHeading').html('Required.'); $('#Heading').focus(); return false; } else { $('#spanHeading').html(''); }
+        if ($('#VideoUrl').val() == "") { $('#spanVideoUrl').html('Required.'); $('#VideoUrl').focus(); return false; } else { $('#spanVideoUrl').html(''); }
+        //if ($('#IsHome').val() == "") { $('#spanIsHome').html('Required.'); $('#IsHome').focus(); return false; } else { $('#spanIsHome').html(''); }
+        return true;
+    }
+</script>
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+    <li><a href="@Url.Action("Index", "VideoGallery")">Video Categories</a> <span class="divider">/</span></li>
+    <li class="active">Add Video</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a target="_blank" href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]">View Mainsite</a></li>
+</ul></div>
+<!-- end breadcumb -->
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r"><a class="clearfix" href="@Url.Action("Videos", "VideoGallery", new { VideoCategoryId =VideoCategoryId})">← back to Videos</a> </div>
+                <h3 class="title">Add Video</h3>
+                
+            </div>
+        </div>
+        <h1></h1>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" class="text12">
+            <tbody>
+                <tr>
+                    <td height="34">
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="text12">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div id="divmessage">
+                                            @if (TempData["message"] != null)
+                                            { @Html.Raw(TempData["message"].ToString())}
+
+                                            @if (ViewBag.message != null)
+                                            { @Html.Raw(ViewBag.message.ToString())}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td height="10"></td>
+                                </tr>
+                                <tr>
+                                    <td class="box2">
+                                        @using (Html.BeginForm("AddVideo", "VideoGallery", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                        {                                             
+                                            <table width="100%" cellspacing="0" cellpadding="3" border="0">
+                                                <tbody>
+                                                    
+                                                    <tr>
+                                                        <td width="24%" align="right">Category :&nbsp;<span class="red-t">*</span></td>
+                                                        <td width="76%">
+                                                            <select id="VideoCategoryId" style="width: 263px" class="inputstyle" name="VideoCategoryId">
+                                                                <option value="">-- Select Category --</option>
+                                                                @if (lstVideoCategories.Count > 0)
+                                                                {
+                                                                    foreach (var item in lstVideoCategories)
+                                                                    {
+                                                                    <option @(item.VideoCategoryId == VideoCategoryId ? "selected = selected" : "") value="@(item.VideoCategoryId)">@(item.CategoryName)</option>
+                                                                    }
+                                                                }
+                                                            </select>
+                                                            <span id="spanVideoCategoryId" class="field-validation-error"></span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="24%" align="right">Heading :&nbsp;<span class="red-t">*</span></td>
+                                                        <td width="76%">
+                                                            <input type="text" value="" style="width: 250px" class="inputstyle" id="Heading" name="Heading">
+                                                            <span id="spanHeading" class="field-validation-error"></span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="24%" align="right">Video Url :&nbsp;<span class="red-t">*</span></td>
+                                                        <td width="76%">
+                                                            <input type="text" value="" maxlength="11" style="width: 250px" class="inputstyle" id="VideoUrl" name="VideoUrl">
+                                                            <span id="spanVideoUrl" class="field-validation-error"></span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="24%" align="right">&nbsp;</td>
+                                                        <td width="76%">
+                                                           <b> Ex: (Video id is - y2atip0h-Kg)</b>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="24%" align="right">Video Description :&nbsp;</td>
+                                                        <td width="76%">
+                                                            <input type="text" value="" style="width: 250px" class="inputstyle" id="VideoDescription" name="VideoDescription">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="24%" align="right">Display Order :&nbsp;</td>
+                                                        <td width="76%">
+                                                            <input type="text" value="" maxlength="3" onkeypress="return Common.isNumberKey(event)" style="width: 250px" class="inputstyle" id="DisplayOrder" name="DisplayOrder">
+                                                            <span id="spanDisplayOrder" class="field-validation-error"></span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="24%" align="right">Is Home :&nbsp;</td>
+                                                        <td width="76%">
+                                                            @Html.CheckBox("IsHome")
+                                                            <span id="spanIsHome" class="field-validation-error"></span>
+                                                        </td>
+                                                    </tr>
+                                                    @*<tr>
+                                                        <td align="right">Image :&nbsp;</td>
+                                                        <td>
+                                                            <input type="file" id="file1" name="file1">
+                                                            <label id="spanfile1" class="field-validation-error"></label>
+                                                            (It automatically generate thumb also)</td>
+                                                    </tr>*@
+                                                    <tr>
+                                                        <td width="24%" align="right" colspan="2">&nbsp;</td>
+                                                        
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="24%" align="right" colspan="2">&nbsp;</td>
+                                                        
+                                                    </tr>
+                                                    <tr>
+                                                        <td align="right" height="43">&nbsp;</td>
+                                                        <td>
+                                                            <input type="submit" onclick="return Validate()" class="btn btn-primary" id="Button1" value="Submit" name="send">
+                                                            <a class="btn btn-inverse" href="@Url.Action("Videos", "VideoGallery", new { VideoCategoryId =VideoCategoryId})">Cancel</a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        }
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

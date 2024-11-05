@@ -1,0 +1,194 @@
+﻿@{
+    ViewBag.Title = "ViewForm1";
+    Layout = null;
+
+    var objForm1Details = (WATS.Entities.Form1)ViewBag.objForm1;
+}
+@{var baseurl = System.Configuration.ConfigurationManager.AppSettings["baseurl"];}
+<base href="@(baseurl)" />
+<link href="Content/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" type="text/css" href="Content/jquery-ui.css" />
+<link href="Content/admin-style.css" rel="stylesheet" media="screen">
+<link href="Content/admin-comman-styles.css" rel="stylesheet" media="screen">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700' rel='stylesheet' type='text/css'>
+<script src="Scripts/jquery-1.8.3.js" type="text/javascript"></script>
+<script src="Scripts/jquery-ui-1.9.2.custom.min.js" type="text/javascript"></script>
+<script src="Scripts/jquery.ui.widget.js"></script>
+<script src="Scripts/jquery.ui.accordion.js"></script>
+<script src="Scripts/delete_item.js" type="text/javascript"></script>
+<script type="text/javascript" src="Scripts/jquery-ui-timepicker-addon.js"></script>
+<script type="text/javascript" src="Scripts/jquery-ui-sliderAccess.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $(".ui-accordion").accordion({
+            collapsible: true,
+            heightStyle: "content"
+        });
+
+        // date picker
+        $(function () {
+            $(function () {
+                $(".datepicker").datepicker({
+                    altField: "#alternate",
+                    altFormat: "DD, d MM, yy"
+                });
+            });
+        });
+    });
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+        Common.mfadeout();
+
+    });
+</script>
+<table width="750" cellspacing="0" cellpadding="0" border="0" align="center" class="main-text">
+    <tbody>
+        <tr>
+            <td>
+                <div id="messages"></div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Registration Details</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                            <div class="filedsetInner clearfix">
+
+                                <table width="100%" cellspacing="0" cellpadding="6" border="0" class="mgrey2">
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Registration Category : </strong></td>
+                                            <td>@(objForm1Details.CategoryName == "" ? "N/A" : objForm1Details.CategoryName)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Event Name : </strong></td>
+                                            <td>@(objForm1Details.EventName == "" ? "N/A" : objForm1Details.EventName)</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td><strong>First Name : </strong></td>
+                                            <td>@objForm1Details.FirstName</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Last Name : </strong></td>
+                                            <td>@objForm1Details.LastName</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>School Name : </strong></td>
+                                            <td>@(objForm1Details.SchoolName)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Grade in School : </strong></td>
+                                            <td>@(objForm1Details.GradeinSchool)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Contact First Name   : </strong></td>
+                                            <td>@(objForm1Details.ContactFullName)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Contact Last Name : </strong></td>
+                                            <td>@objForm1Details.Field1</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Contact Phone : </strong></td>
+                                            <td>@objForm1Details.ContactPhone</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Contact Email : </strong></td>
+                                            <td>@(objForm1Details.ContactEmail)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Date of Birth : </strong></td>
+                                            <td>@(objForm1Details.DateofBirth)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Notes : </strong></td>
+                                            <td>@(objForm1Details.Notes)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>AdminComments : </strong></td>
+                                            <td>@(objForm1Details.AdminComments)</td>
+                                        </tr>
+
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end personal info form -->
+                </div>
+
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Payment Details</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                            <div class="filedsetInner clearfix">
+
+                                <table width="100%" cellspacing="0" cellpadding="6" border="0" class="mgrey2">
+                                    <tbody>
+
+
+                                        <tr>
+                                            <td><strong> TransactionId : </strong></td>
+                                            <td>@objForm1Details.TransactionId</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Bank Name : </strong></td>
+                                            <td>@(objForm1Details.BankName)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Amount Paid : </strong></td>
+                                            <td>  @(objForm1Details.AmountPaid != null && objForm1Details.AmountPaid != 0 ? objForm1Details.AmountPaid.ToString("#") : "N'A")</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Cheque No : </strong></td>
+                                            <td>@(objForm1Details.ChequeNo)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>ChequeDate : </strong></td>
+                                            <td>  @objForm1Details.ChequeDate.ToString("dd/MM/yyyy")</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>PaymentStatus   : </strong></td>
+                                            <td>
+                                                @(objForm1Details.PaymentStatus == "" ? "N/A" : objForm1Details.PaymentStatus)
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Payment Method: </strong></td>
+                                            <td>
+                                                @(objForm1Details.PaymentMethod == "" ? "N/A" : objForm1Details.PaymentMethod)
+                                            </td>
+
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Payment Date : </strong></td>
+                                            <td> @objForm1Details.PaymentDate.ToString("dd/MM/yyyy")</td>
+                                        </tr>
+
+
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end personal info form -->
+                </div>
+
+                <div class="clearfix sepH_b b-m0"></div>
+
+
+                <!-- end other details form -->
+            </td>
+        </tr>
+    </tbody>
+</table>

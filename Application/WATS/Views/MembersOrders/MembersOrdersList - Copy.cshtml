@@ -1,0 +1,111 @@
+﻿  @{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+
+    List<WATS.Entities.Members> lstMembers = ViewBag.lstMembers;    
+}
+
+<script type="text/javascript">
+   
+    
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div> 
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+               <thead>
+                    <tr>
+                        @* <th class="table_checkbox"> <input type="checkbox" name="mainchk" onclick="javascript: Select('mainchk');" /></th>*@
+                        <th width="5%" align="center">S.No.</th>
+                        <th><a onclick="javascript:sortresult('MemberId');" class="white-t-u">Member ID @if (sortcolumn == "MemberId")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }</th>
+                        <th width="17%">
+                            <a onclick="javascript:sortresult('UserName');" class="white-t-u">Name @if (sortcolumn == "UserName")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="12%">
+                             <a onclick="javascript:sortresult('MembershipType');" class="white-t-u">Membership @if (sortcolumn == "MembershipType")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="12%">
+                            <a onclick="javascript:sortresult('ExpiryDate');" class="white-t-u">Expire Date  @if (sortcolumn == "ExpiryDate")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="12%">
+                            <a onclick="javascript:sortresult('OrderDate');" class="white-t-u">Order Date  @if (sortcolumn == "OrderDate")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="12%">
+                            <a onclick="javascript:sortresult('PaymentMethod');" class="white-t-u">Payment Method  @if (sortcolumn == "PaymentMethod")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="9%">
+                            <a onclick="javascript:sortresult('PaymentStatus');" class="white-t-u">P Status  @if (sortcolumn == "PaymentStatus")
+                         {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" /> }
+                        </th>
+                        <th width="9%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (lstMembers.Count != 0)
+                    {
+                        Int64 i=1;
+                        foreach (var item in lstMembers)
+                        { 
+                        <tr>
+                            @* <td><input type="checkbox" name="checkbox" id="checkbox-@i" value= "@{@item.MemberId}" /></td>*@
+                            <td>@item.RId</td>
+                            <td style="text-align: left">@item.MemberId</td>
+                            <td>@item.UserName
+                            </td>
+                            
+                            <td>@item.MembershipType
+                            </td>
+                            <td>@(item.objMembershipOrder.ExpiryDate==DateTime.MinValue?"":item.objMembershipOrder.ExpiryDate.ToString("dd-MM-yyyy"))
+                            </td>
+                              <td>@(item.objMembershipOrder.OrderDate==DateTime.MinValue?"":item.objMembershipOrder.OrderDate.ToString("dd-MM-yyyy"))
+                            </td>
+                            <td>@item.objMembershipOrder.PaymentMethod
+                            </td>
+                            <td>
+                              @item.objMembershipOrder.PaymentStatus
+                            </td>
+                            <td>
+                                <a href="@Url.Action("EditMemberOrder", "MembersOrders", new {MemberOrderId=item.objMembershipOrder.MembershipOrderId })" title="Edit"><i class="icon-pencil"></i></a>
+                                <a class="pagedelete" onclick="javascript:Delete(@item.objMembershipOrder.MembershipOrderId);" id="1" title="Delete"><i class="icon-trash"></i></a>
+                                @*<a title="Delete" class="sepV_a disable-alpha"><i class="icon-trash"></i></a>*@
+                            </td>
+                        </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="9">No Orders Found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    </div>
+</div>
+ @Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

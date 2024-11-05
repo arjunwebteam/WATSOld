@@ -1,0 +1,616 @@
+﻿@{
+    ViewBag.Title = "ViewEventUser";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var objEventUserInfo = (WATS.Entities.CulturalUserInfo)ViewBag.objEventUserInfo;
+    var lstEventRegCounts = (List<WATS.Entities.EventRegistrationCounts>)ViewBag.lstEventRegCounts;
+
+    HttpContext ctx = HttpContext.Current;
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+
+    authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+
+    string Role = authTicket.UserData;
+
+    var imglocNormal = System.Configuration.ConfigurationManager.AppSettings["usersiteurl"] + "Content/CulturalEvent/";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $(".ui-accordion").accordion({
+            collapsible: true,
+            heightStyle: "content"
+        });
+
+        // date picker
+        $(function () {
+            $(function () {
+                $(".datepicker").datepicker({
+                    altField: "#alternate",
+                    altFormat: "DD, d MM, yy"
+                });
+            });
+        });
+    });
+    $(document).ready(function () {
+        $('#MEvents').addClass('active');
+
+    });
+</script>
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+
+        <li><a href="@Url.Action("Index", "Events", new { EventType = "current" })">Events</a> <span class="divider">/</span></li>
+        <li class="active">View Event</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+
+                <div class="fR t-r p_b">
+                    @if (Role.Contains("SuperAdmin"))
+                    {
+                        <a class="clearfix" href="@Url.Action("Index", "EventRegistrations", new { EventId = objEventUserInfo.EventId, EventName = objEventUserInfo.EventName })">← back to event users list</a>
+                    }
+                    else
+                    {
+                        <a class="clearfix" href="@Url.Action("Registrations", "EventRegistrations")">← back to event users list</a>
+                    }
+                    <div class="fR t-r">
+                        @if (Role.Contains("SuperAdmin"))
+                        {
+                            <a class="btn btn-small btn-primary coursesMenu" href="@Url.Action("EditCulturalUser", "EventRegistrations", new { EventUserInfoId = objEventUserInfo.EventUserInfoId })">Edit Event User</a>
+                        }
+                    </div>
+                </div>
+                <h3 class="title">View User Details</h3>
+                @if (Role.Contains("SuperAdmin"))
+                {
+                    <div class="sectionTabNav">
+                        <div class="btn-group">
+                            <a class="btn" href="@Url.Action("Index", "Events", new { EventType = "upcoming" })">Upcoming Events</a>
+                            @*  <a class="btn" href="@Url.Action("Index", "Events", new { EventType = "current" })">Current Events</a>*@
+                            <a class="btn" href="@Url.Action("Index", "Events", new { EventType = "past" })">Past Events</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            {@Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            {@Html.Raw(ViewBag.message.ToString())}
+        </div>
+        @if (objEventUserInfo.ItemName != null && objEventUserInfo.ItemName != "")
+        {
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion">
+                    <h3 class="bor0 black-t"><b>Item Details</b></h3>
+                    <div class="clearfix">
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Program Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.ItemName</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Audio/Video Url :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.DocumentUrl</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="span6">
+                                <div class="clearfix">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Program Duration :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.ItemDuration (min)</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Program Category :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">
+                                                @objEventUserInfo.ItemCategory
+                                                @if (objEventUserInfo.DocumentUrl != null)
+                                                {
+                                                    <span><a download="@objEventUserInfo.DocumentUrl" title="Download Group Image" href="@(imglocNormal + objEventUserInfo.DocumentUrl)">  (<i class="icon-download-alt"></i> Download Image)</a></span> <br />
+                                                }
+                                                @if (objEventUserInfo.Address != null)
+                                                {
+                                                    <span><a download="@objEventUserInfo.Address" title="Download Audio/Video" href="@(imglocNormal + objEventUserInfo.Address)">  (<i class="icon-download-alt"></i> Download Audio/Video)</a></span>
+                                                }
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row-fluid">
+                            <div class="span12">
+                                <div class="clearfix">
+                                    <div class="row-fluid">
+                                        <div class="span2">
+                                            <label class="t-p5">Program Description :</label>
+                                        </div>
+                                        <div class="span10">
+                                            @objEventUserInfo.ItemDescription
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion">
+                    <h3 class="bor0 black-t"><b>Choreographer's Details</b></h3>
+                    <div class="clearfix">
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>First Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.FirstName</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Last Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.LastName</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Email :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.Email</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Name of the Dance/Music School :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t"> @(objEventUserInfo.UpdatedBy != objEventUserInfo.FirstName ? objEventUserInfo.UpdatedBy : "") </label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Group Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">
+                                                @objEventUserInfo.State
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="span6">
+                                <div class="clearfix">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>State :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@(objEventUserInfo.State != "Washington" ? objEventUserInfo.State : "" )</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>City :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.City</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Mobile :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.Mobile</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Number of Participants :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.Gender</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion">
+                    <h3 class="bor0 black-t"><b>Coordinator Details</b></h3>
+                    <div class="clearfix">
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>First Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.CoorFirstName</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Last Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.CoorLastName</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Email :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.CoorEmail</label>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            <div class="span6">
+                                <div class="clearfix">
+
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>City :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.CoorCity</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Mobile :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.CoorMobileNo</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion">
+                    <h3 class="bor0 black-t"><b>Personal Details</b></h3>
+                    <div class="clearfix">
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>First Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.FirstName</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Last Name :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.LastName</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Email :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.Email</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="span6">
+                                <div class="clearfix">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>State :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.State</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>City :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.City</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Mobile :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@objEventUserInfo.Mobile</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="mN" />
+            if (lstEventRegCounts != null && lstEventRegCounts.Count != 0)
+            {
+                <div class="custom-adn grayBackground nobL nobR">
+                    <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                        <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Registrations</b></h3>
+                        <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                            <div class="filedsetInner clearfix">
+                                <table cellspacing="0" cellpadding="0" border="0" class="tbl membership" width="100%">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <table id="childinfo" name="childinfo" width="650" cellspacing="0" cellpadding="0" border="0" class="table table-hover span9 omb table_vam table-black tvm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th width="180">Registration Type</th>
+                                                            <th width="180">Count</th>
+                                                            <th width="100" align="center">Amount</th>
+
+                                                        </tr>
+                                                        @if (lstEventRegCounts != null && lstEventRegCounts.Count != 0)
+                                                        {
+                                                            Int64 i = 0;
+                                                            foreach (var Item in lstEventRegCounts)
+                                                            {
+                                                                <input id="EventRegCountId-@(i)" name="[@(i)].EventRegCountId" value="@(Item.EventRegCountId)" type="hidden" />
+                                                                <tr>
+                                                                    <td width="180">
+                                                                        <label class="t-p5 black-t">@Item.RegistrationTitle</label>
+                                                                    </td>
+                                                                    <td width="110" align="center">
+                                                                        <label class="t-p5 black-t">@Item.Count</label>
+                                                                    </td>
+                                                                    <td width="180" align="center">
+                                                                        <label class="t-p5 black-t">@Item.Amount</label>
+                                                                    </td>
+                                                                </tr>
+                                                                i++;
+                                                            }
+                                                        }
+
+                                                    </thead>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end personal info form -->
+                </div>
+                <hr class="mN" />
+            }
+        }
+
+        @if (objEventUserInfo.lstEventParticipant.Count() != 0 && objEventUserInfo.lstEventParticipant != null)
+        {
+            <!-- end personal info form -->
+            <hr class="mN" />
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Particpatnts</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <table cellspacing="0" cellpadding="0" border="0" class="tbl membership" width="100%">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table id="childinfo" name="childinfo" width="650" cellspacing="0" cellpadding="0" border="0" class="table table-hover span9 omb table_vam table-black tvm">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="180">First Name</th>
+                                                        <th width="180">Last Name</th>
+                                                        <th width="100" align="center">( Age )</th>
+                                                        <th width="180" align="center">Member Id</th>
+
+                                                    </tr>
+                                                    @if (objEventUserInfo.lstEventParticipant != null && objEventUserInfo.lstEventParticipant.Count != 0)
+                                                    {
+                                                        Int64 i = 0;
+                                                        foreach (var Item in objEventUserInfo.lstEventParticipant)
+                                                        {
+                                                            <tr>
+                                                                <td width="180">
+                                                                    <label class="t-p5 black-t">@Item.FirstName</label>
+                                                                </td>
+                                                                <td width="110" align="center">
+                                                                    <label class="t-p5 black-t">@Item.LastName</label>
+                                                                </td>
+                                                                <td width="180" align="center">
+                                                                    <label class="t-p5 black-t">@Item.Age</label>
+                                                                </td>
+                                                                <td width="180" align="center">
+                                                                    <label class="t-p5 black-t">@Item.Mobile</label>
+                                                                </td>
+
+                                                            </tr>
+                                                            i++;
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <tr>
+                                                            <td width="180" colspan="4" class="t-c">
+                                                                <label class="t-p5 black-t t-c">No User's Found</label>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </thead>
+                                            </table>
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- end personal info form -->
+            </div>
+        }
+        <hr class="mN" />
+        <div class="clearfix sepH_b b-m0"></div>
+        @if (objEventUserInfo.objEventOrderDetails.PaymentMethodId != 0)
+        {
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion">
+                    <h3 class="bor0 black-t"><b>Payment Details</b></h3>
+                    <div class="clearfix">
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <div class="clearfix rp10">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Payment Method :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@(objEventUserInfo.objEventOrderDetails.PaymentMethod == null ? "N/A" : objEventUserInfo.objEventOrderDetails.PaymentMethod)</label>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label>Transaction Id  :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <label class="t-p5 black-t">@(objEventUserInfo.objEventOrderDetails.TransactionId == null ? "N/A" : objEventUserInfo.objEventOrderDetails.TransactionId)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="span6">
+                                <div class="row-fluid">
+                                    <div class="span5">
+                                        <label>Amount :</label>
+                                    </div>
+                                    <div class="span6">
+                                        $ @(objEventUserInfo.objEventOrderDetails.AmountPaid == null ? "N/A" : objEventUserInfo.objEventOrderDetails.AmountPaid.ToString())<span id="payamount"></span>
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span5">
+                                        <label>Payment Status :</label>
+                                    </div>
+                                    <div class="span6">
+                                        <label class="t-p5 black-t">@(objEventUserInfo.objEventOrderDetails.PaymentStatus == null ? "N/A" : objEventUserInfo.objEventOrderDetails.PaymentStatus)</label>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <!-- end other details form -->
+        <hr class="mN" />
+        <div class="clearfix sepH_b b-m0"></div>
+        <div class="custom-adn grayBackground nobL nobR">
+            <div class="ui-accordion">
+                <h3 class="bor0 black-t"><b>Payment Details</b></h3>
+                <div class="clearfix">
+                    <div class="row-fluid">
+                        <div class="span6">
+                            <div class="clearfix rp10">
+                                <div class="row-fluid">
+                                    <div class="span5">
+                                        <label>Check-In Status :</label>
+                                    </div>
+                                    <div class="span6">
+                                        <label class="t-p5 black-t">@objEventUserInfo.Status</label>
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span5">
+                                        <label>Comments  :</label>
+                                    </div>
+                                    <div class="span6">
+                                        <label class="t-p5 black-t">@objEventUserInfo.Comment</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="adminfooter"></div>
+    </div>
+</div>
+
+
+

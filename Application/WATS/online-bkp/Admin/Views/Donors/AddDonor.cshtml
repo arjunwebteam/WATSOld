@@ -1,0 +1,263 @@
+﻿@{
+    ViewBag.Title = "AddDonor";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    WATS.Entities.Members objMembers = ViewBag.objMembers;
+    List<WATS.Entities.DonationCategories> lstDonationCategories = ViewBag.lstDonationCategories;
+    var lstPaymentMethod = (List<WATS.Entities.PaymentMethods>)objMembers.lstPaymentMethod;
+    var lstPaymentStatus = (List<WATS.Entities.PaymentStatus>)objMembers.lstPaymentStatus;
+    Int64 DonationCategoryId = ViewBag.DonationCategoryId;
+   
+}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#OrderDate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-10:+10", altFormat: 'mm/dd/yy' });
+        $('#MWebsite').addClass('active');
+    });
+
+    function Validate() {
+        if ($('#FirstName').val() == "") { $('#spanFirstName').html('Required.'); $('#FirstName').focus().addClass("red-border"); return false; } else { $('#spanFirstName').html(''); $('#FirstName').focus().removeClass("red-border"); }
+        if ($('#LastName').val() == "") { $('#spanLastName').html('Required.'); $('#LastName').focus().addClass("red-border"); return false; } else { $('#spanLastName').html(''); $('#LastName').focus().removeClass("red-border"); }
+        if ($('#Email').val() == "") { $('#spanEmail').html('Required.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); $('#Email').focus().removeClass("red-border"); }
+        if (!Common.CheckEmail($('#Email').val())) { $('#spanEmail').html('Invalid email address.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); $('#Email').focus().removeClass("red-border"); }
+        if ($('#Amount').val() == "") { $('#spanAmount').html('Required.'); $('#Amount').focus().addClass("red-border"); return false; } else { $('#spanAmount').html(''); $('#Amount').focus().removeClass("red-border"); }
+
+        if (!IsNumeric($("#Amount").val())) { $('#Amount').val(''); document.getElementsByName('Amount')[0].placeholder = 'Please enter valid amount.'; $('#Amount').focus().addClass("validate"); return false; } else { $('#Amount').focus().removeClass("validate"); }
+        if ($('#Amount').val() <= 0) { $('#Amount').val(''); document.getElementsByName('Amount')[0].placeholder = 'Please enter valid amount.'; $('#Amount').focus().addClass("validate"); return false; } else { $('#Amount').focus().removeClass("validate"); }
+        if ($('#PaymentMethodId').val() == "Cash/Cheque") {
+            if ($('#PaymentBy').val() == "") { $('#spanPaymentBy').html('Required.'); $('#PaymentBy').focus(); return false; } else { $('#spanPaymentBy').html(''); $('#PaymentBy').focus().removeClass("red-border"); }
+            if ($('#ChequeNo').val() == "") { $('#spanChequeNo').html('Required.'); $('#ChequeNo').focus(); return false; } else { $('#spanChequeNo').html(''); $('#ChequeNo').focus().removeClass("red-border"); }
+            if ($('#BankName').val() == "") { $('#spanBankName').html('Required.'); $('#BankName').focus(); return false; } else { $('#spanBankName').html(''); $('#BankName').focus().removeClass("red-border"); }
+            if ($('#ChequeDate').val() == "") { $('#spanChequeDate').html('Required.'); $('#ChequeDate').focus(); return false; } else { $('#spanChequeDate').html(''); $('#ChequeDate').focus().removeClass("red-border"); }
+            return true;
+        }
+    }
+</script>
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+
+        <li><a href="@Url.Action("Index", "Donors")">Donors</a> <span class="divider">/</span></li>
+        <li class="active">Add Donor</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r p_b"><a class="clearfix" href="@Url.Action("Index", "Donors")">← back to donors list</a> </div>
+                <h3 class="title">Add Donor</h3>
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            { @Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            { @Html.Raw(ViewBag.message.ToString())}
+        </div>
+        @using (Html.BeginForm("AddDonor", "Donors", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Donor Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">First Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="FirstName" name="FirstName" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanFirstName"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Email :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="Email" name="Email" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanEmail"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Amount :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="Amount" name="Amount" onkeypress="return Common.isNumberKey(event);" maxlength="4" class="input-block-level border-radius0" />
+                                                <span id="spanAmount" class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Order Date :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="OrderDate" name="OrderDate" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanOrderDate"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Last Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="LastName" name="LastName" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanLastName"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Phone No :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="PhoneNo" name="PhoneNo" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanPhoneNo"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Donation Cause</label>
+
+                                            </div>
+                                            <div class="span6">
+                                                <textarea type="text" id="Donationause" name="Donationause"></textarea>
+                                                <span class="field-validation-error" id="spanDonationause"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Address</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" class="input-block-level border-radius0" placeholder="Address" name="Address" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>    
+            
+     
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Donor Description</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Payment By :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" class="input-block-level border-radius0" placeholder="PaymentBy" name="PaymentBy" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Donation Program :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <select class="input-block-level" name="DonationProgram">
+                                                    <option value="">--Select--</option>
+                                                    @if (lstDonationCategories != null && lstDonationCategories.Count != 0)
+                                                    {
+                                                        foreach (var item in lstDonationCategories)
+                                                        { 
+                                                        <option @(item.DonationCategoryId == DonationCategoryId ? "selected=selected" : "") value="@item.DonationCategoryId">@(item.CategoryName)</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="span5">
+                                        <label class="t-p5">Payment Status :</label>
+                                    </div>
+                                    <div class="span6">
+                                        <select class="input-block-level" name="PaymentStatusId" id="PaymentStatusId">
+                                            @if (lstPaymentStatus != null)
+                                            {
+                                                <option value="">Select</option>
+                                                foreach (var item in lstPaymentStatus)
+                                                { 
+                                                <option value="@item.PaymentStatusId">@item.PaymentStatus1</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span class="field-validation-error" id="spanPaymentStatusId"></span>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="span5">
+                                        <label class="t-p5">Payment Method :</label>
+                                    </div>
+                                    <div class="span6">
+                                        <select class="input-block-level" name="PaymentMethodId" id="PaymentMethodId">
+                                            @if (lstPaymentMethod != null)
+                                            {
+                                                <option value="">Select</option>
+                                                foreach (var item in lstPaymentMethod)
+                                                { 
+                                                <option value="@item.PaymentMethodId">@item.PaymentMethod</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span class="field-validation-error" id="spanPaymentMethodId"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <div class="actionButtons">
+                    <input type="submit" value="Submit" onclick="return Validate()" name="send" class="button2 btn btn-primary">
+                    <a class="btn btn-inverse" href="@Url.Action("Index", "Members")">Cancel</a>
+                </div>
+            </div>
+        }
+        <div class="adminfooter"></div>
+    </div>
+</div>

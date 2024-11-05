@@ -1,0 +1,731 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    //var objMembers = (WATS.Entities.Members)ViewBag.objMembers;
+    var objTeluguBadiRequirement = (WATS.Entities.TeluguBadiRegistrations)ViewBag.objTeluguBadiRequirement;
+    var lstTeluguBadiTypes = (List<WATS.Entities.TeluguBadiTypes>)objTeluguBadiRequirement.lstTeluguBadiTypes;
+    ViewBag.heading = "TeluguBadi Registrations";
+
+    List<WATS.Entities.VolunteerCategories> lstVolunteerCategory = ViewBag.lstVolunteerCategory;
+    var Type = ViewBag.Type;
+
+    WATS.Entities.InnerPages objTeluguInnerPages = new WATS.Entities.InnerPages();
+    WATS.BLL.InnerPages _InnerPages = new WATS.BLL.InnerPages();
+    int status = 0;
+
+    objTeluguInnerPages = _InnerPages.GetInnerPagesListById(0, "Telugu Badi Timings", ref status);
+}
+
+<script type="text/javascript" src="Scripts\User\Common.js"></script>
+
+<script type="text/javascript">
+   $(function () {
+        $(document).pjScrollUp({
+            imgSrc: "Content/images/toparrow.png"
+       });
+       getamount();
+    });
+
+    $(document).ready(function () {
+        $("#PhoneNo").mask("(999) 999-9999");
+        $("#MotherPhoneNo").mask("(999) 999-9999");
+        $("#HomePhone").mask("(999) 999-9999");
+        $("#EmergencyPhoneNo").mask("(999) 999-9999");
+        $('#memberbenifits').dialog
+           ({
+               autoOpen: false,
+               width: 450,
+               modal: true
+           });
+    /*  Unemployed('No');*/
+
+        /*VolunteerInterest('No');*/
+    });
+    function VolunteerInterest(val) {
+        if (val == 'No') {
+            $('#EmployerName').hide();
+            $('#Notes').hide();
+            $('#VolunteerSignup').hide();
+        }
+        else {
+            $('#EmployerName').show();
+            $('#Notes').show();
+            $('#VolunteerSignup').show();
+
+        }
+    }
+    function checkhide() {
+        document.getElementById("mailed").checked = false;
+        document.getElementById("rpaymentby").checked = false;
+        $('#PaymentBy').show();
+        $('#check').hide();
+        $('#PaymentMethod').val('PayPal');
+        $('#paypaldiv').show();
+    }
+    function checkshow() {
+        document.getElementById("mailed").checked = false;
+        document.getElementById("rpaymentby").checked = true;
+        $('#PaymentBy').show();
+        $('#check').show();
+        $('#PaymentMethod').val('Cash/Cheque');
+        $('#paypaldiv').hide();
+    }
+    function CheckEmailAvailability(email) {
+
+        var returnval = null;
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CheckEmailAvailability", "TeluguBadiRegistrations")', // the URL of the controller action method
+            data: { Email: email }, // optional data
+            datatype: "JSON",
+            async: false,
+            success: function (result) {
+                if (result.ok) {
+                    returnval = result.data;
+                }
+            }
+        });
+        return returnval;
+    }
+
+    function CheckUserNameAvailability(username) {
+
+        var returnval = null;
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CheckUserNameAvailability", "TeluguBadiRegistrations")', // the URL of the controller action method
+            data: { UserName: username }, // optional data
+            datatype: "JSON",
+            async: false,
+            success: function (result) {
+                if (result.ok) {
+                    returnval = result.data;
+                }
+            }
+        });
+        return returnval;
+    }
+
+    function AddStudent() {
+        var Count1 = $('#Count').val();
+        if (parseInt(Count1) <= 4) {
+            var Count = parseInt(Count1);
+            var yeardrop = '';
+            var y = 0
+            y = (new Date()).getFullYear();
+            var z = parseInt(y) - parseInt(18);
+
+            for (var x = z; x <= y; x++) {
+                yeardrop = yeardrop + '<option value="' + x + '">' + x + '</option>';
+            }
+            var stdhtml = "<article class=\"clearfix\" id=\"Student-" + (parseInt(Count1) + 1) + "\"><article class=\"box-header\" style=\"cursor: move;\"><h3 class=\"box-title\">Student - " + (parseInt(Count1) + 1) + " <a class=\"btn btn-danger btn-small pull-right t-m20n\" onclick=\"RemoveStudent(" + (parseInt(Count1) + 1) + ");\" style=\"color: #ffffff; padding-left: 15px;\">Remove</a></h3></article><article class=\"clearfix part-row t-p5\"><article class=\"part-6 t-b-p5 position-r\"><article class=\"clearfix r-p10 tabhorizontal-r-p5 mobile-l-p0\"><label>First Name<span class=\"red-t\">*</span></label><input type=\"text\" id=\"FirstName-" + Count + "\" name=\"[" + Count + "].FirstName\" class=\"form-control\"><span id=\"spanStudentFirstName-" + Count + "\" class=\"errormsg\"></span></article></article><article class=\"part-6 t-b-p5 position-r\"><article class=\"clearfix l-p10 tabhorizontal-l-p5 mobile-r-p0\"><label>Last Name<span class=\"red-t\">*</span></label><input type=\"text\" id=\"LastName-" + Count + "\" name=\"[" + Count + "].LastName\" class=\"form-control\"><span id=\"spanStudentLastName-" + Count + "\" class=\"errormsg\"></span></article></article></article><article class=\"clearfix part-row\"><article class=\"part-6 t-b-p5 position-r\"><article class=\"clearfix r-p10 tabhorizontal-r-p5 mobile-l-p0\"><label> Age <span class=\"red-t\">*</span></label><input type=\"text\" id=\"Age-" + Count + "\" name=\"[" + Count + "].Age\" class=\"form-control\" onkeypress=\"return Common.isNumberKey(event);\" maxlength=\"2\" type=\"text\" /><span class=\"errormsg\" id=\"spanAge-" + Count + "\"></span></article></article><article class=\"part-6 t-b-p5 position-r\"><article class=\"clearfix l-p10 tabhorizontal-l-p5 mobile-l-p0\"><label> Level Intended to Register <span class=\"red-t\">*</span></label><article class=\"clearfix dropdown\"><select class=\"dropdown-select ui-select\" name=\"[" + Count + "].LevelOfferings\" id=\"LevelOfferings-" + Count + "\"><option value=\"\">--Select Class--</option><option value=\"Balanandam\">Balanandam (Level 0)</option><option value=\"1\">Level 1</option><option value=\"2\">Level 2</option><option value=\"3\">Level 3</option><option value=\"4\">Level 4</option><option value=\"5\">Level 5</option></select><span class=\"errormsg\" id=\"spanLevelOfferings-" + Count + "\"></span></article></article></article></article></article>";
+            $('#Count').val(parseInt(Count1) + 1);
+            $('#Students').append(stdhtml);
+
+            //GetCentersList((Count));
+        }
+        if ((parseInt(Count1) + 1) == 4) {
+            $('#Addbtn').hide();
+        }
+        var Count2 = $('#Count').val();
+        if (Count2 > 1) {
+            $('#TeluguBadiTypeId-1').prop('checked', false);
+            $('#TeluguBadiTypeId-2').prop('checked', true);
+            $('#Types-1').hide();
+            getamount();
+        }
+        else {
+            $('#TeluguBadiTypeId-2').prop('checked', false);
+            $('#TeluguBadiTypeId-1').prop('checked', true);
+            $('#Types-1').show();
+            getamount();
+        }
+    }
+
+    function RemoveStudent(id) {
+        var Count1 = $('#Count').val();
+        var aid = 0;
+
+        $('#Amount-' + (id == 2 ? 1 : 2)).val('0');
+        var tamt = 0;
+        for (i = 0; i <= 2; i++) {
+            tamt = parseInt(tamt) + parseInt($('#Amount-' + i).val());
+        }
+
+        $('#spanTotalAmount').html(tamt);
+        $('#TotalAmount').val(tamt);
+
+        $('#Student-' + id).remove();
+        $('#Count').val(parseInt(Count1) - 1);
+        $('#Addbtn').show();
+
+        var Count2 = $('#Count').val();
+        if (Count2 > 1) {
+            $('#TeluguBadiTypeId-1').prop('checked', false);
+            $('#TeluguBadiTypeId-2').prop('checked', true);
+            $('#Types-1').hide();
+            getamount();
+        }
+        else {
+            $('#TeluguBadiTypeId-2').prop('checked', false);
+            $('#TeluguBadiTypeId-1').prop('checked', true);
+            $('#Types-1').show();
+            getamount();
+        }
+    }
+
+    function Validate() {
+        if ($('#FatherFirstName').val() == "") { $('#spanFatherFirstName').html('Required.'); $('#FatherFirstName').focus().addClass(""); return false; } else { $('#spanFatherFirstName').html(''); $('#FatherFirstName').focus().removeClass(""); }
+        if ($('#FatherLastName').val() == "") { $('#spanFatherLastName').html('Required.'); $('#FatherLastName').focus().addClass(""); return false; } else { $('#spanFatherLastName').html(''); $('#FatherLastName').focus().removeClass(""); }
+        if ($('#FatherEmail').val() == "") { $('#spanFatherEmail').html('Required.'); $('#FatherEmail').focus().addClass(""); return false; } else { $('#spanFatherEmail').html(''); $('#FatherEmail').focus().removeClass(""); }
+        if (!Common.CheckEmail($('#FatherEmail').val())) { $('#FatherEmail').val(''); document.getElementsByName('FatherEmail')[0].placeholder = 'Invalid email address'; $('#FatherEmail').focus().addClass("validate"); return false; } else { $('#FatherEmail').removeClass("validate"); }
+        if (!CheckEmailAvailability($.trim($('#FatherEmail').val()))) { $('#FatherEmail').val(''); document.getElementsByName('FatherEmail')[0].placeholder = 'Email already exist.'; $('#FatherEmail').focus().addClass("validate"); return false; } else { $('#FatherEmail').removeClass("validate"); }
+        if ($('#FatherPhoneNo').val() == "") { $('#spanFatherPhoneNo').html('Required.'); $('#FatherPhoneNo').focus().addClass(""); return false; } else { $('#spanFatherPhoneNo').html(''); $('#FatherPhoneNo').focus().removeClass(""); }
+        if ($('#MotherFirstName').val() == "") { $('#spanMotherFirstName').html('Required.'); $('#MotherFirstName').focus().addClass(""); return false; } else { $('#spanMotherFirstName').html(''); $('#MotherFirstName').focus().removeClass(""); }
+        if ($('#MotherLastName').val() == "") { $('#spanMotherLastName').html('Required.'); $('#MotherLastName').focus().addClass(""); return false; } else { $('#spanMotherLastName').html(''); $('#MotherLastName').focus().removeClass(""); }
+        if ($('#MotherEmail').val() == "") { $('#spanMotherEmail').html('Required.'); $('#MotherEmail').focus().addClass(""); return false; } else { $('#spanMotherEmail').html(''); $('#MotherEmail').focus().removeClass(""); }
+        if (!Common.CheckEmail($('#MotherEmail').val())) { $('#MotherEmail').val(''); document.getElementsByName('MotherEmail')[0].placeholder = 'Invalid email address'; $('#MotherEmail').focus().addClass("validate"); return false; } else { $('#MotherEmail').removeClass("validate"); }
+        if ($('#MotherPhoneNo').val() == "") { $('#spanMotherPhoneNo').html('Required.'); $('#MotherPhoneNo').focus().addClass(""); return false; } else { $('#spanMotherPhoneNo').html(''); $('#MotherPhoneNo').focus().removeClass(""); }
+        if ($('#TeluguBadiCenterName').val() == "") { $('#spanTeluguBadiCenterName').html('Required.'); $('#TeluguBadiCenterName').focus().addClass(""); return false; } else { $('#spanTeluguBadiCenterName').html(''); $('#TeluguBadiCenterName').focus().removeClass(""); }
+
+        //var VolunteerFor = Common.GetCheckBoxValue('ItemValue');
+        //if (VolunteerFor == "") {
+        //   /* alert("Please select atleast one item From Interested List.");*/
+        //   /* return false;*/
+        //}
+
+        //else {
+        //    $('#VolunteerFor').val(VolunteerFor);
+        //}
+
+        var count = $('#Count').val();
+        for (var i = 0; i < parseInt(count); i++) {
+            if ($.trim($('#FirstName-' + i).val()) == '') { $('#spanFirstName').html('Required.'); $('#FirstName-' + i).focus().addClass(""); return false; } else { $('#spanFirstName').html(''); $('#FirstName-' + i).focus().removeClass(""); }
+            if ($.trim($('#LastName-' + i).val()) == '') { $('#spanLastName').html('Required.'); $('#LastName-' + i).focus().addClass(""); return false; } else { $('#spanLastName').html(''); $('#LastName-' + i).focus().removeClass(""); }
+            if ($.trim($('#Age-' + i).val()) == '') { $('#spanAge').html('Required.'); $('#Age-' + i).focus().addClass(""); return false; } else { $('#spanAge').html(''); $('#Age-' + i).focus().removeClass(""); }
+            if ($.trim($('#LevelOfferings-' + i).val()) == '') { $('#spanLevelOfferings').html('Required.'); $('#LevelOfferings-' + i).focus().addClass(""); return false; } else { $('#spanLevelOfferings').html(''); $('#LevelOfferings-' + i).focus().removeClass(""); }
+        }
+
+        if ($('#TeluguBadiTypeId').val() == "") { $('#spanTeluguBadiTypeId').html('Required.'); $('#TeluguBadiTypeId').focus(); return false; } else { $('#spanTeluguBadiTypeId').html(''); $('#MembershipTypeId').focus().removeClass("validate"); }
+
+        if ($('#txtCaptcha').val() == '') { $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+        var str = Common.GetCaptcha();
+
+        if ($('#txtCaptcha').val() != str) { $('#txtCaptcha').val(''); document.getElementsByName('MCaptcha')[0].placeholder = 'wrong captcha.'; $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+
+        return true;
+    }
+
+
+    function deleteRow1(i) {
+        try {
+            var row = document.getElementById(i);
+            row.parentNode.removeChild(row);
+            $('#hdnRowCount1').val(i - 1);
+            $('#addbtn').show();
+        } catch (e) {
+            alert(e);
+        }
+    }
+
+    function closeValidation(field) {
+        $(field).parent().hide();
+    }
+
+    function getamount() {
+        var TeluguBadiTypeId = Common.getCheckedRadio('TeluguBadiTypeId');;
+        $.ajax({
+            url: '@Url.Action("GetTeluguBadiTypeAmount", "TeluguBadiRegistrations")',
+            type: 'POST',
+            data: { TeluguBadiTypeId: TeluguBadiTypeId },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objTeluguBadiTypes = result.data;
+                    $('#payamount').html(objTeluguBadiTypes.Price);
+                    $('#Amount').val(objTeluguBadiTypes.Price);
+                    $('#MembershipType').val(objTeluguBadiTypes.MembershipType);
+                    if (Common.ConvertDate(objTeluguBadiTypes.ExpiryDate) != '1/1/1') {
+                        $('#ExpiryDate').val(Common.ConvertDate(objTeluguBadiTypes.ExpiryDate));
+                    } else { $('#ExpiryDate').val('01/01/0001'); }
+                }
+            }
+        });
+    }
+
+    function ResetValidateClass() {
+        $('#UserName').removeClass("validate");
+        $('#Password').removeClass("validate");
+        $('#Email').removeClass("validate");
+        $('#ConfPassword').removeClass("validate");
+        $('#FirstName').removeClass("validate");
+        $('#LastName').removeClass("validate");
+        $('#txtCaptcha').removeClass("validate");
+
+    }
+
+    function CreloadCaptcha() {
+        document.getElementById('CUcaptcha').src = document.getElementById('CUcaptcha').src + '/';
+    }
+    function paymentbyhide() {
+        $('#PaymentBy').val('');
+        $('#PaymentBy').hide();
+    }
+    function paymentbyshow() {
+        $('#PaymentBy').val('');
+        $('#PaymentBy').show();
+    }
+
+    function paypalyhide() {
+        $('#PayPal').hide();
+    }
+    function paypalbyshow() {
+        $('#PayPal').show();
+    }
+
+    function phonenochange(event) {
+        if (event.keyCode == 8 || event.keyCode == 46) {
+        }
+        else {
+            var ph = $('#FatherPhoneNo').val();
+            if (ph.length == 3) { $('#FatherPhoneNo').val(ph + '-'); }
+            if (ph.length == 7) { $('#FatherPhoneNo').val(ph + '-'); }
+        }
+    }
+
+    function mothernochange(event) {
+        if (event.keyCode == 8 || event.keyCode == 46) {
+        }
+        else {
+            var ph = $('#MotherPhoneNo').val();
+            if (ph.length == 3) { $('#MotherPhoneNo').val(ph + '-'); }
+            if (ph.length == 7) { $('#MotherPhoneNo').val(ph + '-'); }
+        }
+    }
+
+    function onlyAlphabets(e, t) {
+        try {
+            if (window.event) {
+                var charCode = window.event.keyCode;
+            }
+            else if (e) {
+                var charCode = e.which;
+            }
+            else { return true; }
+            if ((charCode == 32) || (charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || (specialKeys.indexOf(e.keyCode) != -1 && e.charCode != e.keyCode)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        catch (err) {
+            alert(err.Description);
+        }
+    }
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    specialKeys.push(9); //Tab
+    specialKeys.push(32); //Space
+    specialKeys.push(46); //Delete
+    specialKeys.push(36); //Home
+    specialKeys.push(35); //End
+    specialKeys.push(37); //Left
+    specialKeys.push(39); //Right
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+
+        });
+       /* VolunteerInterest('No');*/
+    });
+
+    function LoginValidate() {
+        if ($('#Email1').val() == "") { $('#Email1').focus().addClass("validate"); return false; } else { $('#Email1').removeClass("validate"); }
+        if (!Common.CheckEmail($('#Email1').val())) { $('#Email1').val(''); document.getElementsByName('Email')[0].placeholder = 'Invalid email address'; $('#Email1').focus().addClass("validate"); return false; } else { $('#Email1').removeClass("validate"); }
+        if ($('#Password1').val() == '') { $('#Password1').focus().addClass("validate"); return false; } else { $('#Password1').focus().removeClass("validate"); }
+
+
+        return true;
+    }
+    function ResetValidateClass() {
+        $('#Email1').removeClass("validate");
+        $('#Password1').removeClass("validate");
+
+    }
+    //function VolunteerInterest(val) {
+    //    if (val == 'No') {
+    //        $('#EmployerName').hide();
+    //        $('#Notes').hide();
+    //        $('#VolunteerSignup').hide();
+    //    }
+    //    else {
+    //        $('#EmployerName').show();
+    //        $('#Notes').show();
+    //        $('#VolunteerSignup').show();
+
+    //    }
+    //}
+</script>
+<script type="text/javascript">
+
+    function ValidateFPword1() {
+        if ($('#Email2').val() == "" && $('#UserName').val() == "") { alert("Please Enter User Name or Email."); return false; }
+        if ($('#Email2').val() != "") {
+            if ($.trim($('#Email2').val()) == '') { $('#Email2').focus().addClass("validate"); return false; } else { $('#Email2').focus().removeClass("validate"); }
+            if (!Common.CheckEmail($('#Email2').val())) { $('#Email2').val(''); document.getElementsByName('Email')[0].placeholder = 'Invalid email address'; $('#Email2').focus().addClass("validate"); return false; } else { $('#Email2').removeClass("validate"); }
+        }
+        return true;
+    }
+    function ResetValidateClass() {
+        $('#Email').removeClass("validate");
+    }
+
+
+
+</script>
+
+<input type="hidden" value="1" id="hdnRowCount" />
+
+<article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height: 1150px;">
+    <article class="clearfix curve position-r t-m4n b-p15">
+        <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">Telugu Badi <span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16"> Registration</span></h2>
+    </article>
+    <article class="clearfix p15" style="display:none;">
+        @using (Html.BeginForm("AddTeluguBadiRegistrations", "TeluguBadiRegistrations", FormMethod.Post, new { enctype = "multipart/form-data", @class = "validation" }))
+        {
+            <input type="hidden" value="PayPal" id="PaymentMethod" name="PaymentMethod" />
+            <input type="hidden" id="Count" name="Count" value="1" />
+            <input type="hidden" id="Amount" name="Amount" value="" />
+            <input type="hidden" value="" id="ExpiryDate" name="ExpiryDate" />
+            @*<input type="hidden" value="" id="VolunteerFor" name="VolunteerFor" />*@
+
+            <h2 class="clearfix t-m0 orange-t Montserrat-Regular font20 mobilev-font18 mobile-l-h24"><span class="border-b2 yellowborder b-p5">Personal Information</span></h2>
+            <article class="clearfix part-row">
+                <article class="part-6 t-b-p5 position-r">
+                    <article class="clearfix r-p10 tabhorizontal-r-p5 mobile-l-p0">
+                        <label>Father First Name<span class="red-t">*</span></label>
+                        <input name="FatherFirstName" id="FatherFirstName" placeholder="Father First Name *" class="form-control" onkeypress="return onlyAlphabets(event,this);" type="text">
+
+                    </article>
+                </article>
+                <article class="part-6 t-b-p5 position-r">
+                    <article class="clearfix l-p10 tabhorizontal-l-p5 mobile-r-p0">
+                        <label>Father Last Name<span class="red-t">*</span></label>
+                        <input name="FatherLastName" id="FatherLastName" placeholder="Father Last Name *" onkeypress="return onlyAlphabets(event,this);" class="form-control">
+
+                    </article>
+                </article>
+            </article>
+            <article class="clearfix part-row">
+                <article class="part-6 t-b-p5 position-r">
+                    <article class="clearfix r-p10 tabhorizontal-r-p5 mobile-l-p0">
+                        <label>Father Email <span class="red-t">*</span></label>
+                        <input name="FatherEmail" id="FatherEmail" placeholder="Father Email *" class="form-control" type="text">
+
+                    </article>
+                </article>
+                <article class="part-6 t-b-p5 position-r">
+                    <article class="clearfix l-p10 tabhorizontal-l-p5 mobile-l-p0">
+                        <label>Father Phone Number <span class="red-t">*</span></label>
+                        <input name="FatherPhoneNo" id="FatherPhoneNo" placeholder="Father Phone Number *" class="form-control" type="text" onkeypress="phonenochange(event); return Common.isNumberKey(event);" maxlength="12">
+
+                    </article>
+                </article>
+            </article>
+            <article class="clearfix part-row">
+                <article class="part-6 t-b-p5 position-r">
+                    <article class="clearfix r-p10 tabhorizontal-r-p5 mobile-l-p0">
+                        <label>Mother First Name <span class="red-t">*</span></label>
+                        <input name="MotherFirstName" id="MotherFirstName" placeholder="Mother First Name *" onkeypress="return onlyAlphabets(event,this);" class="form-control" type="text">
+
+                    </article>
+                </article>
+                <article class="part-6 t-b-p5 position-r">
+                    <article class="clearfix l-p10 tabhorizontal-l-p5 mobile-l-p0">
+                        <label>Mother Last Name <span class="red-t">*</span></label>
+                        <input name="MotherLastName" id="MotherLastName" placeholder="Mother Last Name *" onkeypress="return onlyAlphabets(event,this);" class="form-control">
+
+                    </article>
+                </article>
+            </article>
+            <article class="clearfix part-row">
+                <article class="part-6 t-b-p5 position-r">
+                    <article class="clearfix r-p10 tabhorizontal-r-p5 mobile-r-p0">
+                        <label>Mother Email </label>
+                        <input name="MotherEmail" id="MotherEmail" placeholder="Mother Email *" class="form-control" type="text">
+
+                    </article>
+                </article>
+                <article class="part-6 t-b-p5 position-r">
+                    <article class="clearfix l-p10 tabhorizontal-l-p5 mobile-l-p0">
+                        <label>Mother Phone No </label>
+                        <input name="MotherPhoneNo" id="MotherPhoneNo" placeholder="Mother Phone No *" class="form-control" type="text" onkeypress="mothernochange(event); return Common.isNumberKey(event);" maxlength="12">
+
+                    </article>
+                </article>
+            </article>
+            <article class="clearfix part-row">
+                <article class="part-6 t-b-p5 position-r">
+                    <article class="clearfix r-p10 tabhorizontal-r-p5 mobile-r-p0">
+                        <label>Telugu Badi Centers <span class="red-t">*</span></label>
+                        <article class="clearfix dropdown">
+                            <select class="dropdown-select ui-select" name="TeluguBadiCenterName" id="TeluguBadiCenterName">
+                                <option value="">Center where student will attend the classes</option>
+                                <option value="Redmond"> Redmond </option>
+                                <option value="Bothell">Bothell</option>
+                                <option value="Sammamish">Sammamish</option>
+                            </select>
+                            <span style="color:#f00; float:right;" id="spanTeluguBadiCenterName"></span>
+                        </article>
+                    </article>
+                </article>
+                <article class="part-6 t-b-p5 position-r">
+                    <article class="clearfix l-p10 tabhorizontal-l-p5 mobile-l-p0">
+                        <label>&nbsp;</label>
+                    </article>
+                </article>
+            </article>
+            <h3 class="font18 dk-t t-m0 b-p10">Volunteer interest For?</h3>
+
+
+            <ul class="clearfix m0 list-pn list-f  box-row t-b-p5 grayborder">
+                <li class="box-3">
+                    <label class="checkboxstyle b-m0">
+                        <input name="VolunteerFor" id="VolunteerFor" checked="checked" value="Yes" type="radio" onchange="VolunteerInterest('Yes');">
+                        <span for="radio" class="dis-in Poppins-Regular l-h20 font15 black-t mobile-font12"><a class="black-t">Yes</a></span>
+                    </label>
+                </li>
+                <li class="box-3">
+                    <label class="checkboxstyle b-m0">
+                        <input name="VolunteerFor" id="VolunteerFor" value="No" type="radio" onchange="VolunteerInterest('No');">
+                        <span for="radio" class="dis-in Poppins-Regular l-h20 font15 black-t mobile-font12"><a class="black-t">No</a></span>
+                    </label>
+                </li>
+            </ul>
+            <article class="clearfix part-row border2 border-radius4 t-b-m10 p10 l-m5 shadow" style="border-color:#17275d;" id="EmployerName">
+                <article class="part-6 t-b-p5 position-r" id="EmployerName">
+                    <article class="clearfix r-p10 tabhorizontal-r-p5 mobile-r-p0">
+                        <label>Employer Name </label>
+                        <input name="Address" id="EmployerName" placeholder="Employer Name " class="form-control" type="text">
+
+                    </article>
+                </article>
+                <article class="part-6 t-b-p5 position-r" id="Notes">
+                    <article class="clearfix l-p10 tabhorizontal-l-p5 mobile-l-p0">
+                        <label>Notes </label>
+                        <input name="City" id="Notes" placeholder="Notes " class="form-control" type="text" maxlength="12">
+
+                    </article>
+                </article>
+            </article>
+            <article class="clearfix part-row">
+                <article class="part-7 t-b-p5 position-r" id="VolunteerSignup">
+                    <article class="clearfix l-p10 tabhorizontal-l-p5 mobile-l-p0">
+                        <a class="btn btn-danger pull-right poppins-medium" href="@Url.Action("AddVolunteer", "Volunteer")" target="_blank">Register As a Volunteer</a>
+                    </article>
+                </article>
+            </article>
+
+            if (objTeluguInnerPages != null && objTeluguInnerPages.Description != "")
+            {
+                @Html.Raw(objTeluguInnerPages.Description);
+            }
+            <h2 class="clearfix orange-t Montserrat-Regular font20 dis-in"><span class="border-b2 yellowborder b-p5">Student(s) Information</span></h2>
+            <article class="clearfix pull-right mobile-pull-n mobilev-t-p10">
+                <a class="btn btn-danger btn-sm btn-block font14 l-r-p20 t-b-p8 t-t-u border-radius5 poppins-medium" onclick="AddStudent();" id="Addbtn" style="max-width: 290px;">Add Siblings  </a>
+            </article>
+            <article class="clearfix" id="Students">
+                <article class="clearfix part-row t-p5">
+                    <article class="part-6 t-b-p5 position-r">
+                        <article class="clearfix r-p10 tabhorizontal-r-p5 mobile-l-p0">
+                            <label>First Name<span class="red-t">*</span></label>
+                            <input type="text" id="FirstName-0" name="[0].FirstName" class="form-control" type="text" />
+
+                        </article>
+                    </article>
+                    <article class="part-6 t-b-p5 position-r">
+                        <article class="clearfix l-p10 tabhorizontal-l-p5 mobile-r-p0">
+                            <label>Last Name<span class="red-t">*</span></label>
+                            <input type="text" id="LastName-0" name="[0].LastName" class="form-control" />
+
+                        </article>
+                    </article>
+                </article>
+                <article class="clearfix part-row">
+                    <article class="part-6 t-b-p5 position-r">
+                        <article class="clearfix r-p10 tabhorizontal-r-p5 mobile-l-p0">
+                            <label> Age <span class="red-t">*</span></label>
+                            <input type="text" id="Age-0" name="[0].Age" class="form-control" type="text" onkeypress="return Common.isNumberKey(event);" maxlength="2" />
+
+                        </article>
+                    </article>
+                    <article class="part-6 t-b-p5 position-r">
+                        <article class="clearfix l-p10 tabhorizontal-l-p5 mobile-l-p0">
+                            <label> Level Intended to Register <span class="red-t">*</span></label>
+                            <article class="clearfix dropdown">
+                                <select class="dropdown-select ui-select" name="[0].LevelOfferings" onchange="GetClass(0);" id="LevelOfferings-0">
+                                    <option value="">--Select Class--</option>
+                                    @*<option value="0">0</option>*@
+                                    <option value="Balanandam">Balanandam (Level 0)</option>
+                                    <option value="1">Level 1</option>
+                                    <option value="2">Level 2</option>
+                                    <option value="3">Level 3</option>
+                                    <option value="4">Level 4</option>
+                                    <option value="5">Level 5</option>
+                                </select>
+
+                            </article>
+                        </article>
+                    </article>
+                </article>
+
+            </article>
+
+            <article class="clearfix border-t dashborder-t grayborder t-m20 mobile-t-m10 mobile-t-p0"></article>
+            if (objTeluguBadiRequirement.lstTeluguBadiTypes != null && objTeluguBadiRequirement.lstTeluguBadiTypes.Count != 0)
+            {
+                int i = 1;
+                <h3 class="font18 dk-t t-m0 t-b-p10">Registration Type</h3>
+                <ul class="clearfix m0 list-pn list-f part-row border-t border-b grayborder p10 mobilev-p5">
+                    @foreach (var item in objTeluguBadiRequirement.lstTeluguBadiTypes)
+                    {
+                        <li class="part-6 t-b-p7" id="Types-@i">
+                            <label class="radiostyle b-m0">
+                                <input value="@item.TeluguBadiTypeId" onclick="getamount(@item.Price);" name="TeluguBadiTypeId" id="TeluguBadiTypeId-@i" @(i == 1 ? "checked=checked" : "") type="radio">
+                                <span for="radio" class="dis-in Poppins-Regular l-h20 font15 black-t mobile-font12"><a class="black-t"> @item.Type (@(item.Price == 0 ? "Free" : "$" + (Math.Round(@item.Price, 0)))) </a></span>
+                            </label>
+                        </li>
+                        i++;
+                    }
+                </ul>
+
+            }
+
+            <article class="clearfix t-b-p5">
+                <span>Note: <span style="color:#f00">100$ charge is for Telugu Text Books and LMS Online platform service.</span></span>
+            </article>
+
+            <article class="clearfix font13 poppinsregular l-h24 tabhorizontal-p10">
+                <h2 class="clearfix orange-t Montserrat-Regular font20 mobilev-font18 mobile-l-h24"><span class="border-b2 yellowborder b-p5">Payment Method :</span></h2>
+                <article class="clearfix row-fluid t-b-p15">
+                    <article class="clearfix span10">
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-6">
+                                <label class="font16 dkdark-t radiostyle b-m0">
+                                    <input value="1" name="pmethod" checked="checked" onclick="checkhide();" type="radio">
+                                    <span class="dis-in" for="radio1">Instant Checkout  through PayPal </span>
+                                </label>
+                            </article>
+                            <article class="clearfix part-6">
+                                <label class="font16 dkdark-t radiostyle b-m0">
+                                    <input type="radio" value="0" name="pmethod" onclick="checkshow();">
+                                    <span class="dis-in" for="radio1">Cash/Cheque</span>
+                                </label>
+                            </article>
+                        </article>
+                    </article>
+                </article>
+                <article style="display: none;" class="Poppins-Regular font14" id="check">
+                    @*<article class="clearfix border2 border-radius4 t-b-m10 p10 l-m5 shadow" style="border-color: #17275d;">
+                            <article class="clearfix b-p5">
+                                <span class="muliregular font13 red-t2">You will recieve a confirmation email once the payment is credited to Telugu Badi account. Please follow-up with your Telugu Badi contact, if you did not recieve email within seven days..</span>
+                            </article>
+                            <article class="clearfix b-p10 row-fluid">
+                                <label class="dkdark-t radiostyle b-m0 yellowborder">
+                                    <input onclick="paymentbyhide();" name="Cash/Cheque" id="mailed" type="radio">
+                                    <span class="dis-in" for="radio1">Mailed the cheque already to Telugu Badi</span>
+                                </label>
+                            </article>
+                            <article class="clearfix part-row b-p10">
+                                <label class="dkdark-t radiostyle dis-in">
+                                    <input onclick="paymentbyshow();" id="rpaymentby" name="Cash/Cheque" type="radio">
+                                    <span class="dis-in t-p10" for="radio1">Handed the cash/cheque to - </span>
+                                </label>
+                                <input placeholder="Handed the cash/cheque to" name="PaymentBy" id="PaymentBy" class="b-m0 form-control" style="max-height: 30px; max-width: 200px; display: inline-block!important; font-size: 12px;" type="text">
+                            </article>
+                        </article>*@
+                    <article class="clearfix border2 border-radius10 bluegrayborder t-b-m10 p10 l-m5 shadow" style="border-color: #396dad;">
+                        <article class="black-t l-h22 b-p5">
+                            You will receive a confirmation email once the payment is credited to WATSWEB account.<br>
+                            <span class="latoitalic font13 red-t2">Check should be payable to “WATSWEB” and mail it to “</span>P.O. Box No : 3322, 1171 Bellevue Way NE, Bellevue, WA 98004.<span class="latoitalic font13 red-t2">
+                                ”<br>
+                                Phone:
+                            </span>425-985-2035<span class="latoitalic font13 red-t2">, &nbsp; Email: <a href="mailto:board@watsweb.org">board@watsweb.org</a>.</span>
+                        </article>
+                        <article class="clearfix b-p10 row-fluid">
+                            <label class="dkdark-t radiostyle b-m0">
+                                <input type="radio" onclick="paymentbyhide();" name="Cash/Cheque" id="mailed">
+                                <span class="dis-in" for="radio1">Mailed the cheque already to Washington Telugu Samithi (WATS)</span>
+                            </label>
+                        </article>
+                        <article class="clearfix part-row b-p10">
+                            <article class="clearfix part-4">
+                                <label class="dkdark-t radiostyle">
+                                    <input type="radio" onclick="paymentbyshow();" id="rpaymentby" name="Cash/Cheque">
+                                    <span class="dis-in t-p10" for="radio1">Handed the cash/cheque to - </span>
+                                </label>
+                            </article>
+                            <article class="clearfix part-4">
+                                <input type="text" placeholder="Handed the cash/cheque to" name="PaymentBy" id="PaymentBy" class="b-m0 input-block-level">
+                            </article>
+                        </article>
+                    </article>
+                </article>
+                <article class="clearfix border2 border-radius4 t-b-m10 p10 l-m5 shadow" id="paypaldiv" style="border-color: #17275d;">
+                    <article class="clearfix part-row">
+                        <article class="clearfix part-8">
+                            <article class="clearfix font13 poppinsregular l-h24 tabhorizontal-p10 b-p5">
+                                <h4 class="clearfix Poppins-Regular t-m0 blue-t l-h20 font18 border-b dis-in b-p5 mobilev-font14 mobile-font18">Payment by using PayPal</h4>
+                                <br>
+                                <img src="Content/images/paypal.jpg" alt="PayPal" width="116" height="59">
+                            </article>
+                        </article>
+                        <article class="part-4">
+                            <article class="part-8 t-p15 tablet-t-p10 mobile-t-p0 t-r font16 mobile-t-c">
+                                <input type="hidden" name="TotalAmount" id="TotalAmount" value="0" />
+                                <span class="v-align-m mobilev-font14">Total Amount:&nbsp;</span>
+                            </article>
+                            <article class="part-4 t-p15 font15 tablet-t-p10 mobile-t-c">
+                                <b class="font16 red-t">$<span id="payamount">0</span></b>
+                            </article>
+                        </article>
+                    </article>
+                </article>
+
+                <article class="clearfix t-p10 sm-row mobile-t-b-p10">
+                    <article class="sm-4">
+                        <article class="clearfix r-p10 tabhorizontal-r-p5 mobilev-r-p0 position-r">
+                            <input placeholder="Security Code" class="form-control" onkeypress="ResetValidateClass();" id="txtCaptcha" name="MCaptcha" type="text">
+                            <span class="errormsg" id="spantxtCaptcha"></span>
+                        </article>
+                    </article>
+                    <article class="sm-8">
+                        <article class="clearfix l-p10 tabhorizontal-l-p5 mobilev-l-p0">
+                            <img alt="Captcha" width="91" border="0" height="33" id="CUcaptcha" src="Members/ShowCaptchaImage" style="min-height: 38px!important;" />
+                            <a href="javascript:CreloadCaptcha();">
+                                <img src="Content/images/refresh.png" alt="Refresh" width="33" border="0" height="33" />
+                            </a>
+                        </article>
+                    </article>
+                </article>
+
+
+            </article>
+            <article class="clearfix t-b-p10 pull-right mobile-pull-n">
+                <input value="SUBMIT" class="btn btn-danger btn-sm btn-block font20 l-r-p30 t-b-p10 t-t-u border-radius0 poppins-medium" style="max-width: 290px;" onclick="return Validate();" type="submit">
+            </article>
+        }
+    </article>
+
+    <article class="clearfix">
+        <article class="clearfix border shadow t-b-p10 l-r-p10 t-c l-r-m-auto tm20" style="max-width: 550px;">
+            <p class="b-m0"><b>Registrations are closed or Registrations not available for Telugu Badi. </b></p>
+        </article>
+    </article>
+    </article>

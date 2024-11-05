@@ -1,0 +1,105 @@
+﻿@using System.Configuration
+@model WATS.Entities.LogOnModel
+           @{ ViewBag.Title = "WATS Admin Panel";}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    @{var baseurl = ConfigurationManager.AppSettings["baseurl"];}
+    <base href="@(baseurl)" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>WATS-Admin Panel</title>
+      <link rel="shortcut icon" href="Content/images/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="Content/bootstrap/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="Content/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="Content/admin-style.css" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700' rel='stylesheet' type='text/css'>
+    <!-- ============== GENRAL JS [start] ========= -->
+    <script type="text/javascript" src="Scripts/jquery-1.8.3.js"></script>
+    <script src="Scripts/jquery-ui-1.9.2.custom.min.js"></script>
+    <script src="Scripts/Common.js" type="text/javascript"></script>
+    <!-- =============GENRAL JS [end] ================ -->
+
+    <script type="text/javascript" src="Content/bootstrap/js/bootstrap.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            Common.mfadeout();
+            $('.closable').append('<span class="closelink" title="Close"></span>');
+            $('.closelink').click(function () {
+                $(this).parent().fadeOut('600', function () { $(this).remove(); });
+            });
+        });
+
+        function reloadCaptcha() {
+            document.getElementById('captcha').src = document.getElementById('captcha').src + '/';
+        }
+        function ValidatePword() {
+            if ($('#UserName').val() == "") { $('#spanUserName').html('Required.'); $('#UserName').focus().addClass("red-border"); return false; } else { $('#spanUserName').html(''); $('#UserName').focus().removeClass("red-border"); }
+            if ($('#Password').val() == "") { $('#spanPassword').html('Required.'); $('#Password').focus().addClass("red-border"); return false; } else { $('#spanPassword').html(''); $('#Password').focus().removeClass("red-border"); }
+            
+            return true;
+        }
+    </script>
+</head>
+<body>
+    
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container-fluid">
+                <a class="brand" href="@Url.Action("Index", "Home")" target="_blank">
+                    <img width="300" src="Content/images/logo.png" title="WATS"  alt="WATS" /></a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="loginWrapper">
+        <div class="clearfix" style="min-height: 0px;"></div>
+        <div class="loginContent">
+             <h3 class="logintitle">Admin Login</h3>
+            <!-- login form -->
+            <div class="loginSection clearfix">
+                       <div id="divmessage" class="sepH_b">@{ if (ViewBag.message != null)
+                                                              {@Html.Raw(@ViewBag.message)}}</div>
+                @using (Html.BeginForm())
+                {
+                    <div class="row-fluid">
+                        <label>User Name</label>
+                         @Html.TextBoxFor(m => m.UserName, new { @Value = "", @class = "span12 text text_medium" })
+                        <span class="field-validation-error" id="spanUserName"></span>
+                    </div>
+                    <div class="row-fluid">
+                        <label>Password</label>
+                          @Html.PasswordFor(m => m.Password, new { @Value = "", @class = "span12 text text_medium" })
+                        @Html.ValidationMessageFor(m => m.Password)
+                        <span class="field-validation-error" id="spanPassword"></span>
+                    </div>
+                    
+                    <div class="actionBlock clearfix" style="margin-top:30px;">
+                        
+                             <div class="row-fluid">
+                                 <div class="span7" >
+                                       <a href="@Url.Action("ForgotPassword", "Account")" style="color: #999">Forgot your password?</a>
+                                     </div>
+                                  <div class="span5 t-r">
+                            <a href="@Url.Action("Index", "Home")">
+                                <input type="submit" class="button button_login btn btn-primary" value="Login"  onclick="return ValidatePword();" /></a>
+                        </div></div>
+                    </div>
+                    <div class="clearfix sepH_b"></div>
+                }
+                <div class="clearfix"></div>
+                <div style="float: right">
+                    <br />
+                  
+                </div>
+                <div style="float: right">
+                    <br />
+                </div>
+                <div style="clear: both"></div>
+            </div>
+            <!-- end login form -->
+        </div>
+    </div>
+</body>
+</html>

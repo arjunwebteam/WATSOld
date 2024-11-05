@@ -1,0 +1,161 @@
+﻿@{ Layout = null;}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+    List<WATS.Entities.TeluguBadiTypes> lstTeluguBadiTypes = ViewBag.lstTeluguBadiTypes;    
+}
+
+    <script type="text/javascript">
+
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+
+    function SponsorRegistrationCategoryStatus(TeluguBadiTypeId) {
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("TeluguBadiTypeStatus", "TeluguBadiTypes")', // the URL of the controller action method
+            data: { TeluguBadiTypeId: TeluguBadiTypeId }, // optional data
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    TeluguBadiTypesBind($('#hdnPageNo').val());
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                }
+            }
+        });
+    }
+
+function UpdateDisplayOrder(i, TeluguBadiTypeId) {
+                var DisplayOrder = parseInt($('#DisplayOrder' + i).val());
+                $.ajax({
+                type: 'POST',
+                url: '@Url.Action("TeluguBadiTypeDisplayOrder", "TeluguBadiTypes")',
+                data: { DisplayOrder: DisplayOrder, TeluguBadiTypeId: TeluguBadiTypeId },
+                success: function (result) {
+                var div = '';
+                if (result.ok) {
+                $("#divmessage").html(result.data);
+                    TeluguBadiTypesBind(1);
+                }
+                else {
+                $("#divmessage").html(result.data);
+                }
+                }
+                });
+    }
+    </script>
+
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div> 
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+                <thead>
+                    <tr>
+                        <th width="5" align="center">S.No.</th>
+                        <th width="20">
+                            <a onclick="javascript:sortresult('Type');" class="white-t-u">
+                                Type @if (sortcolumn == "Type")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                            </a>
+                        </th>
+
+                        <th width="15">
+                            <a onclick="javascript:sortresult('Price');" class="white-t-u">
+                                Price @if (sortcolumn == "Price")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                            </a>
+                        </th>
+                        <th width="20">
+                            <a onclick="javascript:sortresult('ExpiryDate');" class="white-t-u">
+                                Expiry Date @if (sortcolumn == "ExpiryDate")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                            </a>
+                        </th>
+                        <th width="20%">Order No</th>
+                        <th width="10%">Status</th>
+                        <th width="10%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                     @if (lstTeluguBadiTypes.Count != 0)
+                     {
+                         int i = 0;
+                         foreach (var item in lstTeluguBadiTypes)
+                         {
+                    <tr>
+                        <td valign="top">@item.RId</td>
+                        <td style="text-align: left">@item.Type</td>
+                        <td style="text-align: left">@item.Price</td>
+                        <td style="text-align: left">
+                            @(item.ExpiryDate != DateTime.MinValue ? item.ExpiryDate.ToString("MM/dd/yyyy") : "N/A")
+                        </td>
+
+
+                      
+                        <td>
+                            <input type="text" style="width:30px;margin-bottom:0px;" maxlength="3" id="DisplayOrder@(i)" value="@item.OrderNo" onkeypress="return Common.isNumberKey(event)" />
+                            <a onclick="UpdateDisplayOrder(@i,@item.TeluguBadiTypeId);" title="Update"><i class="icon-refresh"></i></a>
+                        </td>
+
+                        <td>
+                            @{
+                                var isactive = "";
+                                var active = "";
+                                var disable = "";
+                                if (item.IsActive == true)
+                                {
+                                    isactive = "Active";
+                                    disable = "style=\"cursor: pointer;\" onclick=\"javascript:SponsorRegistrationCategoryStatus(" + item.TeluguBadiTypeId + ");\"";
+                                }
+                                else
+                                {
+                                    isactive = "Disabled";
+                                    active = "style=\"cursor: pointer;\" onclick=\"javascript:SponsorRegistrationCategoryStatus(" + item.TeluguBadiTypeId + ");\"";
+                                }
+                                <div class="admin-active">
+                                    @isactive
+                                    <ul>
+                                        <li><a @Html.Raw(active)>Active</a></li>
+                                        <li><a @Html.Raw(disable)>Disabled</a></li>
+                                    </ul>
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            <a title="Edit" onclick="EditTeluguBadiType(@item.TeluguBadiTypeId);"><i class="icon-pencil"></i></a>
+                            <a title="Delete" id="10" onclick="javascript:Delete(@item.TeluguBadiTypeId);" class="scdelete"><i class="icon-trash"></i></a>
+                        </td>
+                    </tr>
+                                        i++;
+                                    }
+
+                                }
+                                else
+                                {
+                        <tr>
+                            <td class="norecords" colspan="9">No Records Found.</td>
+                        </tr>
+                    }
+            </table>
+        }
+    </div>
+</div>
+
+@Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.pageno, "pagination pagination-centered"))

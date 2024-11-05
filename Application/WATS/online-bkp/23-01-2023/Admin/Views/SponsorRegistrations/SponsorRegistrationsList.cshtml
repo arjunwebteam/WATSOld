@@ -1,0 +1,210 @@
+﻿@{ Layout = null;
+    var userRole = "";
+}
+@{
+    string sortcolumn = (string)ViewBag.sortcolumn;
+    string sortorder = (string)ViewBag.sortorder;
+    Int64 Total = (Int64)ViewBag.total;
+    var PageNo = (Int64)ViewBag.pageno;
+    var Items = (Int64)ViewBag.items;
+
+    var imgloc = System.Configuration.ConfigurationManager.AppSettings["usersiteurl"] + "Content/SponsorRegistrations/ThumbImages/";
+    var imglocNormal = System.Configuration.ConfigurationManager.AppSettings["usersiteurl"] + "Content/SponsorRegistrations/NormalImages/";
+
+    List<WATS.Entities.SponsorRegistrations> lstSponsorRegistrations = ViewBag.lstSponsorRegistrations;
+}
+@{ HttpContext ctx = HttpContext.Current;
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+
+    if (this.User.Identity.IsAuthenticated && this.User.Identity.Name != null && Context.Session != null)
+    {
+        authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+        userRole = authTicket.UserData;
+    }
+
+}
+
+<link type="text/css" media="screen" rel="stylesheet" href="colorbox/colorbox.css" />
+<script type="text/javascript" src="colorbox/jquery.colorbox.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("a[rel]").colorbox({ transition: "fade" });
+        $(".viewdetails").colorbox({ iframe: true, innerWidth: 600, innerHeight: 550 });
+    });
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('#MWebsite').addClass('active');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+
+    function SponsorRegistrationsStatus(SponsorRegistrationId) {
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SponsorRegistrationsStatus", "SponsorRegistrations")', // the URL of the controller action method
+            data: { SponsorRegistrationId: SponsorRegistrationId }, // optional data
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    $('#divmessage').html(result.data);
+                    SponsorRegistrationBind($('#hdnPageNo').val());
+                }
+                else {
+                    $('#divmessage').html(result.data);
+                }
+            }
+        });
+    }
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        @if (Total == -1)
+        {
+            <div class="norecords">Sorry failed processing your request.</div>
+        }
+        else
+        {
+            <table width="100%" class="table table-hover  table_vam table-black">
+                <thead>
+                    <tr>
+                        <th width="7%">S.No.</th>
+                        <th width="10%" align="center">Picture</th>
+                        <th width="11%">
+                            <a onclick="javascript:sortresult('Name');" class="white-t-u">
+                                Name @if (sortcolumn == "Name")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+                        <th width="11%">
+                            <a onclick="javascript:sortresult('Email');" class="white-t-u">
+                                Email @if (sortcolumn == "Email")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+                        <th width="7%">
+                            <a onclick="javascript:sortresult('Amount');" class="white-t-u">
+                                Amount @if (sortcolumn == "Amount")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+                        <th width="12%">
+                            <a onclick="javascript:sortresult('PaymentMethod');" class="white-t-u">
+                                Payment Method @if (sortcolumn == "PaymentMethod")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+                        <th width="11%">
+                            <a onclick="javascript:sortresult('PaymentStatus');" class="white-t-u">
+                                Payment Status @if (sortcolumn == "PaymentStatus")
+                                {<img alt="@(sortorder)" title="@(sortorder)" src="Content/images/sort_@(sortorder).gif" />}
+                        </th>
+                        <th width="11%">Status</th>
+                        
+                        @if (userRole.Contains("VicePresident"))
+                        { }
+                        else
+                        {
+                            <th width="10%">Action</th>
+                        }
+                        </tr>
+                </thead>
+                <tbody>
+                    @if (lstSponsorRegistrations.Count != 0)
+                    {
+                        foreach (var item in lstSponsorRegistrations)
+                        {
+                    <tr>
+                        <td>@item.RId</td>
+                        <td>
+                            <img width="80px" alt="@item.FirstName" title="@item.FirstName" src="@WATS.BLL.Common.ValidateImage((imgloc + item.ImageUrl), imgloc + "no-image.png")" class="borwhite5 border-radius shadow" />
+                        </td>
+                        <td class="t-t-c">@item.FirstName @item.LastName</td>
+                        <td>@item.Email</td>
+                        <td>@item.Amount</td>
+                        <td>@(item.PaymentMethod == "" ? "N/A" : item.PaymentMethod)</td>
+                        <td>@(item.PaymentStatus == "" ? "N/A" : item.PaymentStatus)</td>
+                        @if (userRole.Contains("WebMaster") || userRole.Contains("SuperAdmin"))
+                        {
+                            <td>
+                                @{
+                                    var isactive = "";
+                                    var active = "";
+                                    var disable = "";
+                                    if (item.IsActive == true)
+                                    {
+                                        isactive = "Active";
+                                        disable = "style=\"cursor: pointer;\" onclick=\"javascript:SponsorRegistrationsStatus(" + item.SponsorRegistrationId + ");\"";
+                                    }
+                                    else
+                                    {
+                                        isactive = "Disabled";
+                                        active = "style=\"cursor: pointer;\" onclick=\"javascript:SponsorRegistrationsStatus(" + item.SponsorRegistrationId + ");\"";
+                                    }
+                                    <div class="admin-active">
+                                        @isactive
+                                        <ul>
+                                            <li><a @Html.Raw(active)>Active</a></li>
+                                            <li><a @Html.Raw(disable)>Disabled</a></li>
+                                        </ul>
+                                    </div>
+                                }
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                <span>@(item.IsActive == true ? "Active" : "Disabled")</span>
+                            </td>
+                        }
+
+                        @if (userRole.Contains("VicePresident"))
+                        { }
+                        else
+                        {
+                            <td>
+                                @if (userRole.Contains("WebMaster"))
+                                {
+                                    <a title="Edit" href="@Url.Action("EditSponsorRegistration", "SponsorRegistrations", new { SponsorRegistrationId = item.SponsorRegistrationId })" class="sepV_a"><i class="icon-pencil"></i></a>
+                                }
+                                else if (userRole.Contains("SuperAdmin"))
+                                {
+                                    <a title="Send Mail" href="@Url.Action("SendMail", "Home", new { SponsorRegistrationId = item.SponsorRegistrationId })"><i class="icon-envelope r-m5"></i></a>
+                                    <a title="Edit" href="@Url.Action("EditSponsorRegistration", "SponsorRegistrations", new { SponsorRegistrationId = item.SponsorRegistrationId })" class="sepV_a"><i class="icon-pencil"></i></a>
+                                }
+                                <a title="View" href="@Url.Action("ViewSponsorRegistration", "SponsorRegistrations", new { SponsorRegistrationId = item.SponsorRegistrationId })" data-lightview-group='example' class='lightview rightmost t-t-c' data-lightview-type='iframe' data-lightview-options="width: 600" data-lightview-caption="@item.FirstName">
+                                    <i class="icon-eye-open"></i>
+                                </a>&nbsp; &nbsp;
+
+                                @if (userRole.Contains("WebMaster"))
+                                {
+                                }
+                                else if (userRole.Contains("SuperAdmin") || userRole.Contains("Treasurer"))
+                                {
+                                    <a class="Donordelete" onclick="javascript:Delete(@item.SponsorRegistrationId,'@item.ImageUrl');" id="66" title="Delete"><i class="icon-trash"></i></a>
+                                }
+                                @*<a title="Delete" class="sepV_a disable-alpha"><i class="icon-trash"></i></a>*@
+                            </td>
+                        }
+                    </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="norecords" colspan="9">No Records Found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+    </div>
+</div>
+
+@Html.Raw(WATS.BLL.Common.SetPaging((Int64)ViewBag.items, ref Total, (Int64)ViewBag.PageNo, "pagination pagination-centered"))

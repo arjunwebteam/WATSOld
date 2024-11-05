@@ -1,0 +1,788 @@
+﻿@{
+    ViewBag.Title = "AddDetails";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var objMembers = (WATS.Entities.Members)ViewBag.objMembers;
+    var lstMembershipType = (List<WATS.Entities.MembershipTypes>)objMembers.lstMembershipType;
+    var lstPaymentMethod = (List<WATS.Entities.PaymentMethods>)objMembers.lstPaymentMethod;
+    var lstPaymentStatus = (List<WATS.Entities.PaymentStatus>)objMembers.lstPaymentStatus;
+}
+
+
+<!-- Fonts -->
+
+<script type="text/javascript">
+    function addRow() {
+
+        var table = document.getElementById("childinfo");
+
+        var rowCount = table.rows.length;
+        var row = table.insertRow(rowCount);
+        row.id = rowCount;
+
+        var cell1 = row.insertCell(0);
+        var element1 = document.createElement("input");
+        element1.type = "text";
+        element1.name = "[" + (rowCount - 1) + "].FirstName";
+        element1.id = "FirstName-" + (rowCount - 1);
+        element1.className = "span2 sepH_am";
+        cell1.appendChild(element1);
+
+        //var cell2 = row.insertCell(1);
+        //var element2 = document.createElement("input");
+        //element2.type = "text";
+        //element2.name = "[" + (rowCount - 1) + "].LastName";
+        //element2.id = "LastName-" + (rowCount - 1);
+        //element2.className = "span2 sepH_am";
+        //cell2.appendChild(element2);
+
+        var cell2 = row.insertCell(1);
+        var element2 = document.createElement("input");
+        element2.type = "text";
+        element2.className = "span1 sepH_am";
+        element2.name = "[" + (rowCount - 1) + "].Age";
+        element2.id = "Age-" + (rowCount - 1);
+        cell2.appendChild(element2);
+
+        //var cell4 = row.insertCell(3);
+        //var element4 = document.createElement("input");
+        //element4.type = "text";
+        //element4.className = "span2 sepH_am";
+        //element4.name = "[" + (rowCount - 1) + "].Relationship";
+        //element4.id = "Relationship-" + (rowCount - 1);
+
+        //cell4.appendChild(element4);
+        document.getElementById("Age-" + (rowCount - 1)).onkeypress = function (event) { return Common.isNumberKey(event) };
+        var cell3 = row.insertCell(2);
+        cell3.innerHTML = '<a onclick="javascript:deleteRow(' + rowCount + ')" class="btn darkgray-text"><img alt="Delete" title="Delete" src="Content/images/delete.gif" class="margin-top-5" /> Delete</a>';
+        $('#hdnRowCount').val(rowCount);
+    }
+
+    function deleteRow(i) {
+        try {
+            var row = document.getElementById(i);
+            row.parentNode.removeChild(row);
+        } catch (e) {
+            alert(e);
+        }
+    }
+
+    function DropDown(el) {
+        this.dd = el;
+        this.initEvents();
+    }
+    DropDown.prototype = {
+        initEvents: function () {
+            var obj = this;
+
+            obj.dd.on('click', function (event) {
+                $(this).toggleClass('active');
+                event.stopPropagation();
+            });
+        }
+    }
+
+    $(function () {
+
+        var dd = new DropDown($('#dd'));
+
+        $(document).click(function () {
+
+            $('.wrapper-dropdown-3').removeClass('active');
+
+        });
+
+    });
+
+    function CheckEmailAvailability(email) {
+
+        var returnval = null;
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CheckEmailAvailability", "Members")', // the URL of the controller action method
+            data: { Email: email }, // optional data
+            datatype: "JSON",
+            async: false,
+            success: function (result) {
+                if (result.ok) {
+                    returnval = result.data;
+                }
+            }
+        });
+        return returnval;
+    }
+
+   
+    function CheckUserNameAvailability(username) {
+
+        var returnval = null;
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CheckUserNameAvailability", "Members")', // the URL of the controller action method
+            data: { UserName: username }, // optional data
+            datatype: "JSON",
+            async: false,
+            success: function (result) {
+                if (result.ok) {
+                    returnval = result.data;
+                }
+            }
+        });
+        return returnval;
+    }
+
+    function Validate() {
+        if ($('#UserName').val() == "") { $('#spanUserName').html('Required.'); $('#UserName').focus().addClass(""); return false; } else { $('#spanUserName').html(''); $('#UserName').focus().removeClass(""); }
+        //if ($('#UserName').val() == "") { $('#spanUserName').html('Required.'); $('#UserName').focus().addClass("red-border"); return false; } else { $('#spanUserName').html(''); $('#UserName').focus().removeClass("red-border"); }
+        //if (!CheckUserNameAvailability($.trim($('#UserName').val()))) { $('#spanUserName').html('User Name already exist.'); $('#UserName').focus().addClass("red-border"); return false; } else { $('#spanUserName').html(''); $('#UserName').focus().removeClass("red-border"); }
+        if ($('#Email').val() == "") { $('#spanEmail').html('Required.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); $('#Email').focus().removeClass("red-border"); }
+        if (!Common.CheckEmail($('#Email').val())) { $('#spanEmail').html('Please enter valid email address.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); $('#Email').focus().removeClass("red-border"); }
+        if (!CheckEmailAvailability($.trim($('#Email').val()))) { $('#spanEmail').html('Email address already exist.'); $('#Email').focus().addClass("red-border"); return false; } else { $('#spanEmail').html(''); $('#Email').focus().removeClass("red-border"); }
+        if ($('#FirstName').val() == "") { $('#spanFirstName').html('Required.'); $('#FirstName').focus().addClass("red-border"); return false; } else { $('#spanFirstName').html(''); $('#FirstName').focus().removeClass("red-border"); }
+        if ($('#LastName').val() == "") { $('#spanLastName').html('Required.'); $('#LastName').focus().addClass("red-border"); return false; } else { $('#spanLastName').html(''); $('#LastName').focus().removeClass("red-border"); }
+
+        if ($('#IsVolunteer').val() == "") { $('#spanIsVolunteer').html('Required.'); $('#IsVolunteer').focus(); return false; } else { $('#spanIsVolunteer').html(''); }
+
+
+        if ($('#MembershipTypeId').val() == "") { $('#spanMembershipTypeId').html('Required.'); $('#MembershipTypeId').focus(); return false; } else { $('#spanMembershipTypeId').html(''); }
+
+        if ($('#PaymentMethodId').val() == "PayPal") {
+            if ($('#TransactionId').val() == "") { $('#spanTransactionId').html('Required.'); $('#TransactionId').focus().addClass("red-border"); return false; } else { $('#spanTransactionId').html(''); }
+        }
+        if ($('#PaymentMethodId').val() == "Cash/Cheque") {
+            if ($('#PaymentBy').val() == "") { $('#spanPaymentBy').html('Required.'); $('#PaymentBy').focus(); return false; } else { $('#spanPaymentBy').html(''); $('#PaymentBy').focus().removeClass("red-border"); }
+            if ($('#ChequeNo').val() == "") { $('#spanChequeNo').html('Required.'); $('#ChequeNo').focus(); return false; } else { $('#spanChequeNo').html(''); $('#ChequeNo').focus().removeClass("red-border"); }
+            if ($('#BankName').val() == "") { $('#spanBankName').html('Required.'); $('#BankName').focus(); return false; } else { $('#spanBankName').html(''); $('#BankName').focus().removeClass("red-border"); }
+            if ($('#ChequeDate').val() == "") { $('#spanChequeDate').html('Required.'); $('#ChequeDate').focus(); return false; } else { $('#spanChequeDate').html(''); $('#ChequeDate').focus().removeClass("red-border"); }
+        }
+
+       
+        //var rowcount = $('#hdnRowCount').val();
+        //for (var i = 0; i < rowcount; i++) {
+        //    if ($("#FirstName-" + i).val() != "" || $("#LastName-" + i).val() != "" || $("#Age-" + i).val() != "" || $("#Relationship-" + i).val() != "") {
+        //        if ($("#FirstName-" + i).val() == '') { alert('Please enter FirstName.'); $("#FirstName-" + i).focus(); return false; }
+        //        if ($("#LastName-" + i).val() == '') { alert('Please enter LastName'); $("#LastName-" + i).focus(); return false; }
+        //        if ($("#Age-" + i).val() == '') { alert('Please enter Age.'); $("#Age-" + i).focus(); return false; }
+        //        if ($("#Relationship-" + i).val() == '') { alert('Please enter Relationship.'); $("#Relationship-" + i).focus(); return false; }
+        //    }
+        //}
+
+        return true;
+    }
+
+</script>
+<script type="text/javascript">
+    $(function () {
+        $(".ui-accordion").accordion({
+            collapsible: true,
+            heightStyle: "content"
+        });
+
+        // date picker
+        $(function () {
+            $(function () {
+                $(".datepicker").datepicker({
+                    altField: "#alternate",
+                    altFormat: "DD, d MM, yy"
+                });
+            });
+        });
+    });
+    $(document).ready(function () {
+        getamount();
+        $(".Odate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-90:+0", altField: '.Odate', altFormat: 'mm/dd/yy' });
+        $(".Edate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-90:+0", altField: '.Edate', altFormat: 'mm/dd/yy' });
+        $(".Cdate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-90:+0", altField: '.Cdate', altFormat: 'mm/dd/yy' });
+        $('#MMembers').addClass('active');
+    });
+    function getamount() {
+        var membershipid = $('#MembershipTypeId').val();
+        $.ajax({
+            url: '@Url.Action("EditMembershipTypes", "MembershipTypes")',
+            type: 'POST',
+            data: { MembershipTypeId: membershipid },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objMembershipType = result.data;
+                    $('#payamount').html(objMembershipType.Price);
+                    if (objMembershipType.Validity != 0) {
+                        var d = new Date();
+                        d.setMonth((d.getMonth()) + objMembershipType.Validity);
+                        $('#ExpiryDate').val(d.toDateString("MM/dd/yyyy"));
+                    } else { $('#ExpiryDate').val('Life Time'); }
+                }
+                else {
+                    alert(result.data);
+                }
+            }
+        });
+    }
+</script>
+<input type="hidden" value="1" id="hdnRowCount" />
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+        <li><a href="@Url.Action("Index", "Members")">Members</a> <span class="divider">/</span></li>
+        <li class="active">Add Member</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<input type="hidden" id="hdnimgvalidate" value="0" />
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r p_b"><a class="clearfix" href="@Url.Action("Index", "Members")">← back to members list</a> </div>
+                <h3 class="title">Add Member</h3>
+                <div class="sectionTabNav">
+                    <div class="btn-group">
+                        <a class="btn active" href="@Url.Action("Index", "Members")">Members</a>
+                        <a class="btn"  href="@Url.Action("Index", "MembersOrders")">Orders</a>
+                        <a class="btn" href="@Url.Action("Index", "MembershipTypes")">Membership Types</a>
+                         @*<a class="btn" href="@Url.Action("Index", "Volunteers")">Volunteers</a>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            { @Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            { @Html.Raw(ViewBag.message.ToString())}
+        </div>
+        @using (Html.BeginForm("AddMember", "Members", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+           
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Personal Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p2">Title :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <select class="input-block-level" name="UserName" id="UserName">
+                                                     <option value="">Select Title</option>
+                                                    <option value="Mr.">Mr.</option>
+                                                    <option value="Mrs.">Mrs.</option>
+                                                    <option value="Mrs.">Ms.</option>
+                                                </select>
+                                                @*<input type="text" id="UserName" name="UserName" placeholder="Mr./Mrs./Ms." class="input-block-level" />*@
+                                                <span class="field-validation-error" id="spanUserName"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">First Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="FirstName" name="FirstName" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanFirstName"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Profession :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="Occupation" name="Occupation" class="input-block-level" />
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        @*<div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Password :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="password" id="Password" name="Password" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanPassword"></span>
+                                            </div>
+                                        </div>*@
+                                        @*<div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Profile Image :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="file" id="file" name="file" class="input-block-level" />
+                                                <span id="spanfile" class="field-validation-error"></span>
+                                            </div>
+                                        </div>*@
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Email :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="Email" name="Email" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanEmail"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Last Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="LastName" name="LastName" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanLastName"></span>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            @*<div class="clearfix t-p15">
+                                    <b style="color: #f00; font-size: 11px;">Note :</b> Image size should be maintained width * height (350 * 250)
+                                </div>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Spouse Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Spouse Name :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="SpouseFirstName" name="SpouseFirstName" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanSpouseFirstName"></span>
+                                            </div>
+                                        </div>
+
+                                        @*<div class="row-fluid t-p10">
+                                            <div class="span5">
+                                                <label class="t-p5">Cell :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="SpouseCell" name="SpouseCell" class="input-block-level" />
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>*@
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix">
+                                        @*<div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5 font12">Last Name :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="SpouseLastName" name="SpouseLastName" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanSpouseLastName"></span>
+                                            </div>
+                                        </div>*@
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5 font12">Profession :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="SpouseOccupation" name="SpouseOccupation" class="input-block-level" />
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+ 
+            @*<div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Children Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <table cellspacing="0" cellpadding="0" border="0" class="tbl membership" width="100%">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <table id="childinfo" name="childinfo" width="650" cellspacing="0" cellpadding="0" border="0" class="table table-hover span9 omb table_vam table-black tvm">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="360">Child Name</th>
+                                                        <th width="180">Last Name</th>
+                                                        <th width="280" align="center">( Age )</th>
+                                                        <th width="180" align="center">Relationship</th>
+                                                        <th width="90" align="center">
+                                                            <input type="button" onclick="javascript: addRow();" name="add-child" class="btn" value="Add child">
+                                                        </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="290">
+                                                            <input type="text" id="FirstName-0" name="[0].FirstName" class="span2 sepH_am"></td>
+                                                        <td width="110" align="center">
+                                                            <input type="text" id="LastName-0" name="[0].LastName" class="span2 sepH_am"></td>
+                                                        <td width="360" align="center">
+                                                            <input type="text" id="Age-0" name="[0].Age" maxlength="2" onkeypress="return Common.isNumberKey(event);" class="span1 sepH_am "></td>
+                                                        <td width="180" align="center">
+                                                            <input type="text" id="Relationship-0" name="[0].Relationship" class="span2 sepH_am"></td>
+                                                        <td width="180" align="center">&nbsp;</td>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>*@
+
+
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Contact Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Address1:<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea type="text" id="Address" name="Address" class="input-block-level"></textarea>
+                                               @* <input type="text" id="Address" name="Address" class="input-block-level" />*@
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">State:</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="State" name="State" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanState"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Home Phone:</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="HomePhone" name="HomePhone" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanHomePhone"></span>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Referred By: </label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="ReferredBy" name="ReferredBy" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanReferredBy"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Fax </label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="" name="Fax" class="input-block-level" />
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid t-p10">
+                                            <div class="span5">
+                                                <label class="t-p5">Comments:</label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea type="text" id="Comments" name="Comments" class="input-block-level"></textarea>
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Address2:</label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea type="text" id="" name="Address2" class="input-block-level"></textarea>
+                                               @* <input type="text" id="Address" name="Address" class="input-block-level" />*@
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">City: </label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="City" name="City" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanCity"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Zip Code:</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="ZipCode" name="ZipCode" class="input-block-level" />
+                                                <span class="field-validation-error" id="spanZipCode"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Mobile Phone </label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="MobilePhone" name="MobilePhone" class="input-block-level" />
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">WebSite Address </label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" id="" name="WebsiteAddress" class="input-block-level" />
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        @*<div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Volunteer:<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <select id="IsVolunteer" name="IsVolunteer" class="input-block-level">
+                                                    <option value="">Select Volunteer</option>
+                                                    <option value="false">No</option>
+                                                    <option value="true">Yes</option>
+                                                </select>
+                                                <span class="field-validation-error" id="spanIsVolunteer"></span>
+                                            </div>
+                                        </div>*@
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Latest Order Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Membership  Type : <span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <select class="input-block-level" name="MembershipTypeId" id="MembershipTypeId">
+                                                    @if (lstMembershipType != null)
+                                                    {
+                                                        <option value="">Select</option>
+                                                        foreach (var item in lstMembershipType)
+                                                        { 
+                                                        <option value="@item.MembershipTypeId">@item.MembershipType</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <span class="field-validation-error" id="spanMembershipTypeId"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Transaction Id  :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" value="" id="TransactionId" class="input-block-level" name="TransactionId">
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Payment Method :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <select class="input-block-level" name="PaymentMethodId" id="PaymentMethodId">
+                                                    @if (lstPaymentMethod != null)
+                                                    {
+                                                        <option value="">Select</option>
+                                                        foreach (var item in lstPaymentMethod)
+                                                        { 
+                                                        <option value="@item.PaymentMethodId">@item.PaymentMethod</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">
+                                                    Payment By<br />
+                                                    (Already Paid) :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" class="input-block-level" id="PaymentBy" name="PaymentBy">
+                                                <span class="field-validation-error" id="spanPaymentBy"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Bank Name :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" class="input-block-level" id="BankName" name="BankName">
+                                                <span class="field-validation-error" id="spanBankName"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Expiry Date :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" class="input-block-level" id="ExpiryDate" readonly="true" name="ExpiryDate">
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Admin Comment :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea type="text" value="" class="input-block-level" id="AdminComment" name="AdminComment"></textarea>
+                                                <span class="field-validation-error"></span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Amount :</label>
+                                        </div>
+                                        <div class="span6 b-m15">
+                                            $ <span id="payamount"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Payment Status :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <select class="input-block-level" name="PaymentStatusId" id="PaymentStatusId">
+                                                @if (lstPaymentStatus != null)
+                                                {
+                                                    <option value="">Select</option>
+                                                    foreach (var item in lstPaymentStatus)
+                                                    { 
+                                                    <option value="@item.PaymentStatusId">@item.PaymentStatus1</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <span class="field-validation-error"></span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Cheque No :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <input type="text" class="input-block-level" id="ChequeNo" name="ChequeNo">
+                                            <span class="field-validation-error" id="spanChequeNo"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">Cheque Date :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <input type="text" class="input-block-level Cdate" id="ChequeDate" name="ChequeDate">
+                                            <span class="field-validation-error" id="spanChequeDate"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row-fluid">
+                                        <div class="span5">
+                                            <label class="t-p5">User Comment :</label>
+                                        </div>
+                                        <div class="span6">
+                                            <textarea class="input-block-level" id="UserComment" name="UserComment"></textarea>
+                                            <span class="field-validation-error"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end other details form -->
+            <div class="form-actions">
+                <div class="actionButtons">
+                    <input type="submit" value="Submit" onclick="return Validate()" name="send" class="button2 btn btn-primary">
+                    <a class="btn btn-inverse" href="@Url.Action("Index", "Members")">Cancel</a>
+                </div>
+            </div>
+        }
+        <div class="adminfooter"></div>
+    </div>
+</div>
+
+<script>
+    var _URL = window.URL || window.webkitURL;
+    $("#file").change(function (e) {
+        var file, img;
+        if ((file = this.files[0])) {
+            img = new Image();
+            img.onload = function () {
+                if (this.width == 350 && this.height == 250) {
+                    $('#hdnimgvalidate').val('1');
+                }
+                else {
+                    $('#hdnimgvalidate').val('0');
+                }
+            };
+            img.src = _URL.createObjectURL(file);
+        }
+    });
+
+</script>

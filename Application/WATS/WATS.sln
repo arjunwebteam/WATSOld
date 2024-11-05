@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.645
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WATS", "WATS\WATS.csproj", "{43E64387-A05B-4FCD-99D1-1A4F1744D970}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WATS.BLL", "WATS.BLL\WATS.BLL.csproj", "{0EA949CB-515A-4026-9A49-3010C94A47C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WATS.DAL", "WATS.DAL\WATS.DAL.csproj", "{A3CCBEC8-6BA4-46CF-B10B-D519F020BC93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WATS.User", "WATS.User\WATS.User\WATS.User.csproj", "{7B92DE7D-400A-4040-A068-527B380715C9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{43E64387-A05B-4FCD-99D1-1A4F1744D970}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43E64387-A05B-4FCD-99D1-1A4F1744D970}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43E64387-A05B-4FCD-99D1-1A4F1744D970}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43E64387-A05B-4FCD-99D1-1A4F1744D970}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EA949CB-515A-4026-9A49-3010C94A47C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EA949CB-515A-4026-9A49-3010C94A47C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EA949CB-515A-4026-9A49-3010C94A47C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EA949CB-515A-4026-9A49-3010C94A47C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3CCBEC8-6BA4-46CF-B10B-D519F020BC93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3CCBEC8-6BA4-46CF-B10B-D519F020BC93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3CCBEC8-6BA4-46CF-B10B-D519F020BC93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3CCBEC8-6BA4-46CF-B10B-D519F020BC93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B92DE7D-400A-4040-A068-527B380715C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B92DE7D-400A-4040-A068-527B380715C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B92DE7D-400A-4040-A068-527B380715C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B92DE7D-400A-4040-A068-527B380715C9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {627C1D53-CE8C-48F0-BFDB-EF3771A0A1FD}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 5
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://arjunweb-team.visualstudio.com/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = WATS.BLL\\WATS.BLL.csproj
+		SccProjectName1 = WATS.BLL
+		SccLocalPath1 = WATS.BLL
+		SccProjectUniqueName2 = WATS.DAL\\WATS.DAL.csproj
+		SccProjectName2 = WATS.DAL
+		SccLocalPath2 = WATS.DAL
+		SccProjectUniqueName3 = WATS.User\\WATS.User\\WATS.User.csproj
+		SccProjectName3 = WATS.User/WATS.User
+		SccLocalPath3 = WATS.User\\WATS.User
+		SccProjectUniqueName4 = WATS\\WATS.csproj
+		SccProjectName4 = WATS
+		SccLocalPath4 = WATS
+	EndGlobalSection
+EndGlobal

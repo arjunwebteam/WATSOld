@@ -1,0 +1,360 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    HttpContext ctx = HttpContext.Current;
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+
+    authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+
+    string Role = authTicket.UserData;
+}
+
+<script type="text/javascript">
+
+
+    $(function () {
+        $(".ui-accordion").accordion({
+            collapsible: true,
+            heightStyle: "content"
+        });
+
+        // date picker
+        $(function () {
+            $(function () {
+                $(".datepicker").datepicker({
+                    altField: "#alternate",
+                    altFormat: "DD, d MM, yy"
+                });
+            });
+        });
+    });
+
+    $(document).ready(function () {
+      //  $("#ExpiryDate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-10:+10", altFormat: 'mm/dd/yy' });
+       //$("#ExpiryDate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-100:+10", altFormat: 'mm/dd/yy', dateFormat: "mm/dd/yy" });
+       // $(".date").datepicker({ changeMonth: true, changeYear: true, yearRange: "-90:+0", altField: '.date', altFormat: 'mm/dd/yy' });
+        $(".Cdate").datepicker({ changeMonth: true, changeYear: true, yearRange: "-90:+0", altField: '.Cdate', altFormat: 'mm/dd/yy' });
+
+        $('#MWebsite').addClass('active');
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+        PagerClickBind();
+
+    });
+
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            TeluguBadiTypesBind($(this).text());
+        });
+    }
+
+    $(document).ready(function () { 
+        $('#AddTeluguBadiType').dialog
+           ({
+               autoOpen: false,
+               width: 450,
+               modal: true
+           });
+       
+    });
+
+    function sortresult(sortcolumn) {
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        TeluguBadiTypesBind(1);
+    }
+
+    function Add() {
+        cleanTeluguBadiType();
+        $("#AddTeluguBadiType").dialog("open");
+        $('#lbltitle').html('Add Registration Type');
+    }
+
+    function cleanTeluguBadiType() {
+        $('#TeluguBadiTypeId').val('');
+        $('#Type').val('');
+        $('#Price').val('');
+        $('#Year').val('');
+        $('#ExpiryDate').val('');
+        $('#OrderNo').val('');
+        $('#spanType').html('');
+        $('#spanPrice').html('');
+        $('#spanYear').html('');
+        $('#spanOrderNo').html('');
+        $('#Type').focus().removeClass("red-border");
+        $('#Price').focus().removeClass("red-border");
+        $('#Year').focus().removeClass("red-border");
+       // $('#ExpiryDate').focus().removeClass("red-border");
+        $("#AddTeluguBadiType").dialog("close");
+    }
+
+   
+
+    function TeluguBadiTypesBind(Pageno) {
+
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+        var Search = $('#txtsearch').val();
+       
+        $.ajax({
+            url: '@Url.Action("TeluguBadiTypesList", "TeluguBadiTypes")',
+            type: 'GET',
+            cache: false,
+            data: { Search: Search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items },
+            success: function (result) {
+                $('#divTeluguBadiTypesList').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+
+  
+
+    function EditTeluguBadiType(TeluguBadiTypeId) {
+        $.ajax({
+            url: '@Url.Action("EditTeluguBadiType", "TeluguBadiTypes")',
+            type: 'POST',
+            data: { TeluguBadiTypeId: TeluguBadiTypeId },
+            datatype: "JSON",
+            success: function (result) {
+                if (result.ok) {
+                    var objTeluguBadiTypes = result.data;
+                    $('#TeluguBadiTypeId').val(objTeluguBadiTypes.TeluguBadiTypeId);
+                    $('#Type').val(objTeluguBadiTypes.Type);
+                    $('#Price').val(objTeluguBadiTypes.Price);
+                    $('#Year').val(objTeluguBadiTypes.Year);
+
+                    $('#ExpiryDate').val(Common.ConvertDate(objTeluguBadiTypes.ExpiryDate));
+                    //$('#ExpiryDate').val(objTeluguBadiTypes.ExpiryDate);
+
+                    $('#OrderNo').val(objTeluguBadiTypes.OrderNo);
+                    $('#lbltitle').html('Edit Registration Type');
+
+                    $('#spanType').html('');
+                    $('#Type').focus().removeClass("red-border");
+                    $('#Price').focus().removeClass("red-border");
+                    $('#ExpiryDate').focus().removeClass("red-border");
+                    $('#OrderNo').focus().removeClass("red-border");
+                    $('#TeluguBadiTypeId').focus().removeClass("red-border");
+
+                    $("#AddTeluguBadiType").dialog("open");
+                }
+                else {
+                    alert(result.data);
+                }
+            }
+        });
+    }
+
+    function SponsorRegistrationCategorySave() {
+        if (Validate()) {
+            var objTeluguBadiTypes = {};
+            objTeluguBadiTypes.TeluguBadiTypeId = $('#TeluguBadiTypeId').val();
+            objTeluguBadiTypes.Type = $('#Type').val();
+            objTeluguBadiTypes.Price = $('#Price').val();
+            objTeluguBadiTypes.Year = $('#Year').val();
+           // alert($('#ExpiryDate').val());
+            objTeluguBadiTypes.ExpiryDate = $('#ExpiryDate').val();
+            //objTeluguBadiTypes.ExpiryDate = (Common.ConvertDate($('#ExpiryDate').val()));
+            //alert(objTeluguBadiTypes.ExpiryDate);
+            objTeluguBadiTypes.OrderNo = $('#OrderNo').val();
+            objTeluguBadiTypes.IsActive = true;
+           
+      
+            $.ajax({
+                url: '@Url.Action("AddTeluguBadiType", "TeluguBadiTypes")',
+                type: 'POST',
+                data: JSON.stringify(objTeluguBadiTypes),
+                datatype: "JSON",
+                contentType: 'application/json',
+                success: function (result) {
+                    if (result.ok) {
+                        $("#divmessage").html(result.data);
+                        TeluguBadiTypesBind($('#hdnPageNo').val());
+
+                        $("#AddTeluguBadiType").dialog("close");
+                    }
+                    else {
+                        $("#spanType").html(result.data);
+                        $("#spanPrice").html(result.data);
+                        $("#spanYear").html(result.data);
+                        $("#spanExpiryDate").html(result.data);
+                        $("#spanOrderNo").html(result.data);
+                    }
+                }
+            });
+        }
+    }
+
+    function Delete(TeluguBadiTypeId) {
+        var val2 = confirm("Do you want to delete this record?");
+        if (val2) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("DeleteTeluguBadiType", "TeluguBadiTypes")',  // the URL of the controller action method
+                data: { TeluguBadiTypeId: TeluguBadiTypeId }, // optional data
+                success: function (result) {
+                    $("#divmessage").html(result.data);
+                    TeluguBadiTypesBind($('#hdnPageNo').val());
+                },
+                error: function (req, status, error) {
+                    $("#divmessage").html(result.data);
+                }
+            });
+        }
+    }
+
+    function Validate() {
+        if ($('#Type').val() == '') { $('#spanType').html('Required.'); $('#Type').focus().addClass("red-border"); return false; } else { $('#spanType').html(''); $('#Type').focus().removeClass("red-border"); }
+
+        if ($('#Price').val() == "") { $('#spanPrice').html('Required.'); $('#Price').focus(); return false; } else { $('#spanPrice').html(''); $('#Price').focus(); }
+
+        if ($('#Year').val() == '') { $('#spanYear').html('Required.'); $('#Year').focus().addClass("red-border"); return false; } else { $('#spanYear').html(''); $('#Year').focus().removeClass("red-border"); }
+
+        if ($('#ExpiryDate').val() == '') { $('#spanExpiryDate').html('Required.'); $('#ExpiryDate').focus().addClass("red-border"); return false; } else { $('#spanExpiryDate').html(''); $('#ExpiryDate').focus().removeClass("red-border"); }
+       
+        //if ($('#ItemLink').val() == '') { $('#spanItemLink').html('Required.'); $('#ItemLink').focus().addClass("red-border"); return false; } else { $('#spanItemLink').html(''); $('#ItemLink').focus().removeClass("red-border"); }
+        return true;
+    }
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="TeluguBadiTypeId" />
+<input id="hdnsortorder" type="hidden" value="ASC" />
+
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    <li><a href="@Url.Action("Index","InnerPages")">Web Pages</a> <span class="divider">/</span></li>
+    <li class="active">TeluguBadi Types</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="alert('Under Process')" target="_blank">View Mainsite</a></li>
+</ul></div>
+<!-- end breadcumb -->
+
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r">
+                    @*<a href="@Url.Action("Index", "TeluguBadiTypes")" class="btn btn-primary coursesMenu">TeluguBadi Types</a>*@
+                    <a class="btn btn-primary coursesMenu" onclick="Add();">Add Registration Type</a>
+                </div>
+                <h3 class="title">TeluguBadi Types</h3>
+                <div class="sectionTabNav visible">
+                    <div class="btn-group">
+                        <a class="btn" href="@Url.Action("Index", "TeluguBadiRegistrations")">Registrations</a>
+                        @*<a class="btn" href="@Url.Action("Index", "TeluguBadiOrders")">TeluguBadi Orders</a>*@
+                        <a class="btn active"  href="@Url.Action("Index", "TeluguBadiTypes")">Types</a>
+                        @*<a class="btn" href="@Url.Action("Index", "Volunteers")">Volunteers</a>*@
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="divmessage">
+                        @if (TempData["message"] != null)
+                        { @Html.Raw(TempData["message"].ToString())}
+
+                        @if (ViewBag.message != null)
+                        { @Html.Raw(ViewBag.message.ToString())}
+                    </div>
+                    </td>
+                </tr>               
+                <tr>
+                    <td><a id="edit" name="edit"></a></td>
+                </tr>
+                <tr>
+                    <td align="right" height="15">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>                       
+                        <div id="divTeluguBadiTypesList">
+                            @{Html.RenderAction("TeluguBadiTypesList", "TeluguBadiTypes");}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="AddTeluguBadiType" style="display: none;">
+    <input type="hidden" id="TeluguBadiTypeId" name="TeluguBadiTypeId" value="0" />
+    <div class="dialog-title"><span id="lbltitle"></span></div>
+    <div class="dialog-content">
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span5">Type : <span class="red-t">*</span></div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="Type" name="Type">
+                    <span class="field-validation-error" id="spanType"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Price : <span class="red-t">*</span></div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="Price" name="Price" onkeypress="return Common.isNumberKey(event);">
+                    <span class="field-validation-error" id="spanPrice"></span>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span5">Year :<span class="red-t">*</span></div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="Year" name="Year" onkeypress="return Common.isNumberKey(event);">
+                    <span class="field-validation-error" id="spanYear"></span>
+                </div>
+            </div>
+
+            @*<div class="row-fluid">
+                <div class="span5">Expiry Date :</div>
+                <div class="span7">
+                    <input type="text" value="" class="input-block-level Cdate" class="input-block-level" id="ExpiryDate" name="ExpiryDate">
+                    <span class="field-validation-error" id="spanExpiryDate"></span>
+
+                </div>
+            </div>*@
+
+        <div class="row-fluid">
+           
+            <div class="span5">Expiry Date :<span class="red-t">*</span></div>
+
+            <div class="span7">
+                <input type="text" class="inputstyle Cdate" id="ExpiryDate" name="ExpiryDate">
+                <span class="field-validation-error" id="spanExpiryDate"></span>
+            </div>
+        </div>
+
+            <div class="row-fluid">
+                <div class="span5">Order No :</div>
+                <div class="span7">
+                    <input type="text" value="" class="inputstyle" id="OrderNo" name="OrderNo" maxlength="3" onkeypress="return Common.isNumberKey(event);">
+                    <span class="field-validation-error" id="spanGold"></span>
+                </div>
+            </div>
+
+
+            <div class="clearfix t-r t-p5">
+                <input type="button" onclick="javascript: SponsorRegistrationCategorySave();" class="btn btn-primary font-w7" value="Submit" />
+                <a class="btn font-w7" onclick=" $('#AddTeluguBadiType').dialog('close')">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+

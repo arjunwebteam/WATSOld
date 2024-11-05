@@ -1,0 +1,225 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    var CommitteeCategoryId = ViewBag.CommitteeCategoryId;
+
+    List<WATS.Entities.CommitteeMembers> lstCommittee = ViewBag.lstCommittee;
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+    });
+
+    $(document).ready(function () {
+        $('#AddCommitteeMember').dialog
+           ({
+               autoOpen: false,
+               width: 450,
+               modal: true
+           });
+        PagerClickBind();
+    });
+
+    function sortresult(sortcolumn) {
+        $('#hdnsortorder').val(($('#hdnsortorder').val() == 'ASC' ? 'DESC' : 'ASC'));
+        $('#hdnsortcolumn').val(sortcolumn);
+        Onload(1);
+    }
+
+    function Onload(Pageno) {
+        var pageno = Common.Pageno(Pageno);
+        var sortcolumn = $('#hdnsortcolumn').val();
+        var sortorder = $('#hdnsortorder').val();
+        var items = $('#txtitems').val();
+        var Search = $('#keyword').val();
+
+        $.ajax({
+            url: '@Url.Action("CommitteesList", "Committees")',
+            type: 'GET',
+            cache: false,
+            data: { Search: Search, PageNo: pageno, SortColumn: sortcolumn, SortOrder: sortorder, Items: items,CommitteeCategoryId:@CommitteeCategoryId },
+            success: function (result) {
+                $('#divcommittee').html(result);
+                PagerClickBind();
+            }
+        });
+    }
+    function PagerClickBind() {
+        $(".pagination a").bind("click", function () {
+            Onload($(this).text());
+        });
+    }
+    function ClearSearch() {
+        $('#keyword').val('');
+        $('#hdnPageNo').val(1);
+        Onload(1);
+    }
+
+    function Add() {
+         clearCommitteeMember();
+        $("#AddCommitteeMember").dialog("open");
+        $('#lbltitle').html('Add Committee Member');
+    }
+  
+
+    function clearCommitteeMember() {
+        $('#CommitteeId').val('');
+        $('#Designation').val('');
+        $('#spanCommitteeId').html('');
+        $('#spanDesignation').html('');
+        $('#Designation').focus().focus().removeClass("red-border");
+    }
+
+    function Validate() {
+        if ($('#CommitteeId').val() == '') { $('#spanCommitteeId').html('Required.'); $('#CommitteeId').focus(); return false; } else { $('#spanCommitteeId').html(''); $('#CommitteeId').focus(); }
+        if ($('#Designation').val() == '') { $('#spanDesignation').html('Required.'); $('#Designation').focus().addClass("red-border"); return false; } else { $('#spanDesignation').html(''); $('#Designation').focus().removeClass("red-border"); }
+        return true;
+    }
+</script>
+
+<input id="hdnPageNo" type="hidden" value="1" />
+<input id="hdnsortcolumn" type="hidden" value="CommitteeId" />
+<input id="hdnsortorder" type="hidden" value="ASC" />
+<!-- breadcumb -->
+
+<div class="clearfix breadcrumb-main"><ul class="breadcrumb  ">
+    
+    <li><a href="@Url.Action("Index", "InnerPages")">Web Site</a> <span class="divider">/</span></li>
+    <li class="active">Committee Members</li>
+    <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+</ul>
+    </div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r spcT_c">
+                    @if (CommitteeCategoryId == 0)
+                    {
+                        <a class="btn btn-small btn-primary coursesMenu" href="@Url.Action("AddCommittee", "Committees")">Add Committee Member</a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-small btn-primary coursesMenu" onclick="Add();">Add Member to Committee</a>    
+                    }
+                </div>
+                <h3 class="title">Committee Members </h3>
+                <div class="sectionTabNav">
+                    <div class="btn-group">
+                        <a class="btn active" href="@Url.Action("Index", "Committees")">Committee Members</a>
+                        <a class="btn" href="@Url.Action("Index", "CommitteeMaster")">Committees</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="main-text">
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="divmessage">
+                            @if (TempData["message"] != null)
+                            { @Html.Raw(TempData["message"].ToString())}
+
+                            @if (ViewBag.message != null)
+                            { @Html.Raw(ViewBag.message.ToString())}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td height="50">
+                        <div class="grayBackground nobL nobR">
+            <div id="filterReg" class="ui-accordion">
+                <h4><b>Search</b></h4>
+                <div>
+                    <div class="filedsetInner clearfix">
+                        <div class="row-fluid">
+                            <div class="span4">
+                                <label>Search </label>
+                                <input type="text" name="keyword" id="keyword" class="span12" value="" placeholder="User Name" />
+                            </div>
+                            <div class="span3">
+                                <button class="btn btn-primary filterAction" onclick="Onload(1);">Search</button>
+                                <a class="btn btn-inverse filterAction wC" onclick="ClearSearch();">Clear</a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="divcommittee">
+                            @{Html.RenderAction("CommitteesList", "Committees");}
+                        </div>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+<div id="AddCommitteeMember" style="display: none;">
+    @using (Html.BeginForm("AddCommitteeMember", "Committees", FormMethod.Post))
+    {
+        <input type="hidden" id="CommitteeCategoryId" name="CommitteeCategoryId" value="@CommitteeCategoryId" />
+        <div class="dialog-title"><span id="lbltitle"></span></div>
+        <div class="dialog-content">
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span5">Member :</div>
+                    <div class="span7">
+                        <select id="CommitteeId" class="input" name="CommitteeId">
+                            <option value="">Select</option>
+                            @if (lstCommittee != null)
+                            {
+                                foreach (var item in lstCommittee)
+                                { 
+                                <option value="@item.CommitteeId">@item.Name</option>
+                                }
+                            }
+                        </select>
+                        <span class="field-validation-error" id="spanCommitteeId"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Order No :</div>
+                    <div class="span7">
+                        <input type="text" value="" onkeypress="return Common.isNumberKey(event);" class="inputstyle" id="DisplayOrder" name="DisplayOrder">
+                        <span class="field-validation-error" id="spanDisplayOrder"></span>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span5">Designation :</div>
+                    <div class="span7">
+                        <input type="text" value="" class="inputstyle" id="Designation" name="Designation">
+                        <span class="field-validation-error" id="spanDesignation"></span>
+                    </div>
+                </div>
+                <div class="clearfix t-r t-p5">
+                    <input type="submit" onclick="return Validate()" class="btn btn-primary font-w7" value="Submit" />
+                    <a class="btn font-w7" onclick=" $('#AddCommitteeMember').dialog('close')">Cancel</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

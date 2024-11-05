@@ -1,0 +1,205 @@
+﻿@{
+    ViewBag.Title = "AddDetails";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    List<WATS.Entities.InnerPageCategories> lstInnerPageCategory = ViewBag.lstInnerPageCategory;
+    var cssloc = System.Configuration.ConfigurationManager.AppSettings["usersiteurl"] + "Content/front-end-style.css";
+    HttpContext ctx = HttpContext.Current;
+    HttpCookie authCookie = HttpContext.Current.Request.Cookies["UserCookie"];
+
+    FormsAuthenticationTicket authTicket;
+
+    authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+
+    string Role = authTicket.UserData;
+}
+
+<script type="text/javascript" src="ckeditor/ckeditor.js"></script>
+<script type="text/javascript" src="ckfinder/ckfinder.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#MWebsite').addClass('active');
+        $('#wInnerPages').addClass('active');
+        $('.closable').append('<span id="lblclose" class="closelink" title="Close"></span>');
+    });
+
+    function Validate() {
+        if ($('#Heading').val() == "") { $('#Heading').focus().addClass("red-border"); $('#lblHeading').html('Required.'); return false; } else { $('#lblHeading').html(''); $('#Heading').focus().removeClass("red-border"); }
+        if ($('#InnerPageCategoryId').val() == "") { $('#InnerPageCategoryId').focus(); $('#lblInnerPageCategoryId').html('Required.'); return false; } else { $('#lblInnerPageCategoryId').html(''); }
+        if (CKEDITOR.instances.Description.getData() == "") { $('#Description').focus().addClass("red-border"); $('#lblDescription').html('Required.'); return false; } else { $('#Description').val(CKEDITOR.instances.Description.getData()); $('#lblDescription').html(''); }
+        return true;
+    }
+</script>
+<!-- breadcumb -->
+<div class="clearfix breadcrumb-main">
+    <ul class="breadcrumb  ">
+        <li><a href="@Url.Action("Index", "InnerPages")">Web Pages</a> <span class="divider">/</span></li>
+        <li class="active">Add Web Page</li>
+        <li class="fR sepV_c"><i class="icon-globe"></i><a href="@System.Configuration.ConfigurationManager.AppSettings["usersiteurl"]" target="_blank">View Mainsite</a></li>
+    </ul>
+</div>
+<!-- end breadcumb -->
+
+<div id="maincontainer">
+    <div class="mainContent">
+        <!--- TOPEBAR [start] ---->
+        @Html.Partial("MainMenu", "SuperAdmin")
+        <!--- TOPEBAR [end] ---->
+
+        <!--- SIDEBAR [start] ---->
+        @Html.Partial("LeftMenu")
+        <!--- SIDEBAR [en] ---->
+
+        <div class="pageHeadingBlock ">
+            <div class="grayBackground">
+                <div class="fR t-r spcT_c"><a href="@Url.Action("Index", "InnerPages")" class="clearfix">&larr;back to web Pages list</a>  </div>
+                <h3 class="title">Add Web Page</h3>
+                 @if (Role.Contains("SuperAdmin") || Role.Contains("SubAdmin"))
+                {
+                @Html.Partial("WebsiteMenu")
+                 }
+            </div>
+        </div>
+        <div class="clearfix sepH_b"></div>
+        <div id="divmessage">
+            @if (TempData["message"] != null)
+            { @Html.Raw(TempData["message"].ToString())}
+
+            @if (ViewBag.message != null)
+            { @Html.Raw(ViewBag.message.ToString())}
+        </div>
+
+        @using (Html.BeginForm("AddDetails", "InnerPages", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Web Page Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Page Name :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" value="" style="width: 200px" class="inputstyle" name="Heading" id="Heading">
+                                                <span class="field-validation-error" id="lblHeading"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Display Order :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <input type="text" maxlength="3" value="" onkeypress="return Common.isNumberKey(event)" style="width: 200px" class="inputstyle" name="DisplayOrder" id="DisplayOrder">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Category :<span class="red-t">*</span></label>
+                                            </div>
+                                            <div class="span6">
+                                                <select id="InnerPageCategoryId" style="width: 213px" class="inputstyle" name="InnerPageCategoryId">
+                                                    <option value="">-- Select Category --</option>
+                                                    @if (lstInnerPageCategory.Count > 0)
+                                                    {
+                                                        foreach (var item in lstInnerPageCategory)
+                                                        {
+                                                        <option value="@(item.InnerPageCategoryId)">@(item.CategoryName)</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <span class="field-validation-error" id="lblInnerPageCategoryId"></span>
+                                            </div>
+                                        </div>                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>Description </b><span style="font-size:12px" class="red-t">*</span></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <textarea rows="10" name="Description" id="Description" cols="80" style="visibility: hidden; display: none;"></textarea>
+                            <label id="lblDescription" class="field-validation-error"></label>
+                            <script type="text/javascript">
+                                var editor = CKEDITOR.replace('Description', { contentsCss: '@(cssloc)' });
+                                CKFinder.setupCKEditor(editor, '@(System.Configuration.ConfigurationManager.AppSettings["baseurl"])ckfinder/');
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="custom-adn grayBackground nobL nobR">
+                <div class="ui-accordion ui-widget ui-helper-reset" role="tablist">
+                    <h3 class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" role="tab" id="ui-accordion-2-header-0" aria-controls="ui-accordion-2-panel-0" aria-selected="true" tabindex="0"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span><b>SEO Details</b></h3>
+                    <div class="form-horizontal ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="display: block;" id="ui-accordion-2-panel-0" aria-labelledby="ui-accordion-2-header-0" role="tabpanel" aria-expanded="true" aria-hidden="false">
+                        <div class="filedsetInner clearfix">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="clearfix rp10">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Page Title :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea style="width: 200px" class="inputstyle" rows="3" id="PageTitle" name="PageTitle"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Meta Keywords :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea style="width: 200px" class="inputstyle" id="MetaKeywords" rows="3" name="MetaKeywords"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="clearfix">
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Top line :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea style="width: 200px" class="inputstyle" rows="3" id="Topline" name="Topline"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row-fluid">
+                                            <div class="span5">
+                                                <label class="t-p5">Meta Description :</label>
+                                            </div>
+                                            <div class="span6">
+                                                <textarea style="width: 200px" class="inputstyle" id="MetaDescription" rows="3" name="MetaDescription"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>                                   
+                                            
+            <div class="form-actions">
+                <div class="actionButtons">
+                    <input type="submit" value="Submit" onclick="return Validate()" name="send" class="button2 btn btn-primary">
+                    <a class="btn btn-inverse" href="@Url.Action("Index", "InnerPages")">Cancel</a>
+                </div>
+            </div>
+                                           
+        }
+    </div>
+</div>

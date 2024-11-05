@@ -1,0 +1,74 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+
+    List<WATS.Entities.SponsorCategories> lstSponsorCategories = ViewBag.lstSponsorCategories;
+    List<WATS.Entities.Sponsors> lstSponsors = ViewBag.lstSponsors;
+
+    var Type = ViewBag.Type;
+
+    var sponsorlocation = System.Configuration.ConfigurationManager.AppSettings["adminimgurl"] + "Sponsors/NormalImages/";
+
+    ViewBag.heading = "Sponsors";
+
+    //ViewBag.Title = (Sponsors == "" ? Sponsors + "WATS" : Sponsors + "WATS");
+    //ViewBag.MetaDescription = (CategoryName == "" ? CategoryName : CategoryName + "WATS");
+    //ViewBag.MetaKeywords = (CategoryName == "" ? CategoryName : CategoryName + "WATS"); 
+}
+
+         <article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height:1150px;">
+                    <article class="clearfix curve position-r t-m4n b-p15">
+     <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15 t-t-c">@WATS.BLL.Common.DecodeURL(Type) </h2></article>
+                    <article class="clearfix p30 t-p15 tabhorizontal-p10">
+                        @if (lstSponsorCategories != null && lstSponsorCategories.Count != 0)
+                        {
+                            foreach (var SponsorCategory in lstSponsorCategories)
+                            {
+                                if (SponsorCategory.SponsorsCount != 0 && WATS.BLL.Common.EncodeURL(SponsorCategory.CategoryName) != Type)
+                                {
+                                    <h2 class="Poppins-Regular merunred-t l-h18 t-b-p10 t-m0">@SponsorCategory.CategoryName</h2>
+
+                                    <ul class="clearfix list-pn list-f m0 sponcer-list black-t t-p25 tabhorizontal-t-p10">
+                                        @if (lstSponsors != null && lstSponsors.Count != 0)
+                                        {
+                                            foreach (var item in lstSponsors)
+                                            {
+                                                if (item.SponsorCategoryId == SponsorCategory.SponsorCategoryId)
+                                                {
+
+                                                    <li>
+                                                        @if (item.RedirectUrl != "")
+                                                        {
+                                                            <article class="clearfix t-c border border-gray p8 shadow-b2 white-bg">
+                                                                <a href="@item.RedirectUrl" target="@item.Target">
+                                                                    <img alt="" src="@(sponsorlocation + item.LogoUrl)" width="195" border="0" height="71" class="width100">
+                                                                </a>
+                                                            </article>
+                                                        }
+
+                                                        else
+                                                        {
+                                                            <article class="clearfix t-c border border-gray p8 shadow-b2 white-bg">
+                                                                <img alt="" src="@(sponsorlocation + item.LogoUrl)" width="195" border="0" height="71" class="width100">
+                                                            </article>
+                                                        }
+                                                    </li>
+                                                }
+
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <h5 class="kaushan_scriptregular t-c t-m3 b-m0 merunred-t l-h18 tbp20 font26">No Sponsors Found..</h5>
+                                        }
+
+                                    </ul>
+                                }
+                            }
+                        }
+
+                    </article>
+
+         </article>
+  
+
+

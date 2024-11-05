@@ -1,0 +1,374 @@
+﻿@{
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var objEvents = (WATS.Entities.Events)ViewBag.objEvents;
+    var Memberdetails = (WATS.Entities.Members)ViewBag.Memberdetails;
+    var desc = "";
+    var innerpage = (WATS.Entities.InnerPages)ViewBag.InnerPage;
+    if (innerpage != null)
+    {
+        desc = innerpage.Description;
+    }
+
+    Int64 cid = ViewBag.cid;
+
+    int status = 0;
+    WATS.Entities.InnerPages objForm2InnerPages = new WATS.Entities.InnerPages();
+    WATS.BLL.InnerPages _InnerPages = new WATS.BLL.InnerPages();
+
+    if (objEvents.CategoryName == "Cultural Registration")
+    {
+        objForm2InnerPages = _InnerPages.GetInnerPagesListById(0, "Cultural Registration Guidelines", ref status);
+    }
+
+    else if (objEvents.CategoryName == "Mahila Sambaralu")
+    {
+        objForm2InnerPages = _InnerPages.GetInnerPagesListById(0, "Mahila Sambaralu Guidelines", ref status);
+    }
+    else
+    {
+        objForm2InnerPages = _InnerPages.GetInnerPagesListById(0, "Event Form2 Guidelines", ref status);
+    }
+}
+
+<script src="Scripts/User/jquery.validate.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //$("#Mobile").mask("(999) 999-9999");
+        $('.closable').append('<span class="closelink" title="Close"></span>');
+        $('.closelink').click(function () {
+            $(this).parent().fadeOut('600', function () { $(this).remove(); });
+        });
+    });
+
+    function Validate() {
+
+        if ($('#ProgramType').val() == "") { $('#ProgramType').focus().addClass("validate"); $('#spanProgramType').show().html('Please enter Program Type.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanProgramType').hide().html(''); $('#ProgramType').focus().removeClass("validate"); }
+        if ($('#ProgramName').val() == "") { $('#ProgramName').focus().addClass("validate"); $('#spanProgramName').show().html('Please enter Program Name.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanProgramName').hide().html(''); $('#ProgramName').focus().removeClass("validate"); }
+        if ($('#Description').val() == "") { $('#Description').focus().addClass("validate"); $('#spanDescription').show().html('Please enter Description.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanDescription').hide().html(''); $('#Description').focus().removeClass("validate"); }
+        if ($('#MediaTrack').val() == "") { $('#MediaTrack').focus().addClass("validate"); $('#spanMediaTrack').show().html('Please choose MediaTrack.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanMediaTrack').hide().html(''); $('#MediaTrack').focus().removeClass("validate"); }
+        if ($('#NumberOfParticipants').val() == "") { $('#NumberOfParticipants').focus().addClass("validate"); $('#spanNumberOfParticipants').show().html('Please enter NumberOfParticipants.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanNumberOfParticipants').hide().html(''); $('#NumberOfParticipants').focus().removeClass("validate"); }
+        if ($('#Age').val() == "") { $('#Age').focus().addClass("validate"); $('#spanAge').show().html('Please enter Age.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanAge').hide().html(''); $('#Age').focus().removeClass("validate"); }
+
+        if ($('#ParticipantsFullNames').val() == "") { $('#ParticipantsFullNames').focus().addClass("validate"); $('#spanParticipantsFullNames').show().html('Please enter Participants FullNames.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanParticipantsFullNames').hide().html(''); $('#ParticipantsFullNames').focus().removeClass("validate"); }
+        if ($('#ProgramDuration').val() == "") { $('#ProgramDuration').focus().addClass("validate"); $('#spanProgramDuration').show().html('Please enter ProgramDuration.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanProgramDuration').hide().html(''); $('#ProgramDuration').focus().removeClass("validate"); }
+
+        if ($('#ChoreographerName').val() == "") { $('#ChoreographerName').focus().addClass("validate"); $('#spanChoreographerName').show().html('Please enter ChoreographerName.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanChoreographerName').hide().html(''); $('#ChoreographerName').focus().removeClass("validate"); }
+
+        if ($('#ContactPhoneNumber').val() == "") { $('#ContactPhoneNumber').focus().addClass("validate"); $('#spanContactPhoneNumber').show().html('Please enter Contact PhoneNo.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanContactPhoneNumber').hide().html(''); $('#ContactPhoneNumber').focus().removeClass("validate"); }
+
+        if ($.trim($('#ContactEmail').val()) == '') { $('#ContactEmail').focus().addClass('redborder'); $('#spanContactEmail').show().html('Email Id Required <span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanContactEmail').hide().html(''); $('#ContactEmail').removeClass("redborder"); }
+        if (!Common.CheckEmail($.trim($('#ContactEmail').val()))) { $('#spanContactEmail').show().html('Please enter valid email address.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); $('#ContactEmail').focus().addClass("red-border"); return false; } else { $('#spanContactEmail').html(''); }
+
+        if ($('#SchoolName').val() == "") { $('#SchoolName').focus().addClass("validate"); $('#spanSchoolName').show().html('Please enter School Name.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spanSchoolName').hide().html(''); $('#SchoolName').focus().removeClass("validate"); }
+
+        if ($('#Terms').prop("checked") == true) {
+            $('#spanTerms').hide().html(''); $('#spanTerms').html('');
+        } else { $('#spanTerms').show().html('Required.<span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); $('#Terms').focus().addClass("red-border"); return false; }
+
+        if ($.trim($('#txtCaptcha').val()) == '') { $('#txtCaptcha').focus().addClass('redborder'); $('#spantxtCaptcha').show().html('Captcha Required <span>&nbsp;</span><i>&nbsp;</i><abbr onclick="closeValidation(this);">&nbsp;</abbr>'); return false; } else { $('#spantxtCaptcha').hide().html(''); $('#txtCaptcha').removeClass('redborder'); }
+        //if ($('#txtCaptcha').val() == '') { $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+        var str = Common.GetCaptcha();
+
+        if ($('#txtCaptcha').val() != str) { $('#txtCaptcha').val(''); document.getElementsByName('txtCaptcha')[0].placeholder = 'You entered wrong captcha.'; $('#txtCaptcha').focus().addClass("validate"); return false; } else { $('#txtCaptcha').focus().removeClass("validate"); }
+
+        return true;
+    }
+
+    function ResetValidateClass() {
+        $('#ItemName').removeClass("validate");
+        $('#ItemCategory').removeClass("validate");
+        $('#ItemDuration').removeClass("validate");
+        $('#ItemDescription').removeClass("validate");
+        $('#FirstName').removeClass("validate");
+        $('#LastName').removeClass("validate");
+        $('#EmailId').removeClass("validate");
+        $('#Mobile').removeClass("validate");
+        $('#City').removeClass("validate");
+        $('#State').removeClass("validate");
+        $('#txtCaptcha').removeClass("validate");
+
+    }
+    function CreloadCaptcha() {
+        document.getElementById('CUcaptcha').src = document.getElementById('CUcaptcha').src + '/';
+    }
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    specialKeys.push(9); //Tab
+    specialKeys.push(32); //Space
+    specialKeys.push(46); //Delete
+    specialKeys.push(36); //Home
+    specialKeys.push(35); //End
+    specialKeys.push(37); //Left
+    specialKeys.push(39); //Right
+
+
+    function onlyAlphabets(e, t) {
+        try {
+            if (window.event) {
+                var charCode = window.event.keyCode;
+            }
+            else if (e) {
+                var charCode = e.which;
+            }
+            else { return true; }
+            if ((charCode == 32) || (charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || (specialKeys.indexOf(e.keyCode) != -1 && e.charCode != e.keyCode))
+                return true;
+            else
+                return false;
+        }
+        catch (err) {
+            alert(err.Description);
+        }
+    }
+    function phonenochange(event) {
+        if (event.keyCode == 8 || event.keyCode == 46) {
+        }
+        else {
+            var ph = $('#ContactPhoneNumber').val();
+            if (ph.length == 3) { $('#ContactPhoneNumber').val(ph + '-'); }
+            if (ph.length == 7) { $('#ContactPhoneNumber').val(ph + '-'); }
+        }
+    }
+    function closeValidation(field) {
+        $(field).parent().hide();
+    }
+
+    function closeValidationOnClick(field) {
+        $(field).next('span').hide();
+    }
+</script>
+
+<article class="clearfix border t-m1 ralewayregular font14 l-h24 black-t" style="min-height: 1150px;">
+    <article class="clearfix curve position-r t-m4n b-p15">
+        <h2 class="Impact font24 black-t l-h16 t-c mobile-font16 b-p15">@objEvents.EventName - <span class="kaushan_scriptregular font24 red-t l-h14 mobile-font16">@(objEvents.EventName.Contains((objEvents.CategoryName == "Public Speaking Contest" ? "Public Speaking" : objEvents.CategoryName)) ? "" : objEvents.CategoryName) Registration</span></h2>
+    </article>
+
+    <article class="clearfix white-bg l-r-p30 border-b dkgray-border3 t-b-p4 tablet-l-r-p10 tabhorizontal-l-r-p15">
+        <h1 class="clearfix l-h24 font16 montserratregular light-blue-t"><span class="red-t">Event Name:</span><b> @objEvents.EventName</b></h1>
+        <article class="clearfix dis-b">
+            <span class="regular font16 l-h14">
+                <span class="red-t">Location:</span>
+                <b>@(objEvents.Location == null ? "N/A" : objEvents.Location)</b>
+            </span>
+            <span class="font15 green-t mobile-r-p0 mulisemibold pull-right t-m0">
+                <span class="red-t">Event On:</span>
+                <b>@(objEvents.StartDate == DateTime.MinValue ? "N/A" : objEvents.StartDate.ToString("MM/dd/yyyy"))</b>
+            </span>
+        </article>
+    </article>
+    <article class="clearfix p30 t-p15 tabhorizontal-p10 l-r-m-auto" style="max-width: 950px;">
+        <article class="clearfix font16 black-t l-h24 Poppins-Regular validation">
+            <article class="clearfix t-p10">
+                <article class="clearfix explore b-m10">
+                    @*<h3 class="clearfix m0 font24 l-h26 b-p15 t-c Roboto-Medium violet-t">Cultural Registration Form</h3>*@
+                    @using (Html.BeginForm("EventRegistrationForm2", "Event", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        <input type="hidden" value="@objEvents.EventName" id="EventName" name="EventName" />
+                        <input type="hidden" value="@objEvents.EventId" id="EventId" name="EventId" />
+                        <input type="hidden" value="@ViewBag.MemberId" id="MemberId" name="MemberId" />
+                        <input type="hidden" value="@cid" id="RegistrationCategoryId" name="RegistrationCategoryId" />
+
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-6">
+                                <h3 class="clearfix m0 Montserrat-Regular font16 black-t1 l-h26 tie-bor b-p5">Program Details</h3>
+                            </article>
+                            <article class="clearfix part-6"></article>
+                        </article>
+
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 t-p20 black-t1 b-m2">
+                                    Program Type <span class="red-t">*</span>
+                                </label>
+                                <article class="clearfix r-m5 mobile-r-m0">
+                                    <article class="clearfix dropdown" style="background-color: #fefefe;border-color: #e2e2e2;border-radius: 2px">
+                                        <select class="dropdown-select" name="ProgramType" id="ProgramType" style="min-height: 44px; font-family:'Poppins-Regular'; font-size: 13px!important; color: #4a4a4a;" onchange="closeValidationOnClick(this);">
+                                            <option value="">Choose</option>
+                                            <option value="Classical Dance">Classical Dance</option>
+                                            <option value="Folk Dance">Folk Dance</option>
+                                            <option value="Movie Dance">Movie Dance</option>
+                                            <option value="Medley Dance">Medley Dance</option>
+                                            <option value="Singing Movie Song">Singing Movie Song</option>
+                                            <option value="Singing Classical Song">Singing Classical Song</option>
+                                            <option value="Drama">Drama</option>
+                                            <option value="Skit">Skit</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        <span class="error3" id="spanProgramType"></span>
+                                    </article>
+                                </article>
+                            </article>
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 t-p20 black-t1 b-m2 l-p5">
+                                    Name of the Program <span class="red-t">*</span>
+                                </label>
+                                <article class="clearfix l-m5 mobile-r-m0 mobile-l-m0">
+                                    <input id="ProgramName" name="ProgramName" class="form-control get-a-loan" type="text" onkeypress="closeValidationOnClick(this);">
+                                    <span class="error3" id="spanProgramName"></span>
+                                </article>
+                            </article>
+                        </article>
+
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2">
+                                    Description <span class="red-t">*</span>
+                                    <article class="toltip position-r dis-in t-c"> 
+                                        <article class="tooltip-hover">
+                                            <article class="tooltip-content poppins-light">
+                                                <b>(About the Program (2 or 3 line synopsis))</b>
+                                            </article>
+                                        </article>
+                                    </article>
+                                </label>
+                                <article class="clearfix r-m5 mobile-r-m0 mobile-l-m0">
+                                    <textarea id="Description" name="Description" class="form-control get-a-loan" type="" style="max-height: 46px;" onkeypress="closeValidationOnClick(this);"></textarea>
+                                    <span class="error3" id="spanDescription"></span>
+                                </article>
+                            </article>
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2 l-p5">
+                                    Using a Media Track? <span class="red-t">*</span>
+                                </label>
+                                <article class="clearfix l-m5 mobile-r-m0 mobile-l-m0">
+                                    <article class="clearfix dropdown" style="background-color: #fefefe;border-color: #e2e2e2;border-radius: 2px">
+                                        <select class="dropdown-select" name="MediaTrack" id="MediaTrack" style="min-height: 44px; font-family:'Poppins-Regular'; font-size: 13px!important; color: #4a4a4a;" onchange="closeValidationOnClick(this);">
+                                            <option value="">Choose</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                        <span class="error3" id="spanMediaTrack"></span>
+                                    </article>
+                                </article>
+                            </article>
+                        </article>
+
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2">
+                                    Number of Participants <span class="red-t">*</span>
+                                </label>
+                                <article class="clearfix r-m5 mobile-r-m0">
+                                    <input id="NumberOfParticipants" name="NumberOfParticipants" class="form-control get-a-loan" type="text" onkeypress="closeValidationOnClick(this);">
+                                    <span class="error3" id="spanNumberOfParticipants"></span>
+                                </article>
+                            </article>
+
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2 l-p5">
+                                    Age group of Participants  <span class="red-t">*</span>
+                                </label>
+                                <article class="clearfix l-m5 mobile-r-m0">
+                                    <input id="Age" name="Age" class="form-control get-a-loan" type="text" onkeypress="closeValidationOnClick(this);">
+                                    <span class="error3" id="spanAge"></span>
+                                </article>
+                            </article>
+                        </article>
+
+                        <article class="clearfix part-row position-r">
+                            <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2"> All Participants Full Names (separated by comma) </label>
+                            <article class="clearfix mobile-r-m0 mobile-l-m0">
+                                <textarea id="ParticipantsFullNames" name="ParticipantsFullNames" class="form-control get-a-loan" type="text">
+                                    </textarea>
+                                <span class="error3" id="spanParticipantsFullNames"></span>
+                            </article>
+                        </article>
+
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2 l-p5">
+                                    Duration of the Program <span class="red-t">*</span>
+                                </label>
+                                <article class="clearfix r-m5 mobile-r-m0 mobile-l-m0">
+                                    <input id="ProgramDuration" name="ProgramDuration" class="form-control get-a-loan" type="text" onkeypress="closeValidationOnClick(this);">
+                                    <span class="error3" id="spanProgramDuration"></span>
+                                </article>
+                            </article>
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2 l-p5">
+                                    Co-ordinator / Choreographer Full Name <span class="red-t">*</span>
+                                </label>
+                                <article class="clearfix l-m5 mobile-r-m0">
+                                    <input id="ChoreographerName" name="ChoreographerName" class="form-control get-a-loan" type="text" onkeypress="closeValidationOnClick(this);">
+                                    <span class="error3" id="spanChoreographerName"></span>
+                                </article>
+                            </article>
+                        </article>
+
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2 l-p5">
+                                    Contact Phone Number <span class="red-t">*</span>
+                                </label>
+                                <article class="clearfix r-m5 mobile-r-m0 mobile-l-m0">
+                                    <input id="ContactPhoneNumber" name="ContactPhoneNumber" class="form-control get-a-loan" onkeypress="phonenochange(event);closeValidationOnClick(this); return Common.isNumberKey(event);" maxlength="12" type="text">
+                                    <span class="error3" id="spanContactPhoneNumber"></span>
+                                </article>
+                            </article>
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2 l-p5">
+                                    Contact Email <span class="red-t">*</span>
+                                </label>
+                                <article class="clearfix l-m5 mobile-r-m0">
+                                    <input id="ContactEmail" name="ContactEmail" class="form-control get-a-loan" type="text" onkeypress="closeValidationOnClick(this);">
+                                    <span class="error3" id="spanContactEmail"></span>
+                                </article>
+                            </article>
+                        </article>
+
+                        <article class="clearfix part-row">
+                            <article class="clearfix part-6 position-r">
+                                <label class="clearfix mobile-r-p0 Roboto-Regular font13 l-h26 black-t1 b-m2 l-p5">
+                                    Name of the Dance/Music School (if applicable) <span class="red-t">*</span>
+                                </label>
+                                <article class="clearfix l-m5 mobile-r-m0 mobile-l-m0">
+                                    <input id="SchoolName" name="SchoolName" class="form-control get-a-loan" type="text" onkeypress="closeValidationOnClick(this);">
+                                    <span class="error3" id="spanSchoolName"></span>
+                                </article>
+                            </article>
+                        </article>
+
+                        <label class="font15 black-t3 checkboxstyle b-p3 t-p20 position-r">
+                            <input name="TermsandConditions" id="Terms" value="true" type="checkbox">
+                            <span for="checkbox" class="dis-in"><span class="font14 blac-t Roboto-Regular mobile-font14 v-align-m l-h26 l-p5">I hereby agree that I have read all the <span class="pink-t">guidelines / rules</span> above and here to the same.</span></span>
+                            <span class="error3" id="spanTerms"></span>
+                        </label>
+
+                        <article class="clearfix t-p10">
+                            <h4 class="t-b-m10 Roboto-Medium black-t font14 dis-in tabhorizontal-l-r-p10 mobile-font16 tabhorizontal-font14">Type the following text as shown <span class="red-t">*</span></h4>
+                            <article class="part-row b-p3">
+                                <article class="part-9">
+                                    <article class="box-row">
+                                        <article class="box-5 r-p15 position-r">
+                                            <input type="text" onkeypress="ResetValidateClass(); return closeValidationOnClick(this)" placeholder="Code" onclick="ResetValidateClass();" id="txtCaptcha" name="txtCaptcha" class="form-control border-radius0" style="min-height: 45px;background-color:#fcfcfc; border-color:#bdbdbd;" />
+                                            <span class="error3" id="spantxtCaptcha"></span>
+                                        </article>
+                                        <article class="box-6 font24 t-b-p5 roboto_condensedbold_italic black-t ">
+                                            <img title="captcha" alt="captcha" id="CUcaptcha" src="Members/ShowCaptchaImage" height="28" width="120" />
+                                            <a href="javascript:CreloadCaptcha();">
+                                                <img title="Refresh" src="Content/images/refresh.png" alt="Refresh" />
+                                            </a>
+                                        </article>
+                                    </article>
+                                </article>
+                                <article class="part-3 t-r">
+                                    <article class="clearfix mtbp50 pull-right">
+                                        <input type="submit" class="btn btn-danger btn-large font18 poppinssemibold t-t-u border-radius" onclick="return Validate()" value="Submit" />
+                                    </article>
+                                </article>
+                            </article>
+                        </article>
+                    }
+
+                </article>
+
+                @if (objForm2InnerPages != null && objForm2InnerPages.Description != "")
+                {
+                    @Html.Raw(objForm2InnerPages.Description)
+                }
+            </article>
+        </article>
+    </article>
+</article>
